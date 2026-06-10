@@ -52,11 +52,12 @@ Cocher **"Lire depuis le début"** pour analyser un combat déjà terminé. Sino
 
 ### Depuis Wakfuli ou Zénith
 
-1. Ouvrir son personnage sur [wakfuli.com](https://wakfuli.com) ou [zenithwakfu.com](https://zenithwakfu.com)
-2. Ouvrir la console du navigateur (F12)
-3. Coller et exécuter le contenu de `extract-build-wakfuli.js` ou `extract-build-zenith.js`
-4. Copier le JSON affiché dans la console
-5. Le coller dans le champ **Import Wakfuli / Zenith** de l'onglet BUILD
+1. Ouvrir son build sur [wakfuli.com](https://wakfuli.com) ou [zenithwakfu.com](https://zenithwakfu.com)
+2. Pour Zénith : afficher le **panneau de caractéristiques** du personnage (le script lit les valeurs finales qui y sont affichées — équipement + aptitudes + base de classe + passifs)
+3. Ouvrir la console du navigateur (F12)
+4. Coller et exécuter le contenu de `extract-build-wakfuli.js` ou `extract-build-zenith.js`
+5. Le JSON est copié automatiquement dans le presse-papier (affiché aussi dans la console)
+6. Le coller dans le champ **Import Wakfuli / Zenith** de l'onglet BUILD
 
 ---
 

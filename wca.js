@@ -1094,9 +1094,9 @@ function renderPassivesTab(){
 // ── PERSO TAB ────────────────────────────────────────────────────
 const STATDEFS=[
   ['Combat',     [['ap','PA'],['mp','PM'],['wp','PW'],['hp','PV'],['initiative','Initiative'],['critChance','% CC'],['critMastery','Maît. Critique']]],
-  ['Maîtrises',  [['maitriseElem','Maît. Élémentaire'],['maitriseFeu','+ Feu'],['maitriseEau','+ Eau'],['maitriseTerre','+ Terre'],['maitriseAir','+ Air'],['maitriseDos','Maît. Dos'],['maitriseMelee','Maît. Mêlée'],['maitriseDistance','Maît. Distance'],['maitriseBerserk','Maît. Berserk'],['maitriseZone','Maît. Zone'],['maitriseMono','Maît. Mono-cible']]],
+  ['Maîtrises',  [['maitriseFeu','+ Feu'],['maitriseEau','+ Eau'],['maitriseTerre','+ Terre'],['maitriseAir','+ Air'],['maitriseDos','Maît. Dos'],['maitriseMelee','Maît. Mêlée'],['maitriseDistance','Maît. Distance'],['maitriseBerserk','Maît. Berserk'],['maitriseSoin','Maît. Soin']]],
   ['Résistances',[['resElem','Rés. Élémentaire'],['resFeu','+ Feu'],['resEau','+ Eau'],['resTerre','+ Terre'],['resAir','+ Air'],['resCrit','Rés. Critique'],['resDos','Rés. Dos']]],
-  ['Secondaires',[['degatsInfliges','% DI'],['soinsRealises','% Soins'],['tacle','Tacle'],['esquive','Esquive'],['portee','Portée'],['controle','Contrôle'],['sagesse','Sagesse'],['prospection','Prospection']]],
+  ['Secondaires',[['degatsInfliges','% DI'],['dmgIndirect','% Dom. Indirects'],['soinsRealises','% Soins'],['tacle','Tacle'],['esquive','Esquive'],['portee','Portée'],['controle','Contrôle'],['sagesse','Sagesse'],['prospection','Prospection']]],
 ];
 function renderPerso(){
   // Bonus rows
