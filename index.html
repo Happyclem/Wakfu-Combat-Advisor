@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>⚔ Wakfu Combat Advisor</title>
+<link rel="stylesheet" href="wca.css">
+</head>
+<body>
+<div id="app">
+
+<div id="hd">
+  <h1>⚔ WAKFU COMBAT ADVISOR</h1>
+  <div id="fsctl" title="Taille du texte global">
+    <span style="font-size:10px;color:var(--muted)">A</span>
+    <input type="range" id="fontslider" min="0.8" max="1.5" step="0.05" value="1"/>
+    <span style="font-size:14px;color:var(--muted)">A</span>
+  </div>
+  <div id="cw"><div class="led" id="led"></div><span id="clbl">Aucun log</span></div>
+  <div id="hd-center">
+    <div id="sitbuffs"></div>
+  </div>
+  <div id="hdc">
+    <div class="pb on" data-pos="normal" style="border-right:none">⬛ Face</div>
+    <div class="pb" data-pos="side" style="border-radius:0;border-right:none">↔ Côté</div>
+    <div class="pb" data-pos="back" style="border-radius:0">🔙 Dos</div>
+    <div class="pb" id="crit-btn">⚡ CC</div>
+  </div>
+</div>
+
+<div id="rl"></div>
+
+<div id="lf">
+  <div id="ltabs">
+    <button class="lt on" data-lp="log">📡 LOG</button>
+    <button class="lt" data-lp="build">📥 BUILD</button>
+    <button class="lt" data-lp="target">👹 CIBLE</button>
+  </div>
+  <div id="lb">
+
+    <!-- LOG -->
+    <div class="lp on" id="lp-log">
+      <div class="sec">
+        <input type="file" id="lfi" style="display:none"/>
+        <div id="dz" onclick="document.getElementById('lfi').click()">
+          📂 Glisse le log ici<br><span style="font-size:10px;opacity:.7">ou clique pour parcourir</span>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:6px">
+          <input type="checkbox" id="fromstart" style="accent-color:var(--gold)"/> Lire depuis le début
+        </label>
+        <button class="btn danger full sml" id="discbtn" style="display:none">✖ Déconnecter</button>
+      </div>
+      <div class="sec">
+        <div class="sh">Chemin du log</div>
+        <code style="font-size:9px;color:var(--dim);word-break:break-all;line-height:1.8">
+          Windows: C:\Program Files (x86)\Steam\steamapps\common\Wakfu\preferences\logs\<br>
+          Linux: ~/.local/share/Steam/steamapps/common/Wakfu/preferences/logs/
+        </code>
+      </div>
+    </div>
+
+    <!-- BUILD -->
+    <div class="lp" id="lp-build">
+      <div class="sec">
+        <div class="sh">Classe &amp; Niveau</div>
+        <div class="fr"><label>Classe</label>
+          <select class="inp" id="clssel">
+            <option value="">— Choisir —</option>
+            <option value="sram">Sram</option><option value="iop">Iop</option>
+            <option value="cra">Crâ</option><option value="sacrier">Sacrieur</option>
+            <option value="ecaflip">Ecaflip</option><option value="feca">Féca</option>
+            <option value="eniripsa">Eniripsa</option><option value="xelor">Xélor</option>
+            <option value="pandawa">Pandawa</option><option value="sadida">Sadida</option>
+            <option value="osamodas">Osamodas</option><option value="rogue">Roublard</option>
+            <option value="masqueraider">Masqueraider</option><option value="foggernaut">Steamer</option>
+            <option value="eliotrope">Eliotrope</option><option value="huppermage">Huppermage</option>
+            <option value="ouginak">Ouginak</option><option value="forgelance">Forgelance</option>
+          </select>
+        </div>
+        <div class="fr"><label>Niveau</label>
+          <input class="inp" id="lvlinp" type="number" min="1" max="230" placeholder="200" style="width:80px"/>
+        </div>
+        <button class="btn pri full" id="applycls">✅ Appliquer</button>
+      </div>
+      <div class="sec">
+        <div class="sh">Import Wakfuli / Zenith</div>
+        <p style="font-size:10px;color:var(--dim);line-height:1.6;margin-bottom:6px">
+          Sur wakfuli.com ou zenithwakfu.com → F12 Console → script d'extraction → JSON ici
+        </p>
+        <textarea class="inp" id="impta" rows="5" style="font-family:var(--mono);font-size:10px;resize:vertical"
+          placeholder='{"source":"wakfuli","character":{"class":"sram","level":200},...}'></textarea>
+        <div id="imptstatus" style="font-size:11px;min-height:16px;margin:4px 0"></div>
+        <button class="btn pri full" id="imptbtn">⚡ Importer le build</button>
+      </div>
+      <div class="sec">
+        <div class="sh">Nom du personnage</div>
+        <div class="fr"><label>Nom</label><input class="inp" id="pninp" placeholder="Chiropresseur"/></div>
+        <button class="btn full" id="pnsave">💾 Enregistrer</button>
+        <div id="namedbanner" class="dbanner" style="display:none;margin-top:6px"></div>
+      </div>
+    </div>
+
+    <!-- TARGET -->
+    <div class="lp" id="lp-target">
+      <div class="sec" id="monsec" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="sh" style="margin:0">Cibles (<span id="tgtcount">0</span>/8)</div>
+          <button class="btn danger sml" id="monclear">✕ Tout retirer</button>
+        </div>
+        <p style="font-size:9px;color:var(--dim);margin-bottom:6px">● = cible visée &nbsp;·&nbsp; ▲▼ = priorité</p>
+        <div id="tgtlist"></div>
+      </div>
+      <div class="sec">
+        <div class="sh">Rechercher</div>
+        <input class="inp" id="moninp" placeholder="Nom du monstre..." autocomplete="off"/>
+        <div id="monres"></div>
+      </div>
+      <div class="sec">
+        <div class="sh">Custom</div>
+        <div class="fr"><label>Nom</label><input class="inp" id="cmn" placeholder="Boss"/></div>
+        <div class="fr"><label>PV</label><input class="inp" id="cmhp" type="number" placeholder="10000"/></div>
+        <div class="fr"><label>Rés. Feu</label><input class="inp" id="cmrf" type="number" placeholder="0"/></div>
+        <div class="fr"><label>Rés. Eau</label><input class="inp" id="cmre" type="number" placeholder="0"/></div>
+        <div class="fr"><label>Rés. Terre</label><input class="inp" id="cmt" type="number" placeholder="0"/></div>
+        <div class="fr"><label>Rés. Air</label><input class="inp" id="cma" type="number" placeholder="0"/></div>
+        <button class="btn pri full" id="cmadd">➕ Ajouter la cible</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="ct">
+  <div id="ctabs">
+    <button class="ctt on" data-cp="advisor">⚔ Conseiller</button>
+    <button class="ctt" data-cp="perso">👤 Personnage</button>
+    <button class="ctt" data-cp="spells">✨ Sorts &amp; Passifs</button>
+  </div>
+  <div id="cb">
+    <div class="cp on" id="cp-advisor">
+      <div id="idle"><div style="font-size:32px">⚔</div><div>Configure un build et une cible<br>pour voir les conseils</div></div>
+      <div id="advcontent" style="display:none;flex-direction:column;gap:10px">
+        <!-- HP mini -->
+        <div id="advhpcard" class="card" style="display:none;padding:8px 12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span id="advhpname" style="font-size:12px;font-weight:700;color:var(--gold)"></span>
+            <span id="advhptxt" style="font-family:var(--mono);font-size:11px"></span>
+          </div>
+          <div class="hpt"><div id="advhpbar" class="hpf" style="width:100%"></div></div>
+        </div>
+        <!-- Player status -->
+        <div id="plrcard" class="card" style="display:none;padding:8px 12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:700;color:var(--sky)">👤 <span id="plrname"></span></span>
+            <span id="plrhptxt" style="font-family:var(--mono);font-size:11px"></span>
+          </div>
+          <div class="hpt" id="plrhpt"><div id="plrhpbar" class="hpf" style="width:100%;background:var(--green)"></div></div>
+          <div id="plrres" style="margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--muted)"></div>
+        </div>
+        <!-- Gauge -->
+        <div id="gaugecard" class="card" style="display:none">
+          <div class="sh">Mécanique</div>
+          <div id="gaugecontent"></div>
+        </div>
+        <!-- Tips -->
+        <div id="tipscard" class="card" style="display:none">
+          <div class="sh">Conseils</div>
+          <div id="tipscontent"></div>
+        </div>
+        <!-- Calc mode -->
+        <div id="modecard" class="card" style="display:none;padding:6px">
+          <div style="display:flex;gap:6px">
+            <button class="btn sml" id="modedmg" style="flex:1">⚔ Max dégâts</button>
+            <button class="btn sml" id="modekills" style="flex:1">💀 Max kills</button>
+          </div>
+        </div>
+        <!-- Optimal seq -->
+        <div id="seqcard" class="card" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div id="seqstrat" style="font-size:10px;color:var(--sky);font-weight:600"></div>
+            <button class="btn sml" id="seqreset">↺ Reset</button>
+          </div>
+          <div id="seqres" style="margin-bottom:6px"></div>
+          <div id="seqsteps" style="margin-bottom:6px"></div>
+          <div id="seqpfrow" style="display:none;margin-bottom:6px">
+            <div class="gr" style="margin:0">
+              <span class="gl">Point Faible</span>
+              <div class="gb"><div class="gf" id="seqpff" style="background:var(--red)"></div></div>
+              <span class="gv" id="seqpfv">0/100</span>
+            </div>
+          </div>
+          <div id="seqsum" style="display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid var(--border)"></div>
+        </div>
+        <!-- Max kills plan -->
+        <div id="killscard" class="card" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="sh" style="margin:0">💀 Plan — Max kills</div>
+            <span id="killsum" style="font-family:var(--mono);font-size:11px;color:var(--gold)"></span>
+          </div>
+          <div id="killsteps"></div>
+        </div>
+        <!-- Ranking -->
+        <div class="card">
+          <div class="sh" id="ranktitle">⚡ Sorts — Dégâts/PA</div>
+          <p style="font-size:10px;color:var(--dim);margin-bottom:6px">Clic → ajoute à la séquence</p>
+          <div id="ranklist"></div>
+          <div id="rankempty" style="font-size:11px;color:var(--dim)"></div>
+        </div>
+        <!-- Custom seq -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="sh" style="margin:0">🖊 Séquence personnalisée</div>
+            <button class="btn sml" id="csqreset">✕ Vider</button>
+          </div>
+          <div id="csqres" style="margin-bottom:6px"></div>
+          <div id="csqsteps" style="margin-bottom:6px"></div>
+          <div id="csqsum" style="padding-top:6px;border-top:1px solid var(--border);font-size:11px"></div>
+          <div id="csqpfrow" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+            <div class="gr" style="margin:0">
+              <span class="gl">Point Faible</span>
+              <div class="gb"><div class="gf" id="csqpff" style="background:var(--red)"></div></div>
+              <span class="gv" id="csqpfv">0/100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cp" id="cp-perso">
+      <div class="card">
+        <div class="sh">Bonus actifs</div>
+        <div class="brow on" id="brow-guilde" data-bk="guilde">
+          <div class="bchk"></div><span>Bonus de Guilde</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+10PV +2%DI +5Tacle +5Esquive</span>
+        </div>
+        <div class="brow" id="brow-monture" data-bk="monture">
+          <div class="bchk"></div><span>Bonus de Monture</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+40 maîtrises élémentaires</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sh">Statistiques</div>
+        <div id="perstats"></div>
+      </div>
+    </div>
+    <div class="cp" id="cp-spells">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="sh" style="margin:0">Deck actif (<span id="deckcount">0</span>)</div>
+          <button class="btn sml" id="imptclsbtn">+ Importer classe</button>
+        </div>
+        <div id="imptclsstatus" style="font-size:10px;min-height:14px;margin-bottom:4px"></div>
+        <div id="decklist"></div>
+      </div>
+      <div class="card">
+        <div class="sh">Sorts disponibles</div>
+        <div id="allspells"></div>
+      </div>
+      <div class="card">
+        <div class="sh">Passifs actifs (<span id="passcnt">0</span>/6)</div>
+        <div id="passlist"></div>
+      </div>
+      <div class="card" id="passeffsec" style="display:none">
+        <div class="sh">Effets passifs</div>
+        <div id="passefflist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="rr"></div>
+
+<div id="rt">
+  <div id="rthd">
+    <span style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em">ÉVÉNEMENTS</span>
+    <button class="btn sml" id="clrfeed">✕</button>
+  </div>
+  <div id="feed"></div>
+</div>
+
+<div id="dov">📂 Dépose le fichier ici</div>
+<div id="toast"></div>
+</div>
+
+<script src="data-monsters.js"></script>
+<script src="data-game.js"></script>
+<script src="data-commun.js"></script>
+<script src="wca.js"></script>
+</html>
