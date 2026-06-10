@@ -1,0 +1,67 @@
+INFO 16:49:41,195 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Point Faible (+50 Niv.)
+ INFO 16:49:41,209 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic lance le sort Aiguilles
+ INFO 16:49:42,114 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: -25 PV  (Feu)
+ INFO 16:49:42,115 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic lance le sort Aiguilles
+ INFO 16:49:42,912 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: -24 PV  (Feu)
+ INFO 16:49:57,611 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Galopade
+ INFO 16:49:58,712 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Galopade (Niv. 116)
+ INFO 16:49:58,713 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 3 PM
+ INFO 16:49:58,714 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 464 Esquive
+ INFO 16:49:59,513 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Double
+ INFO 16:50:00,611 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Invoque un(e) Double Sram
+ INFO 16:50:01,312 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Peur
+ INFO 16:50:02,214 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 2 PA (Double)
+ INFO 16:50:03,110 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Double Sram: est poussé de 4 cases
+ INFO 16:50:04,027 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Double
+ INFO 16:50:05,144 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Passe son tour
+ INFO 16:50:05,146 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] 47 secondes reportées pour le tour suivant.
+ INFO 16:50:06,827 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Double Sram lance le sort Contact Létal
+ INFO 16:50:07,728 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: Marque létale (Niv. 1)
+ INFO 16:50:11,328 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Double Sram lance le sort Diversion
+ INFO 16:50:12,628 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: tourne son regard
+ INFO 16:50:15,228 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Fourberie
+ INFO 16:50:15,927 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: se téléporte
+ INFO 16:50:17,328 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: -465 PV  (Air)
+ INFO 16:50:17,332 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +5 PV (Neutre)
+ INFO 16:50:17,333 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PA (Assassin)
+ INFO 16:50:17,334 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PM (Assassin)
+ INFO 16:50:17,335 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PW (Assassin)
+ INFO 16:50:17,336 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +44 PV (Neutre) (Assassin)
+ INFO 16:50:17,337 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Assassin (Niv. 1) (Assassin squelettique)
+ INFO 16:50:18,127 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: échange de position (Marque létale)
+ INFO 16:50:18,128 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: n'est plus sous l'emprise de 'Marque létale' (Marque létale)
+ INFO 16:50:18,129 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 2 PA (Marque létale)
+ INFO 16:50:18,428 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Point Faible (+65 Niv.)
+ INFO 16:50:19,427 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic est hors-combat !
+ INFO 16:50:21,128 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Premier Sang (Critiques)
+ INFO 16:50:21,530 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: Hémorragie (+10 Niv.)
+ INFO 16:50:21,531 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: -235 PV (Feu)
+ INFO 16:50:22,031 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +0 PV (Neutre)
+ INFO 16:50:22,032 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PA (Assassin)
+ INFO 16:50:22,033 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PM (Assassin)
+ INFO 16:50:22,034 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PW (Assassin)
+ INFO 16:50:22,035 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +0 PV (Neutre) (Assassin)
+ INFO 16:50:22,331 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: -14 PV (Feu) (Hémorragie)
+ INFO 16:50:22,332 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Point Faible (+75 Niv.)
+ INFO 16:50:23,329 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic est hors-combat !
+ INFO 16:50:26,728 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Fourberie (Critiques)
+ INFO 16:50:27,444 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: se téléporte
+ INFO 16:50:28,844 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: -496 PV (Air)
+ INFO 16:50:28,846 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PA (Assassin)
+ INFO 16:50:28,847 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PM (Assassin)
+ INFO 16:50:28,848 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PW (Assassin)
+ INFO 16:50:28,849 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +0 PV (Neutre) (Assassin)
+ INFO 16:50:29,145 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: Point Faible (+90 Niv.)
+ INFO 16:50:30,144 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic est hors-combat !
+ INFO 16:50:43,144 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur lance le sort Traumatisme (Critiques)
+ INFO 16:50:44,144 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: n'est plus sous l'emprise de 'Point Faible'
+ INFO 16:50:44,146 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Prespic: -1 143 PV (Air)
+ INFO 16:50:44,347 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PA (Assassin)
+ INFO 16:50:44,348 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 1 PM (Assassin)
+ INFO 16:50:44,349 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 0 PW (Assassin)
+ INFO 16:50:44,349 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: +0 PV (Neutre) (Assassin)
+ INFO 16:50:44,645 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 3 PA (Point faible)
+ INFO 16:50:44,646 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 3 PM (Point faible)
+ INFO 16:50:44,647 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur: 0 PW (Point faible)
+ INFO 16:50:44,649 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Chiropresseur : +1 768 points d'XP.  Prochain niveau dans : 13 790 829.
+ INFO 16:50:44,733 [AWT-EventQueue-0] (aPh:174) - [Information (combat)] Combat terminé, cliquez ici pour rouvrir l'écran de fin de combat.
