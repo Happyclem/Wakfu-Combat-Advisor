@@ -54,7 +54,7 @@ function load(){
       if(m.hp&&m._maxHp===undefined){m._maxHp=m.hp;m._currentHp=m.hp;}
       if(!S.targets.length) S.targets=[{...m,uid:Date.now()}];
     }
-    S.targets.forEach((t,i)=>{ if(t.hp&&t._maxHp===undefined){t._maxHp=t.hp;t._currentHp=t.hp;} if(!t.uid)t.uid=Date.now()+i; });
+    S.targets.forEach((t,i)=>{ if(t.hp&&t._maxHp===undefined){t._maxHp=t.hp;t._currentHp=t.hp;} if(!t.uid)t.uid=Date.now()+i; if(t._hemo===undefined)t._hemo=0; });
     S.focusIdx=Math.min(S.focusIdx||0,Math.max(0,S.targets.length-1));
   }catch(e){}
 }
@@ -82,7 +82,7 @@ function normTarget(m){
   const hp=m.hp||0;
   return { uid:m.uid||(Date.now()+Math.floor(Math.random()*1000)),
     id:m.id||0, name:m.name||m.n||'Cible', level:m.level||m.lv||0,
-    hp, _maxHp:hp, _currentHp:hp, dead:false,
+    hp, _maxHp:hp, _currentHp:hp, dead:false, _hemo:0,
     rf,re,rt,ra };
 }
 function addTarget(m){
@@ -91,13 +91,12 @@ function addTarget(m){
   const dup=S.targets.findIndex(x=>x.name===t.name && (x.level||0)===(t.level||0));
   if(dup>=0){ S.focusIdx=dup; }
   else {
-    if(S.targets.length>=MAX_TARGETS){
-      const st=document.getElementById('monres'); if(st){} // silencieux
-      return;
-    }
+    if(S.targets.length>=MAX_TARGETS) return; // limite atteinte (silencieux)
     S.targets.push(t); S.focusIdx=S.targets.length-1;
   }
   save(); renderMonPanel(); renderHPBars(); renderAdvisor(); setTimeout(refreshCSQTarget,0);
+}
+function removeTarget(uid){
   uid=Number(uid);
   const i=S.targets.findIndex(t=>t.uid===uid); if(i<0) return;
   S.targets.splice(i,1);
@@ -319,6 +318,33 @@ function spellDmgMult(sp, pf, target){
   return m;
 }
 function consumesPF(sp){ return !!sp.isFinisher || /consomme.*point\s*faible/i.test(sp.desc||''); }
+
+// ── HÉMORRAGIE (Sram) ────────────────────────────────────────────
+// L'Hémorragie est un DoT Feu indirect : le log la montre comme une ligne
+// de dégâts à part « Cible: -N PV (Feu) (Hémorragie) » (déjà décomptée en PV).
+// Ici on suit le NIVEAU d'Hémorragie par cible (lu du log) et on estime le
+// tick à titre indicatif. ⚠ COEFFICIENT À CALIBRER EN JEU (même dépendance
+// que la calibration du scaling de base) : ne sert qu'à l'affichage, PAS au
+// solveur, tant qu'un point de mesure réel n'est pas confirmé.
+const HEMO_DMG_PER_LVL = 1.4; // ~14 PV observés à Hémo 10 sur Prespic — provisoire
+// Niveau d'Hémorragie appliqué par un sort, vu sa description.
+// Premier Sang est conditionnel : +10 si la cible n'en a pas, +2 sinon.
+function hemoApplied(sp, curHemo){
+  const d=sp.desc||'';
+  if(/premier sang/i.test(sp.name||'')) return (curHemo>0)?2:10;
+  const m=d.match(/h[ée]morragie\s*\(\+?(\d+)\s*niv/i);
+  return m?parseInt(m[1]):0;
+}
+function buildsHemo(sp){ return hemoApplied(sp,0)>0; }
+// Consomme l'Hémorragie de la cible (Ouvrir les veines).
+function consumesHemo(sp){ return /consomme l'h[ée]morragie/i.test(sp.desc||''); }
+// Estimation indicative du tick Hémorragie subi par une cible (réductible par la
+// résistance Feu). Renvoie 0 sans Hémorragie. NON injecté dans le solveur.
+function hemoTickEstimate(t){
+  if(!t||!t._hemo) return 0;
+  const rp=Math.min(.9,1-Math.pow(.8,(t.rf||0)/100)); // facteur résistance Feu
+  return Math.round(HEMO_DMG_PER_LVL*t._hemo*(1-rp));
+}
 // PF généré effectivement par un sort (Assaut Brutal supprime le gain des sorts visés).
 function effPfGen(sp){ return abApplies(sp)?0:(sp.pfGen||0); }
 // Nouveau PF après avoir lancé `sp` depuis `pf`. lethal=true + Assassin → pas de gain.
@@ -552,7 +578,11 @@ function renderHPBars(){
   const col=pct>50?'var(--green)':pct>25?'var(--gold)':'var(--red)';
   const txt=max>0?`${cur.toLocaleString('fr')} / ${max.toLocaleString('fr')}`:'-';
   const ah=document.getElementById('advhpcard'); if(ah) ah.style.display=max>0?'':'none';
-  const an=document.getElementById('advhpname'); if(an) an.textContent=(m?(m.name||m.n||''):'')+(S.targets.length>1?` (${S.focusIdx+1}/${S.targets.length})`:'');
+  const an=document.getElementById('advhpname'); if(an){
+    const hemo=m&&m._hemo>0?` · 🩸 Hémo ${m._hemo} (~${hemoTickEstimate(m)}/tick*)`:'';
+    an.innerHTML=(m?(m.name||m.n||''):'')+(S.targets.length>1?` (${S.focusIdx+1}/${S.targets.length})`:'')
+      +(hemo?`<span style="font-size:10px;color:var(--red);font-weight:600">${hemo}</span>`:'');
+  }
   const at=document.getElementById('advhptxt'); if(at){at.textContent=txt;at.style.color=col;}
   const ab=document.getElementById('advhpbar'); if(ab){ab.style.width=pct+'%';ab.style.background=col;}
   // Barres par cible dans la liste (gauche)
@@ -805,9 +835,10 @@ function renderAdvisor(){
         const co=[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
         const pf=r.spell.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:'';
         const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon le Point Faible">⤢PF</span>`:'';
+        const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
         return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}
+          <span class="scap">${co}</span>${pf}${sc}${hm}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')
@@ -1263,6 +1294,11 @@ function processLine(raw){
   m=content.match(RE_DMG);
   if(m){
     const target=m[1].trim(),amount=cleanN(m[2]),el=m[3];
+    // Source indirecte éventuelle en fin de ligne : « ... (Feu) (Hémorragie) »
+    const srcM=content.match(/\)\s*\(([^)]+)\)\s*$/);
+    const src=srcM?srcM[1].trim():'';
+    const isHemo=/h[ée]morragie/i.test(src);
+    const isIndirect=!!src; // DoT/piège : pas un coup direct du joueur
     const pN=S.playerName||S.detectedName;
     // Player takes damage → track HP
     if(pN&&target===pN){
@@ -1277,14 +1313,15 @@ function processLine(raw){
         const mx=t._maxHp||t.hp||0;
         if(mx>0){ t._currentHp=Math.max(0,(t._currentHp??mx)-amount); if(t._currentHp<=0) t.dead=true; }
         ensureFocusAlive(); save(); renderMonPanel(); renderAdvisor();
-      } else if(pN&&S.combat.lastActor===pN&&target!==pN){
-        // nouvelle cible touchée par le joueur → ajout auto
+      } else if(pN&&S.combat.lastActor===pN&&target!==pN&&!isIndirect){
+        // nouvelle cible touchée DIRECTEMENT par le joueur → ajout auto
+        // (les ticks Hémorragie/pièges n'ajoutent pas de cible)
         const found=MONS.find(mo=>(mo.n||mo.name||'').toLowerCase()===target.toLowerCase());
         if(found) addTarget({id:found.id,name:found.n||found.name,level:found.lv||found.level||0,
           hp:found.hp||0,rf:found.rf||0,re:found.re||0,rt:found.rt||0,ra:found.ra||0});
       }
     }
-    addFeed('dm',`-${amount} PV (${el}) → ${target}`); return;
+    addFeed(isHemo?'hm':'dm',`-${amount} PV (${el}) → ${target}${src?` · ${src}`:''}`); return;
   }
   // Heal
   m=content.match(RE_HEAL);
@@ -1317,6 +1354,12 @@ function processLine(raw){
   if(m){
     const actor=m[1].trim(),sname=m[2].trim(),lvl=parseInt(m[3]);
     if(/^\d+\s*(PA|PM|PW|Esquive|Tacle)/.test(sname)) return;
+    // Hémorragie sur une cible suivie : le log reporte le niveau cumulé.
+    if(/h[ée]morragie/i.test(sname)){
+      const tg=findTargetByName(actor);
+      if(tg){ tg._hemo=lvl; save(); renderMonPanel(); renderHPBars(); renderAdvisor(); }
+      addFeed('st',`${actor} ✦ Hémorragie ${lvl}`); return;
+    }
     const mech=getMech(), pN=S.playerName||S.detectedName;
     const isCS=mech&&/point\s*faible|combativit|stase|veine|charge|ivresse/i.test(sname);
     if(pN&&actor===pN){
@@ -1429,3 +1472,4 @@ loadData(); load();
 applyZoom(); setupFontSlider();
 syncCls(); renderAll(); initCSQ();
 if(S.playerName) document.getElementById('pninp').value=S.playerName;
+
