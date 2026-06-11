@@ -279,7 +279,8 @@ function dmgVs(sp,t,pf,crit){
   const cb=isPFScaler?1:(getMech()?.bonus({pf})||1);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:resVs(sp.element,t),isCrit:crit,cb});
-  return Math.round(d*spellDmgMult(sp,pf,t));
+  const dd=Math.round(d*spellDmgMult(sp,pf,t));
+  return dd + hemoBonus(dd,t,sp);
 }
 
 // ── RÈGLES POINT FAIBLE ──────────────────────────────────────────
@@ -326,13 +327,13 @@ function spellDmgMult(sp, pf, target){
 function consumesPF(sp){ return !!sp.isFinisher || /consomme.*point\s*faible/i.test(sp.desc||''); }
 
 // ── HÉMORRAGIE (Sram) ────────────────────────────────────────────
-// L'Hémorragie est un DoT Feu indirect : le log la montre comme une ligne
-// de dégâts à part « Cible: -N PV (Feu) (Hémorragie) » (déjà décomptée en PV).
-// Ici on suit le NIVEAU d'Hémorragie par cible (lu du log) et on estime le
-// tick à titre indicatif. ⚠ COEFFICIENT À CALIBRER EN JEU (même dépendance
-// que la calibration du scaling de base) : ne sert qu'à l'affichage, PAS au
-// solveur, tant qu'un point de mesure réel n'est pas confirmé.
-const HEMO_DMG_PER_LVL = 1.4; // ~14 PV observés à Hémo 10 sur Prespic — provisoire
+// Calibré en jeu (Sram lvl125, mannequin 0 %, ~15 mesures) : un coup direct sur
+// une cible qui saigne déclenche un coup Feu bonus ≈ 0,96 % des dégâts du coup,
+// par niveau d'Hémorragie. Ex. coup de 424 sur cible Hémo 20 → +~81 (≈+19 %).
+// Le niveau d'Hémo est suivi depuis le log ; le bonus est désormais intégré au calcul.
+// (Le bonus est de l'élément Feu : sur cible résistante au Feu il faudrait la rés Feu,
+//  approximation acceptable ici — affiné plus tard si besoin.)
+const HEMO_PCT_PER_LVL = 0.0096;
 // Niveau d'Hémorragie appliqué par un sort, vu sa description.
 // Premier Sang est conditionnel : +10 si la cible n'en a pas, +2 sinon.
 function hemoApplied(sp, curHemo){
@@ -344,12 +345,12 @@ function hemoApplied(sp, curHemo){
 function buildsHemo(sp){ return hemoApplied(sp,0)>0; }
 // Consomme l'Hémorragie de la cible (Ouvrir les veines).
 function consumesHemo(sp){ return /consomme l'h[ée]morragie/i.test(sp.desc||''); }
-// Estimation indicative du tick Hémorragie subi par une cible (réductible par la
-// résistance Feu). Renvoie 0 sans Hémorragie. NON injecté dans le solveur.
-function hemoTickEstimate(t){
-  if(!t||!t._hemo) return 0;
-  const rp=Math.min(.9,1-Math.pow(.8,(t.rf||0)/100)); // facteur résistance Feu
-  return Math.round(HEMO_DMG_PER_LVL*t._hemo*(1-rp));
+// Bonus Hémorragie déclenché par un coup direct `dd` contre la cible `t`,
+// au lancer du sort `sp` (le sort applique d'abord son Hémo, puis le coup tique).
+function hemoBonus(dd, t, sp){
+  if(!t) return 0;
+  const hLvl=(t._hemo||0)+(sp?hemoApplied(sp,t._hemo||0):0);
+  return hLvl>0 ? Math.round(dd*hLvl*HEMO_PCT_PER_LVL) : 0;
 }
 // PF généré effectivement par un sort (Assaut Brutal supprime le gain des sorts visés).
 function effPfGen(sp){ return abApplies(sp)?0:(sp.pfGen||0); }
@@ -585,7 +586,8 @@ function renderHPBars(){
   const txt=max>0?`${cur.toLocaleString('fr')} / ${max.toLocaleString('fr')}`:'-';
   const ah=document.getElementById('advhpcard'); if(ah) ah.style.display=max>0?'':'none';
   const an=document.getElementById('advhpname'); if(an){
-    const hemo=m&&m._hemo>0?` · 🩸 Hémo ${m._hemo} (~${hemoTickEstimate(m)}/tick*)`:'';
+    const pct=m&&m._hemo>0?Math.round(m._hemo*HEMO_PCT_PER_LVL*100):0;
+    const hemo=m&&m._hemo>0?` · 🩸 Hémo ${m._hemo} (+${pct}% dégâts)`:'';
     an.innerHTML=(m?(m.name||m.n||''):'')+(S.targets.length>1?` (${S.focusIdx+1}/${S.targets.length})`:'')
       +(hemo?`<span style="font-size:10px;color:var(--red);font-weight:600">${hemo}</span>`:'');
   }
@@ -652,7 +654,8 @@ function spellDmgAt(sp,pf){
   const cb=isPFScaler?1:(getMech()?.bonus({pf})||1);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
-  return Math.round(d*spellDmgMult(sp,pf,focusTgt()));
+  const dd=Math.round(d*spellDmgMult(sp,pf,focusTgt()));
+  return dd + hemoBonus(dd,focusTgt(),sp);
 }
 function addToCSQ(sp){
   if(!S.monster){alert("Sélectionne une cible d'abord.");return;}
