@@ -1198,18 +1198,42 @@ function syncCls(){
 }
 document.getElementById('applycls').addEventListener('click',applyClass);
 document.getElementById('lvlinp').addEventListener('keydown',e=>{if(e.key==='Enter') applyClass();});
+// Import d'un build : accepte un objet déjà parsé ou une chaîne JSON.
+// Renvoie true si importé. Affiche un résumé de ce qui a été reconnu.
+function importBuildJSON(input, silentIfInvalid){
+  const status=document.getElementById('imptstatus');
+  let raw;
+  try{ raw=(typeof input==='string')?JSON.parse(input):input; }
+  catch(e){ if(!silentIfInvalid) status.innerHTML=`<span style="color:var(--red)">❌ JSON invalide : ${e.message}</span>`; return false; }
+  if(!raw||typeof raw!=='object'){ if(!silentIfInvalid) status.innerHTML=`<span style="color:var(--red)">❌ Format non reconnu</span>`; return false; }
+  const cls=(raw.character?.class||'').toLowerCase();
+  const lvl=parseInt(raw.character?.level)||200;
+  const stats=raw.stats||{}, spells=Array.isArray(raw.spells)?raw.spells:[];
+  const nStats=Object.keys(stats).length, nSpells=spells.length;
+  const nPass=Array.isArray(raw.passives)?raw.passives.length:0;
+  S.build={class:cls,level:lvl,name:raw.character?.name||'',stats,spells,
+    activePassives:S.build?.activePassives||[]};
+  save(); syncCls(); renderAll();
+  const src=raw.source?` · ${raw.source}`:'';
+  const detail=`${nSpells} sorts, ${nStats} stats${nPass?`, ${nPass} passifs`:''}`;
+  if(cls) status.innerHTML=`<span style="color:var(--green)">✅ ${cls} niv.${lvl}${src} — ${detail}</span>`;
+  else    status.innerHTML=`<span style="color:var(--gold)">⚠ Build importé (${detail}) — classe non détectée, choisis-la ci-dessus</span>`;
+  return true;
+}
 document.getElementById('imptbtn').addEventListener('click',()=>{
-  const status=document.getElementById('imptstatus'), val=document.getElementById('impta').value.trim();
-  if(!val) return;
-  try{
-    const raw=JSON.parse(val);
-    S.build={class:(raw.character?.class||'').toLowerCase(),level:parseInt(raw.character?.level)||200,
-      name:raw.character?.name||'',stats:raw.stats||{},spells:raw.spells||[],
-      activePassives:S.build?.activePassives||[]};
-    save(); syncCls(); renderAll();
-    status.innerHTML=`<span style="color:var(--green)">✅ ${S.build.class} niv.${S.build.level} importé</span>`;
-  }catch(e){status.innerHTML=`<span style="color:var(--red)">❌ JSON invalide: ${e.message}</span>`;}
+  const val=document.getElementById('impta').value.trim();
+  if(!val){ document.getElementById('imptstatus').innerHTML=`<span style="color:var(--dim)">Colle d'abord le JSON du build.</span>`; return; }
+  importBuildJSON(val,false);
 });
+// Auto-import au collage : si le presse-papier contient un build JSON valide,
+// on importe sans clic. Silencieux si ce n'est pas (encore) du JSON exploitable.
+function tryAutoImportBuild(){
+  const val=document.getElementById('impta').value.trim(); if(!val) return;
+  let raw; try{ raw=JSON.parse(val); }catch(e){ return; }
+  if(!raw||typeof raw!=='object'||(!raw.character&&!raw.stats&&!raw.spells)) return;
+  importBuildJSON(raw,true);
+}
+document.getElementById('impta').addEventListener('paste',()=>setTimeout(tryAutoImportBuild,0));
 document.getElementById('pnsave').addEventListener('click',()=>{
   S.playerName=document.getElementById('pninp').value.trim()||null;
   save(); renderNameBanner();
@@ -1472,4 +1496,3 @@ loadData(); load();
 applyZoom(); setupFontSlider();
 syncCls(); renderAll(); initCSQ();
 if(S.playerName) document.getElementById('pninp').value=S.playerName;
-

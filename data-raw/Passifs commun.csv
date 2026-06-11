@@ -1,9 +1,0 @@
-Nom,Niveau de deblocage,Effets
-Evasion,10,100 % du niveau en Esquive. Après avoir esquivé (avec pertes) : 35 % du niveau en Esquive (3 tours)
-Interception,15,100 % du niveau en Tacle. Après avoir taclé un fighter : 35 % du niveau en Tacle (3 tours)
-Inspiration,25,50 % du niveau en Initiative. 10 % Dommages infligés aux fighter ayant plus d'Initiative
-Motivation,35,+1 PA. -20 % Dommages infligés. +10 Volonté
-Médecine,55,+30 % Soins réalisés. +25 % Armure donnée. -15 % Dommages infligés
-Rock,65,+60 % Points de Vie. +25 % Soins reçus. -25 % Dommages infligés. -50 % Soins réalisés
-Carnage,75,+15 % Dommages infligés. 10 % Dommages infligés aux fighter ayant de l'Armure. -30 % Soins réalisés
-Fluctuation,80,Lorsque vous esquivez une fighter : Avec pertes : fighter Fluctuation (+10 Niv.). Sans perte : fighter Fluctuation (+15 Niv.). Lorsque vous taclez une fighter : fighter Fluctuation (+15 Niv.). Aux fighter terminant leur tour à votre contact : fighter Fluctuation (+20 Niv.)

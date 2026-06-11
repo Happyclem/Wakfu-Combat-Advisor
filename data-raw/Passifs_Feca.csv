@@ -1,0 +1,23 @@
+Nom,Niveau de deblocage,Effets
+Bâton,0,Dommage : 152 / Bouclier Terre / En début de tour : / - 40 % Dommages infligés en mêlée / - Retiré en fin de tour sans ennemi au contact / Case vide : Glyphe terrestre (Niveau 91)
+Pacification,0,Pacifié (1 tour) / - Temps de relance sur la cible : 4 tours / Ce sort ne peut pas être utilisé avec Immunité
+Provocation,0,-2 PM max (1 tour) / -20 PM max (tour en cours) / Stabilisé (Niv. 1) (1 tour)
+Égide,0,100 Résistance Elémentaire (1 tour) / 245 Tacle et Esquive / Ce sort coûte +1 PW par lancer du sort / Si le Féca a Armure de la Paix : / - Égide ne peut être lancé que sur le Féca
+Magnétisme,0,Lancé sur avec un Bouclier : / - Pousse de 2 cases les entités au contact / Lancé sur un Glyphe : / - Attire de 2 cases (5 portée)
+Peau rocheuse,0,30 % Parade / Paix intérieure : / - N'augmente plus en cas de bouclier déclenché / - +2 niveaux quand subit des dommages directs
+Compréhension du Wakfu,0,Tant que le Féca a au moins 1 PW : / - 100 % Armure générée / - perd 1 PW quand il donne de l'Armure à une cible
+Carapace d’épines,0,"Si le Féca possède de l’Armure en début de tour, l'Armure est convertie en % Dommages infligés / - 1% des PV max = 1% Dommages infligés (2 tours) / - Max Armure convertie : 20% des PV max / - L'Armure convertie est perdue"
+Boucliers élémentaires,0,Les boucliers ne peuvent plus être posés que sur les alliés / Bouclier Feu / - Nouvel effet : 15 % Dommages infligés / Bouclier Eau / - Nouvel effet : 1 Portée / Bouclier Terre / - Nouvel effet : 1 PM
+Expérience du terrain,0,"Quand le Féca subit des dommages directs : / - 10 % Armure Reçue (1 tour, max 50) / -7 % Armure donnée (1 tour, max 50)"
+Berger,0,"Le Féca peut appliquer un seul Bouclier par tour, son coût en PA est regagné (max 3 PA regagnés)"
+Glyphes persistants,0,Les glyphes durent deux tours / Les glyphes ne peuvent plus être fusionnés
+Oeil pour oeil,0,Quand le Féca ou un de ses alliés perd le reste de son Armure : / - 10 % Dommages infligés (1 tour) / - 20 % Armure donnée (1 tour)
+Connaissance de la carte,0,Modifie la mécanique de Glyphe / - Les glyphes coûtent 2 PW de moins / -50 % Dommages indirects infligés
+Armure de combat,0,-100 % Armure reçue / La moitié des dommages infligés sur les alliés sont transformés en Armure / La meilleure défense est l’attaque [Portée] / Ce passif récompense le Féca s'il attaque ses cibles à l'aide de dommages classiques. / Les dommages directs monocible appliquent / Armudiction (+2 niveaux par PA du sort) / 10 % Dommages infligés
+Glyphe augmenté,0,Augmente la taille des Glyphe de 1 / Les glyphes coûtent 1 PW supplémentaire pour être posés
+Marché pacifiste,0,Convertit la Parade en % Armure donnée / - Taux de 1 pour 1 / - La Parade convertie est perdue / - La Parade doit être <= à 100
+Qui veut la paix prépare la guerre,0,En début de combat : / - -100 % Armure donnée / - 25 % Dommages infligés
+Maître des boucliers,0,Les boucliers se déclenchent immédiatement / - Goutte restaure la dernière perte de PA/PM sur la cible / - Lame de fond se base sur la dernière attaque reçue (feu sinon) / Le temps de relance par cible est augmenté de 2 tours
+Un pour tous,0,Lorsqu'un bouclier est appliqué sur un allié : / - 50 Résistance Elémentaire (1 tour) / - -25 Résistance Elémentaire (1 tour) / - Une fois par tour par allié
+Ligne,0,Les sorts de la branche feu : / - Passent à portée modifiable / - Ne se lancent plus qu'en ligne / 1 Portée
+Protecteur du troupeau,0,"Bonus de PV pour le Féca : / - 300 % de son niveau (+0) / -20 % Dommages infligés / En début de tour de table, par allié (joueur) n'ayant pas subi de dommages au tour précédent : / - Soin : 4 % des PV manquants de la cible"

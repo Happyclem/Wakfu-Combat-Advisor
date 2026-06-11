@@ -59,6 +59,13 @@ Cocher **"Lire depuis le début"** pour analyser un combat déjà terminé. Sino
 5. Le JSON est copié automatiquement dans le presse-papier (affiché aussi dans la console)
 6. Le coller dans le champ **Import Wakfuli / Zenith** de l'onglet BUILD
 
+### Deux façons d'importer le JSON dans le champ
+
+- **Import automatique au collage** *(le plus simple)* : il suffit de coller le JSON dans le champ. Si le contenu est un build valide, il est importé immédiatement, sans clic. Rien ne se passe en silence si ce n'est pas (encore) du JSON exploitable.
+- **Bouton Importer** : coller le JSON puis cliquer sur **Importer**. Utile pour réimporter un texte déjà présent dans le champ, ou si le collage automatique n'a pas pris.
+
+Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / passifs reconnus). Si la classe n'est pas détectée, le build est tout de même importé — il suffit de choisir la classe manuellement au-dessus.
+
 ---
 
 ## Données
