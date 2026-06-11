@@ -181,3 +181,37 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px
 /* Ranking conseiller : 2 colonnes groupées par élément (comme l'onglet Sorts) */
 #ranklist{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;align-items:start}
 #ranklist .elhdr{grid-column:1/-1}
+/* ── Checklist état vide guidé ── */
+.ckl{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-top:8px}
+.cki{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--inp);
+  border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;text-align:left}
+.cki:hover{border-color:var(--gold)}.cki.ok{opacity:.55}
+.ckn{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;background:var(--bg);border:1px solid var(--border);color:var(--muted)}
+.cki.ok .ckn{background:var(--green);border-color:var(--green);color:#06210f}
+.ckt{flex:1;font-size:11px;color:var(--text)}.ckt i{color:var(--dim);font-style:normal;font-size:10px}
+.ckh{font-size:9px;color:var(--gold);flex-shrink:0;white-space:nowrap}
+.cki.ok .ckh{color:var(--dim)}
+.ckhint{font-size:10px;color:var(--dim);margin-top:12px;max-width:340px;line-height:1.6}
+/* ── Panneau d'aide ── */
+#helppanel{position:fixed;z-index:300;display:none;max-width:310px;padding:10px 12px;
+  background:var(--inp);border:1px solid var(--gold);border-radius:var(--r);box-shadow:0 6px 22px rgba(0,0,0,.6)}
+#helppanel.on{display:block}
+#helppanel .hph{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+#helppanel .hpr{font-size:11px;color:var(--text);line-height:1.6;margin-bottom:2px}
+#helppanel b{color:var(--gold);font-weight:600}
+/* ── Feed Hémorragie ── */
+.fl.hm{color:#f08030}
+/* ── Responsive : empilage sur écran étroit ── */
+@media (max-width:860px){
+  html,body{overflow:auto}
+  #app{display:flex;flex-direction:column;height:auto;min-height:100vh;width:100%;zoom:1}
+  #rl,#rr{display:none}
+  #hd{flex-wrap:wrap;height:auto;min-height:38px;padding:6px 8px}
+  #hd-center{flex-basis:100%;order:9;justify-content:flex-start}
+  #hdc{margin-left:0}
+  #lf{order:1;max-height:48vh}
+  #ct{order:2;overflow:visible}
+  #rt{order:3;max-height:42vh;border-left:none;border-top:1px solid var(--border)}
+  #ranklist,#allspells,#passlist,#perstats-cols{grid-template-columns:1fr}
+}

@@ -777,10 +777,31 @@ document.getElementById('cmadd').addEventListener('click',()=>{
     ra:parseInt(document.getElementById('cma').value)||0});
 });
 
+function renderIdle(){
+  const el=document.getElementById('idle'); if(!el) return;
+  const steps=[
+    {n:1, ok:!!S.build?.class,            lbl:'Choisir ta classe & ton niveau', hint:'Build',  go:()=>openLeftTab('build')},
+    {n:2, ok:getDeck().length>0,          lbl:'Ajouter des sorts au deck',       hint:'Sorts',  go:()=>openCenterTab('spells')},
+    {n:3, ok:S.targets.length>0,          lbl:'Choisir une cible',               hint:'Cible',  go:()=>openLeftTab('target')},
+    {n:4, ok:document.getElementById('led')?.classList.contains('on'), lbl:'Connecter le log', opt:true, hint:'Log', go:()=>openLeftTab('log')},
+  ];
+  el.innerHTML=`<div style="font-size:30px">⚔</div>
+    <div style="font-size:13px;color:var(--muted)">Bienvenue — quelques étapes pour démarrer</div>
+    <div class="ckl">${steps.map(s=>`
+      <div class="cki ${s.ok?'ok':''}" data-n="${s.n}">
+        <span class="ckn">${s.ok?'✓':s.n}</span>
+        <span class="ckt">${s.lbl}${s.opt?' <i>(optionnel)</i>':''}</span>
+        <span class="ckh">${s.hint} ›</span>
+      </div>`).join('')}</div>
+    <div class="ckhint">❔ Ctrl + survol d'un sort = détails &nbsp;·&nbsp; 1/2/3 = position &nbsp;·&nbsp; C = critique</div>`;
+  el.querySelectorAll('.cki').forEach(it=>it.addEventListener('click',()=>steps[+it.dataset.n-1].go()));
+}
 // ── ADVISOR ───────────────────────────────────────────────────────
 function renderAdvisor(){
   const hasBuild=!!S.build, hasMon=!!S.monster;
-  document.getElementById('idle').style.display=(hasBuild||hasMon)?'none':'flex';
+  const showIdle=!(hasBuild||hasMon);
+  document.getElementById('idle').style.display=showIdle?'flex':'none';
+  if(showIdle) renderIdle();
   const ac=document.getElementById('advcontent');
   ac.style.display=(hasBuild||hasMon)?'flex':'none';
   if(!hasBuild&&!hasMon) return;
@@ -1410,8 +1431,8 @@ async function poll(){
   if(!logHandle) return;
   try{const f=await logHandle.getFile();if(f.size<=logSize)return;const t=await f.slice(logSize).text();logSize=f.size;t.split('\n').forEach(processLine);}catch(e){}
 }
-function setConn(n){document.getElementById('led').classList.add('on');document.getElementById('clbl').textContent='🟢 '+n;document.getElementById('discbtn').style.display='';}
-function setDisconn(){document.getElementById('led').classList.remove('on');document.getElementById('clbl').textContent='Aucun log';document.getElementById('discbtn').style.display='none';logHandle=null;logSize=0;if(logTimer)clearInterval(logTimer);}
+function setConn(n){document.getElementById('led').classList.add('on');document.getElementById('clbl').textContent='🟢 '+n;document.getElementById('discbtn').style.display='';renderAdvisor();}
+function setDisconn(){document.getElementById('led').classList.remove('on');document.getElementById('clbl').textContent='Aucun log';document.getElementById('discbtn').style.display='none';logHandle=null;logSize=0;if(logTimer)clearInterval(logTimer);renderAdvisor();}
 async function attachFile(f,fromStart){
   if(!f) return;
   logHandle={name:f.name,getFile:()=>Promise.resolve(f)};
@@ -1442,13 +1463,31 @@ document.querySelectorAll('.ctt').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.ctt').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.cp').forEach(p=>p.classList.toggle('on',p.id==='cp-'+b.dataset.cp));
 }));
-document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x===b));
-  S.position=b.dataset.pos; save(); renderAdvisor();
-}));
-document.getElementById('crit-btn').addEventListener('click',()=>{
-  S.critMode=!S.critMode; document.getElementById('crit-btn').classList.toggle('on',S.critMode); renderAdvisor();
-});
+function setPosition(pos){
+  document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===pos));
+  S.position=pos; save(); renderAdvisor();
+}
+function toggleCrit(){
+  S.critMode=!S.critMode;
+  document.getElementById('crit-btn').classList.toggle('on',S.critMode); renderAdvisor();
+}
+document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>setPosition(b.dataset.pos)));
+document.getElementById('crit-btn').addEventListener('click',toggleCrit);
+function openLeftTab(lp){ const b=document.querySelector(`.lt[data-lp="${lp}"]`); if(b) b.click(); }
+function openCenterTab(cp){ const b=document.querySelector(`.ctt[data-cp="${cp}"]`); if(b) b.click(); }
+// ── RACCOURCIS CLAVIER COMBAT (ignorés dans les champs de saisie) ──
+function setupShortcuts(){
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Control') return; // géré par le tooltip
+    const t=e.target,tag=(t&&t.tagName)||'';
+    if(/INPUT|TEXTAREA|SELECT/.test(tag)||t?.isContentEditable) return;
+    if(e.ctrlKey||e.metaKey||e.altKey) return;
+    if(e.key==='1'){ setPosition('normal'); e.preventDefault(); }
+    else if(e.key==='2'){ setPosition('side'); e.preventDefault(); }
+    else if(e.key==='3'){ setPosition('back'); e.preventDefault(); }
+    else if(e.key==='c'||e.key==='C'){ toggleCrit(); e.preventDefault(); }
+  });
+}
 
 // ── RESIZE ───────────────────────────────────────────────────────
 (function(){
@@ -1500,8 +1539,54 @@ document.addEventListener('keydown',e=>{ if(e.key==='Control') _ctrlDown=true; }
 document.addEventListener('keyup',e=>{ if(e.key==='Control'){ _ctrlDown=false; hideSpTip(); } });
 window.addEventListener('blur',()=>{ _ctrlDown=false; hideSpTip(); });
 
+// ── AIDE / LÉGENDE DES INTERACTIONS ──────────────────────────────
+function setupHelp(){
+  if(document.getElementById('helpbtn')) return;
+  const btn=document.createElement('button');
+  btn.id='helpbtn'; btn.className='pb'; btn.title='Aide & raccourcis'; btn.textContent='❔';
+  btn.style.cssText='border-radius:var(--r);margin-left:6px';
+  const panel=document.createElement('div'); panel.id='helppanel';
+  panel.innerHTML=`
+    <div class="hph">Interactions</div>
+    <div class="hpr">🖱 <b>Clic</b> sur un sort du classement → l'ajoute à la séquence</div>
+    <div class="hpr">🖱 <b>Clic</b> sur un événement du log → restaure l'état à cet instant</div>
+    <div class="hpr">⌨ <b>Ctrl + survol</b> d'un sort → affiche sa description</div>
+    <div class="hpr">📂 <b>Glisse</b> ton fichier log dans la fenêtre pour le connecter</div>
+    <div class="hph" style="margin-top:8px">Raccourcis clavier</div>
+    <div class="hpr"><b>1 / 2 / 3</b> → Face / Côté / Dos</div>
+    <div class="hpr"><b>C</b> → bascule Coup Critique</div>`;
+  document.body.appendChild(panel);
+  const place=()=>{ const r=btn.getBoundingClientRect(); panel.style.top=(r.bottom+6)+'px'; panel.style.right=Math.max(8,window.innerWidth-r.right)+'px'; };
+  btn.addEventListener('click',e=>{ e.stopPropagation(); if(panel.classList.toggle('on')) place(); });
+  document.addEventListener('click',e=>{ if(!panel.contains(e.target)&&e.target!==btn) panel.classList.remove('on'); });
+  (document.getElementById('hdc')||document.getElementById('hd')).appendChild(btn);
+}
+// ── CHEMIN DU LOG (détection OS) ─────────────────────────────────
+function detectOS(){
+  const p=(navigator.userAgentData?.platform||navigator.platform||navigator.userAgent||'').toLowerCase();
+  if(/win/.test(p)) return 'win';
+  if(/mac|iphone|ipad/.test(p)) return 'mac';
+  if(/linux|x11|android/.test(p)) return 'linux';
+  return 'win';
+}
+function populateLogPath(){
+  const el=document.getElementById('logpath'); if(!el) return;
+  const os=detectOS();
+  const paths={
+    win:  ['Windows', 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Wakfu\\preferences\\logs\\'],
+    mac:  ['macOS',   '~/Library/Application Support/Steam/steamapps/common/Wakfu/preferences/logs/'],
+    linux:['Linux',   '~/.local/share/Steam/steamapps/common/Wakfu/preferences/logs/'],
+  };
+  const order=[os,...Object.keys(paths).filter(k=>k!==os)];
+  el.innerHTML=order.map(k=>{
+    const [name,path]=paths[k], hot=(k===os);
+    return `<div style="${hot?'color:var(--gold);font-weight:600':'color:var(--dim)'};margin-bottom:3px">${hot?'▸ ':''}<b>${name}</b> : ${path}</div>`;
+  }).join('');
+}
+
 // ── INIT ─────────────────────────────────────────────────────────
 loadData(); load();
 applyZoom(); setupFontSlider();
+setupShortcuts(); setupHelp(); populateLogPath();
 syncCls(); renderAll(); initCSQ();
 if(S.playerName) document.getElementById('pninp').value=S.playerName;

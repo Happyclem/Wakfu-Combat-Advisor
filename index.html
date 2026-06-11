@@ -51,10 +51,8 @@
       </div>
       <div class="sec">
         <div class="sh">Chemin du log</div>
-        <code style="font-size:9px;color:var(--dim);word-break:break-all;line-height:1.8">
-          Windows: C:\Program Files (x86)\Steam\steamapps\common\Wakfu\preferences\logs\<br>
-          Linux: ~/.local/share/Steam/steamapps/common/Wakfu/preferences/logs/
-        </code>
+        <code id="logpath" style="font-size:9px;word-break:break-all;line-height:1.7;display:block"></code>
+        <div style="font-size:9px;color:var(--dim);margin-top:5px">Launcher Ankama (hors Steam) : dossier d'installation de Wakfu → <b>/preferences/logs/</b></div>
       </div>
     </div>
 
@@ -84,7 +82,7 @@
       <div class="sec">
         <div class="sh">Import Wakfuli / Zenith</div>
         <p style="font-size:10px;color:var(--dim);line-height:1.6;margin-bottom:6px">
-          Sur wakfuli.com ou zenithwakfu.com → F12 Console → script d'extraction → JSON ici
+          Sur wakfuli.com ou zenithwakfu.com → F12 Console → script d'extraction → colle le JSON ci-dessous (<b>import automatique</b>)
         </p>
         <textarea class="inp" id="impta" rows="5" style="font-family:var(--mono);font-size:10px;resize:vertical"
           placeholder='{"source":"wakfuli","character":{"class":"sram","level":200},...}'></textarea>
