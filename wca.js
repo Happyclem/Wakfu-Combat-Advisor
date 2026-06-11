@@ -243,12 +243,18 @@ function calcDmg({base,mastery,di,pos,resBrut,isCrit,cb=1}){
   const bonusDos=(st.dmgDos||0)/100, bonusCC=(st.dmgCC||0)/100;
   const pm = pos==='back'?(1.25+bonusDos):pos==='side'?1.15:1;
   const cm = isCrit?(1.25+bonusCC):1;
-  return Math.round(base*(1+mastery/100)*(1+(di||0)/100)*pm*cm*(1-rp)*cb);
+  // Sur un critique, la Maîtrise Critique s'ajoute au pool de maîtrise (confirmé en jeu).
+  const mTot = mastery + (isCrit?(st.critMastery||0):0);
+  return Math.round(base*(1+mTot/100)*(1+(di||0)/100)*pm*cm*(1-rp)*cb);
 }
 function scale(dMin,dMax,lvl){
   const l=Math.max(1,Math.min(245,lvl||200));
-  if(dMin===dMax) return Math.round(dMax*l/245);
-  return Math.round(dMin+(dMax-dMin)*(l-1)/244);
+  // dm = valeur encyclopédie ≈ infobulle niv.245. La base de calcul réelle vaut
+  // dm × g(l), facteur calibré en jeu (mannequin 0 %, Sram lvl20 & lvl125, écart ~1-2 %).
+  // g(1)≈0.11, g(125)=0.76, g(245)≈1.39. L'ancien dm×l/245 sous-estimait ~30-48 %.
+  const dm=(dMax||dMin||0);
+  const g=0.11 + 1.28*(l-1)/244;
+  return Math.round(dm*g);
 }
 function assassinatDebuff(){ return sitActive('assassinat')?-100:0; }
 function elRes(el){

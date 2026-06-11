@@ -1,16 +1,16 @@
-Nom,Niveau de deblocage,Effets
-Piège de Répulsion II,1,Le Piège de Répulsion devient Piège de Répulsion II : le piège n'est plus en zone. Au déclenchement
-Piège d'Attraction II,1,Le Piège d'Attraction devient Piège d'Attraction II : le piège passe en zone croix de taille 1. Au déclenchement
-Piège de Téléportation II,1,Le Piège de Téléportation devient Piège de Téléportation II : le piège n'est pas consommé à l'utilisation
-Embuscade,1,Les pièges ne rendent plus de PA au Sram. Regagne 1 PW au déclenchement d'un piège. Lorsqu'un ennemi déclenche un piège du Sram : Dommage 91 (dommages mêlée).
-Assaut létal,1,La Marque létale du Double change de fonctionnement : si le Sram tue un ennemi
-Diversion alternative,1,Le sort Diversion du Double change de fonctionnement : les cibles autour du Double sont retournées.
-Peur alternative,1,Le sort Peur du Double change de fonctionnement : le sort attire la cible au contact du Double.
-Leurre,1,Le Double explose s'il subit des dommages directs : Dommage 50 % des PV courants du Double. Hémorragie (+20 Niv.).
-Passe-passe,1,Le Double peut s'invoquer jusqu'à 4 Portée en ligne
-Localisation quantique,1,En début de combat
-Hémophilie,1,En fin de tour
-Assassin,1,En tuant un ennemi : ne gagne plus de Point Faible
-Retenue,1,Invisibilité ne peut plus se lancer sur un allié. Invisible est retiré seulement sur un sort à 4 PA ou plus.
-Duperie,1,Après avoir reçu des dommages directs : échange de position avec son Double (1 fois par tour de combattant).
-Assaut Brutal,1,Les sorts à 4 PA ou plus ne génèrent plus de Point Faible : à la place
+Nom;Niveau de deblocage;Effets
+Piège de Répulsion II;1;Le Piège de Répulsion devient Piège de Répulsion II : le piège n'est plus en zone. Au déclenchement
+Piège d'Attraction II;1;Le Piège d'Attraction devient Piège d'Attraction II : le piège passe en zone croix de taille 1. Au déclenchement
+Piège de Téléportation II;1;Le Piège de Téléportation devient Piège de Téléportation II : le piège n'est pas consommé à l'utilisation
+Embuscade;1;Les pièges ne rendent plus de PA au Sram. Regagne 1 PW au déclenchement d'un piège. Lorsqu'un ennemi déclenche un piège du Sram : Dommage 91 (dommages mêlée).
+Assaut létal;1;La Marque létale du Double change de fonctionnement : si le Sram tue un ennemi
+Diversion alternative;1;Le sort Diversion du Double change de fonctionnement : les cibles autour du Double sont retournées.
+Peur alternative;1;Le sort Peur du Double change de fonctionnement : le sort attire la cible au contact du Double.
+Leurre;1;Le Double explose s'il subit des dommages directs : Dommage 50 % des PV courants du Double. Hémorragie (+20 Niv.).
+Passe-passe;1;Le Double peut s'invoquer jusqu'à 4 Portée en ligne
+Localisation quantique;1;En début de combat
+Hémophilie;1;En fin de tour
+Assassin;1;En tuant un ennemi : ne gagne plus de Point Faible
+Retenue;1;Invisibilité ne peut plus se lancer sur un allié. Invisible est retiré seulement sur un sort à 4 PA ou plus.
+Duperie;1;Après avoir reçu des dommages directs : échange de position avec son Double (1 fois par tour de combattant).
+Assaut Brutal;1;Les sorts à 4 PA ou plus ne génèrent plus de Point Faible : à la place
