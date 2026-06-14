@@ -238,14 +238,18 @@ function playerMaxHp(){ return getEffStats().hp||0; }
 // ── DAMAGE CALC ──────────────────────────────────────────────────
 function calcDmg({base,mastery,di,pos,resBrut,isCrit,cb=1}){
   if(!base) return 0;
-  const rp = Math.min(.9, 1-Math.pow(.8,(resBrut||0)/100));
+  // %résis = 1−0,8^(R/100), par paliers de 1 % (arrondi inférieur). Pas de cap 90 % :
+  // les monstres ne sont pas soumis au plafond de résistance des joueurs.
+  const rp = Math.floor((1-Math.pow(.8,(resBrut||0)/100))*100)/100;
   const st=getEffStats();
   const bonusDos=(st.dmgDos||0)/100, bonusCC=(st.dmgCC||0)/100;
-  const pm = pos==='back'?(1.25+bonusDos):pos==='side'?1.15:1;
+  const pm = pos==='back'?(1.25+bonusDos):pos==='side'?1.10:1;
   const cm = isCrit?(1.25+bonusCC):1;
   // Sur un critique, la Maîtrise Critique s'ajoute au pool de maîtrise (confirmé en jeu).
   const mTot = mastery + (isCrit?(st.critMastery||0):0);
-  return Math.round(base*(1+mTot/100)*(1+(di||0)/100)*pm*cm*(1-rp)*cb);
+  // %DI réguliers : plancher −50 % (les DI conditionnels, non modélisés, s'ajouteraient après).
+  const diEff = Math.max(-50, di||0);
+  return Math.round(base*(1+mTot/100)*(1+diEff/100)*pm*cm*(1-rp)*cb);
 }
 function scale(dMin,dMax,lvl){
   const l=Math.max(1,Math.min(245,lvl||200));
