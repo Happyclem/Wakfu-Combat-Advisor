@@ -138,6 +138,23 @@ function parseTirPrecis(effects, baseDmg) {
   return out;
 }
 
+// Dégât conditionnel « Si <condition> : … Dommage : N à la place ».
+// Renvoie { altDmg, altCond } où altCond est un id court (stabilise, cible_armure…).
+// Utilisé pour les sorts dont une condition remplace le dégât de base (Sacrieur :
+// Aversion si stabilisé, Fracasse si la cible a de l'Armure).
+const ALT_COND = [
+  { id: 'stabilise',    re: /stabilis[ée]/i },
+  { id: 'cible_armure', re: /la\s+cible\s+poss[èe]de\s+de\s+l.?Armure/i },
+];
+function parseAltDmg(effects) {
+  // On cherche un « Dommage : N à la place » et la condition « Si … : » qui le précède.
+  const m = effects.match(/Si\b([^:]*):[^]*?Dommage\s*:?\s*(\d+)\s*à\s+la\s+place/i);
+  if (!m) return {};
+  const condText = m[1];
+  const cond = ALT_COND.find(c => c.re.test(condText));
+  return cond ? { altDmg: num(m[2]), altCond: cond.id } : {};
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -155,6 +172,8 @@ function buildSpells(classDisplay) {
     const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg) : 0;
     // Crâ — Tir précis : dégâts alternatifs + Précision consommée.
     const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
+    // Sacrieur — dégât conditionnel « … à la place » (Aversion stabilisé, Fracasse vs Armure).
+    const alt = (classDisplay === 'Sacrieur') ? parseAltDmg(eff) : {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -168,6 +187,8 @@ function buildSpells(classDisplay) {
       gen: gen || undefined, // ressource générée (Concentration Iop, Affûtage Crâ…) ; omis si 0
       tp: tp.tp,             // Crâ : dégâts en Tir précis (omis si inchangé)
       tpCost: tp.tpCost,     // Crâ : Précision consommée par Tir précis
+      altDmg: alt.altDmg,    // dégât conditionnel « à la place » (Sacrieur)
+      altCond: alt.altCond,  // id de la condition (stabilise, cible_armure)
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

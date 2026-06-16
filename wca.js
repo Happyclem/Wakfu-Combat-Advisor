@@ -13,6 +13,7 @@ function spellFull(s){ return {
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
+  altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -258,14 +259,27 @@ function resNext(val,sp,ctx){ const mech=getMech(); return mech?.next?mech.next(
 function currentPF(){ return S.previewMaxPF?(getMech()?.res?.max||100):resVal(); }
 // Un sort dont les dégâts varient avec la jauge (Sram : finisseurs + Arnaque).
 function isPFScaling(sp){ const mech=getMech(); return mech?.scales?!!mech.scales(sp):false; }
+// Fraction de PV courants du joueur (1 = pleine vie). Null si non suivi (pas de log).
+function playerHpFrac(){
+  const mx=playerMaxHp(), hp=getPlayerMech().hp;
+  if(!mx||hp==null) return null;
+  return Math.max(0,Math.min(1,hp/mx));
+}
 // Multiplicateur global de dégâts pour une valeur de jauge donnée (clé selon la classe).
-function mechBonus(val){ const mech=getMech(); if(!mech?.bonus) return 1; const id=resId()||'pf'; return mech.bonus({[id]:val}); }
+// Le contexte transmet aussi la fraction de PV du joueur (Sacrieur : bonus Berserk).
+function mechBonus(val){
+  const mech=getMech(); if(!mech?.bonus) return 1;
+  const id=resId()||'pf';
+  return mech.bonus({[id]:val, hpFrac:playerHpFrac()});
+}
 // La jauge influence-t-elle les dégâts via sa VALEUR ? (→ à suivre dans le knapsack DP)
-// Faux pour le Crâ : le levier (Tir précis) est un toggle global, pas un seuil de jauge.
+// Faux pour le Crâ (levier = toggle Tir précis) et le Sacrieur (levier = PV manquants,
+// pas la valeur de Fureur). On teste le bonus à PLEINE vie pour isoler l'effet jauge.
 function tracksRes(){
   const mech=getMech(); if(!mech?.res) return false;
-  const mx=mech.res.max, spells=getSpells();
-  return mechBonus(mx)!==1 || spells.some(s=>isPFScaling(s)||mechFlatBonus(s,mx)>0);
+  const mx=mech.res.max, spells=getSpells(), id=resId()||'pf';
+  const bonusFromGauge = mech.bonus ? mech.bonus({[id]:mx, hpFrac:1}) : 1;
+  return bonusFromGauge!==1 || spells.some(s=>isPFScaling(s)||mechFlatBonus(s,mx)>0);
 }
 // Faut-il AFFICHER la jauge de ressource ? (plus large : inclut les classes à modes
 // dont la jauge est informative/consommée, comme la Précision du Crâ)
@@ -944,9 +958,12 @@ function renderAdvisor(){
         // Crâ : indicateur Tir précis (dégât amélioré dispo / coût Précision quand actif)
         const tpOn=isModeOn('tir_precis');
         const tp=r.spell.tp>0?`<span style="font-size:9px;color:${tpOn?'var(--gold)':'var(--dim)'}" title="${tpOn?'Tir précis actif — consomme '+r.spell.tpCost+' Précision':'Dégât amélioré en Tir précis'}">🎯${tpOn&&r.spell.tpCost?`-${r.spell.tpCost}`:''}</span>`:'';
+        // Dégât conditionnel « à la place » (Sacrieur : Aversion stabilisé, Fracasse vs Armure)
+        const altOn=r.spell.altCond&&isModeOn(r.spell.altCond);
+        const alt=r.spell.altDmg>0?`<span style="font-size:9px;color:${altOn?'var(--gold)':'var(--dim)'}" title="${altOn?'Condition active — dégâts majorés':'Dégât majoré si condition remplie'}">⚔${altOn?'✓':''}</span>`:'';
         return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}
+          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')

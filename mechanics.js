@@ -136,6 +136,60 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra };
+  // ── SACRIEUR — Fureur / Berserk / dégâts conditionnels ─────────────────────
+  // Identité : le Sacrieur tape plus fort quand il a PEU de PV (Berserk). La Fureur
+  // (0→100) se remplit en ENCAISSANT des dégâts — l'outil ne simule pas le combat
+  // reçu, donc la jauge est INFORMATIVE (alimentée depuis le log si dispo).
+  //
+  // ⚠ BERSERK NON CALIBRÉ : le % de dégâts par PV manquant n'est pas dans les
+  // données scrapées. On applique une rampe linéaire ESTIMÉE (à confirmer in-game) :
+  // pleine vie → ×1 ; à BERSERK_HP_FLOOR (20 % PV) ou moins → ×(1+BERSERK_MAX).
+  // Sans suivi de PV (pas de log), hpFrac=null → aucun bonus (ranking honnête).
+  const BERSERK_MAX = 0.25;        // +25 % de dégâts au berserk plein (ESTIMATION)
+  const BERSERK_HP_START = 0.90;   // le bonus commence sous 90 % PV
+  const BERSERK_HP_FLOOR = 0.20;   // bonus maximal à 20 % PV et en-dessous
+  function berserkMult(hpFrac) {
+    if (hpFrac == null) return 1;                       // PV inconnus → pas de bonus
+    if (hpFrac >= BERSERK_HP_START) return 1;
+    const t = Math.min(1, (BERSERK_HP_START - hpFrac) / (BERSERK_HP_START - BERSERK_HP_FLOOR));
+    return 1 + BERSERK_MAX * t;
+  }
+  const sacrier = {
+    res: { id: 'fureur', label: 'Fureur', max: 100, color: '#d33b3b' },
+    initial: 0,
+    gen() { return 0; },              // la Fureur ne vient pas des sorts (encaissement)
+    consumes() { return false; },
+    next(val) { return val; },        // jauge non modifiée par les sorts lancés
+    bonus(m) { return berserkMult(m && m.hpFrac); }, // Berserk lié aux PV manquants
+    // Dégâts conditionnels « à la place » activés par un mode toggle correspondant.
+    baseDmg(sp, modes) {
+      if (sp.altDmg && sp.altCond && modes && modes[sp.altCond]) return sp.altDmg;
+      return sp.damageMax || sp.damageMin || 0;
+    },
+    modes: [
+      { id: 'stabilise',    label: 'Stabilisé',        desc: 'Aversion inflige ses dégâts majorés' },
+      { id: 'cible_armure', label: 'Cible avec Armure', desc: 'Fracasse inflige ses dégâts majorés' },
+    ],
+    advice(m) {
+      const out = [];
+      const f = m.fureur || 0;
+      if (f >= 100) out.push({ p: 'M', msg: `🩸 Fureur MAX → Berserk plein, Punition disponible` });
+      else out.push({ p: 'L', msg: `🩸 Fureur ${f}/100 (monte en encaissant des dégâts)` });
+      // Conseil Berserk selon les PV courants (si suivis).
+      const hpFrac = m.hpFrac;
+      if (hpFrac != null) {
+        const mult = berserkMult(hpFrac);
+        if (mult > 1) out.push({ p: hpFrac <= BERSERK_HP_FLOOR ? 'H' : 'M',
+          msg: `⚔ Berserk : PV ${Math.round(hpFrac*100)} % → ×${mult.toFixed(2)} dégâts (estimation à confirmer)` });
+        else out.push({ p: 'L', msg: `⚔ Berserk : descends sous 90 % PV pour gagner des dégâts (max à 20 %)` });
+      } else {
+        out.push({ p: 'L', msg: `⚔ Berserk : plus tu as de PV manquants, plus tu frappes fort (connecte le log pour le suivi)` });
+      }
+      return out;
+    },
+    onState(a, n, lvl, m) { if (/fureur/i.test(n)) m.fureur = Math.min(100, lvl); },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier };
 
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -77,6 +77,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Sram** — Point Faible (génération/consommation, finisseurs) + Hémorragie, calibré en jeu
   - **Iop** — Concentration (0→100, palier ×1.10 + bonus Égaré sur Fulgur/Colère à 100)
   - **Crâ** — Précision/Affûtage + **toggle Tir précis** : chaque sort passe à ses dégâts améliorés (chiffrés depuis les effets) et consomme de la Précision
+  - **Sacrieur** — Fureur + **Berserk** : bonus de dégâts selon les PV manquants du joueur (suivi via le log) + dégâts conditionnels chiffrés (Aversion stabilisé, Fracasse vs Armure). ⚠ Le % de Berserk est une estimation à confirmer in-game (isolée dans `mechanics.js`)
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---
