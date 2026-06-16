@@ -73,8 +73,10 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
 - **874 monstres** avec PV, niveau et résistances élémentaires
 - **8 passifs généraux** + **3 sorts communs** partagés par toutes les classes
 - **18 classes** intégrées : sorts (dégâts niv. 245, portée, type, ligne de vue) et passifs
-- **Sram** : mécanique de **Point Faible** + **Hémorragie** entièrement modélisée (dégâts calibrés en jeu)
-- Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe (Concentration, Précision, Glyphes…) est rappelée en conseil mais pas encore chiffrée
+- **Mécaniques modélisées en profondeur** (jauge suivie + bonus de dégâts chiffré) :
+  - **Sram** — Point Faible (génération/consommation, finisseurs) + Hémorragie, calibré en jeu
+  - **Iop** — Concentration (0→100, palier ×1.10 + bonus Égaré sur Fulgur/Colère à 100)
+- Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---
 
@@ -96,6 +98,7 @@ Les données de jeu viennent de l'encyclopédie Wakfu, scrapées puis générée
 index.html              Interface (markup uniquement)
 wca.css                 Styles
 wca.js                  Logique applicative
+mechanics.js            Mécaniques de classe (jauge, génération, bonus de dégâts) — window.WCA_MECHANICS
 data-game.js            [GÉNÉRÉ] Sorts et passifs des 18 classes (window.WCA_SPELLS)
 data-commun.js          [GÉNÉRÉ] Sorts communs + passifs généraux (window.WCA_COMMON_SPELLS / _GENERAL_PASSIVES)
 data-monsters.js        Base de données monstres — 874 entrées (window.WCA_MONSTERS)

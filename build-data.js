@@ -61,9 +61,14 @@ function buildDesc(row) {
 // conditionnelle « Si … : … » (jusqu'au prochain «.») est exclu, car non garanti.
 // Fallback : un sort qui « génère du Point Faible » sans valeur chiffrée (effets
 // parfois vides dans l'encyclopédie, ex. Châtiment) suit la règle observée 5×PA.
+// Retire les clauses conditionnelles « Si … . » (jusqu'au prochain point) : un gain
+// de ressource qui s'y trouve n'est pas garanti. La conséquence peut être introduite
+// par « : » ou par « , » (ex. « Si ce sort tue un combattant, regagne … »).
+function stripConditional(text) {
+  return text.replace(/\bSi\b[^.]*?\./gi, ' ');
+}
 function parsePF(effects, desc, ap) {
-  // Retire les segments conditionnels « Si <cond> : <conséquences> . »
-  const unconditional = effects.replace(/\bSi\b[^:.]*:[^.]*\.?/gi, ' ');
+  const unconditional = stripConditional(effects);
   let pf = 0, m;
   const re = /Point\s*Faible\s*\(\+?\s*(\d+)\s*Niv\.?\)/gi;
   while ((m = re.exec(unconditional)) !== null) pf += num(m[1]);
@@ -84,17 +89,38 @@ function isFinisher(effects, desc) {
          /dommages?\s+suppl.*par\s+point\s*faible/.test(t);
 }
 
+// ── Ressources de classe (générique) ────────────────────────────────────────
+// Chaque classe à jauge déclare le nom de sa ressource et le motif « (+N Niv.) »
+// pour parser le gain d'un sort. `gen` = ressource générée (inconditionnelle).
+// Le bonus de dégâts éventuel est modélisé côté runtime (mechanics.js), pas ici.
+const RESOURCE = {
+  Sram: { token: 'Point\\s*Faible' },        // déjà traité spécifiquement (pf/fin)
+  Iop:  { token: 'Concentration' },           // jauge 0→100, bonus à 100
+};
+// Parse le gain de ressource « <Token> (+N Niv.) », gains inconditionnels seulement.
+function parseResource(effects, token) {
+  const unconditional = stripConditional(effects);
+  let g = 0, m;
+  const re = new RegExp(token + '\\s*\\(\\+?\\s*(\\d+)\\s*Niv\\.?\\)', 'gi');
+  while ((m = re.exec(unconditional)) !== null) g += num(m[1]);
+  return g;
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
   if (!fs.existsSync(file)) return [];
   const rows = parseCSV(fs.readFileSync(file, 'utf8'));
   const isSram = classDisplay === 'Sram';
+  const resCfg = RESOURCE[classDisplay];
   return rows.map(r => {
     const eff = clean(r['Effets']);
-    const descRaw = clean(r['Description']); // pour le parse PF/finisseur (effets parfois vides)
+    const descRaw = clean(r['Description']); // pour le parse ressource/finisseur (effets parfois vides)
     const desc = buildDesc(r);
     const ap = num(r['CoutPA']);
+    // Ressource de classe générique (`gen`). Pour le Sram, `pf` reste le canal
+    // historique ; pour les autres classes à jauge, on remplit `gen`.
+    const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg.token) : 0;
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -105,6 +131,7 @@ function buildSpells(classDisplay) {
       dc: num(r['Dommage lvl245 critique']),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
       fin: isSram ? isFinisher(eff, descRaw) : false,
+      gen: gen || undefined, // ressource générée (Concentration Iop…) ; omis si 0
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

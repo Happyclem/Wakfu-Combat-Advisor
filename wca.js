@@ -7,11 +7,11 @@ function loadData(){
   GPD  = window.WCA_GENERAL_PASSIVES || [];
   CSP  = window.WCA_COMMON_SPELLS || [];
 }
-// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,lvl,rng,type,los,desc
+// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,gen,lvl,rng,type,los,desc
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
-  pfGen:s.pf||0, isFinisher:s.fin||false, desc:s.desc||'',
+  pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -211,22 +211,9 @@ function getOnKillRes(){
 }
 
 // ── CLASS MECHANICS ──────────────────────────────────────────────
-const MECHS = {
-  sram:{
-    // ⚠ Point Faible initial en début de combat : supposé 0 (PAS 90 — à confirmer par test in-game).
-    // La valeur réelle vient du log via onState ; sans log, on part de 0.
-    res:{id:'pf',label:'Point Faible',max:100,color:'#e05c5c'},
-    onState(a,n,lvl,m){ if(/point\s*faible/i.test(n)) m.pf=Math.min(100,lvl); },
-    advice(m){
-      const pf=m.pf||0, mult=(1+pf*.002).toFixed(2);
-      if(pf>=100) return [{p:'H',msg:`🔴 Point Faible MAX → Finisseur ! (×1.20)`}];
-      if(pf>=70)  return [{p:'M',msg:`🟡 Point Faible ${pf}/100 (×${mult})`}];
-      if(pf>0)    return [{p:'L',msg:`⚪ Point Faible ${pf}/100 (×${mult})`}];
-      return [];
-    },
-    bonus(m){ return 1+(m.pf||0)*.002; },
-  },
-};
+// Les mécaniques détaillées vivent dans mechanics.js (window.WCA_MECHANICS).
+// Chaque classe à ressource y déclare jauge, génération, bonus de dégâts, conseils.
+const MECHS = (typeof window!=='undefined' && window.WCA_MECHANICS) || {};
 // Rappels de mécanique par classe (informationnels, sans effet sur le calcul).
 // Le multiplicateur de dégâts réel (Concentration, Précision…) demande une
 // calibration en jeu : seul le Point Faible du Sram est modélisé (voir MECHS).
@@ -250,13 +237,44 @@ const CLASS_NOTES = {
   foggernaut: '⚙ Stasis & tourelles : alimente tes machines pour les dégâts.',
   forgelance: '🔱 Lance : gère ta portée et tes charges.',
 };
-function getClassNote(){ const n=CLASS_NOTES[S.build?.class]; return n?[{p:'L',msg:n}]:[]; }
+// Rappel de classe : seulement pour les classes SANS mécanique modélisée
+// (celles avec mécanique fournissent déjà des conseils chiffrés via mech.advice).
+function getClassNote(){ if(getMech()) return []; const n=CLASS_NOTES[S.build?.class]; return n?[{p:'L',msg:n}]:[]; }
 function getMech(){ return MECHS[S.build?.class]||null; }
 function getPlayerMech(){ return S.combat.mechanics['__p']||{}; }
-// PF utilisé pour l'AFFICHAGE des dégâts : 100 si aperçu actif, sinon PF réel courant.
-function currentPF(){ return S.previewMaxPF?100:(getPlayerMech().pf||0); }
-// Un sort dont les dégâts varient avec le Point Faible (×(1+pf/100)).
-function isPFScaling(sp){ return consumesPF(sp)||/arnaque/i.test(sp.name||''); }
+// ── ACCÈS GÉNÉRIQUE À LA RESSOURCE DE CLASSE ──────────────────────
+// resId() = clé de jauge de la classe active ('pf' Sram, 'conc' Iop…), null sinon.
+function resId(){ return getMech()?.res?.id||null; }
+// Valeur courante de la jauge (lue depuis l'état joueur).
+function resVal(m){ const id=resId(); return id?((m||getPlayerMech())[id]||0):0; }
+// Génération de ressource d'un sort selon la mécanique active.
+function resGenOf(sp){ const mech=getMech(); return mech?.gen?mech.gen(sp):(sp.resGen||0); }
+// Le sort consomme/vide la jauge ? (finisseur Sram). Faux si la classe n'en a pas.
+function resConsumes(sp){ const mech=getMech(); return mech?.consumes?!!mech.consumes(sp):false; }
+// Nouvelle valeur de jauge après lancer de `sp` depuis `val`.
+function resNext(val,sp,ctx){ const mech=getMech(); return mech?.next?mech.next(val,sp,ctx||{}):val; }
+// PF utilisé pour l'AFFICHAGE des dégâts : 100 si aperçu actif, sinon valeur réelle.
+function currentPF(){ return S.previewMaxPF?(getMech()?.res?.max||100):resVal(); }
+// Un sort dont les dégâts varient avec la jauge (Sram : finisseurs + Arnaque).
+function isPFScaling(sp){ const mech=getMech(); return mech?.scales?!!mech.scales(sp):false; }
+// Multiplicateur global de dégâts pour une valeur de jauge donnée (clé selon la classe).
+function mechBonus(val){ const mech=getMech(); if(!mech?.bonus) return 1; const id=resId()||'pf'; return mech.bonus({[id]:val}); }
+// La jauge de la classe active influence-t-elle les dégâts ? (sinon inutile de la suivre)
+function tracksRes(){
+  const mech=getMech(); if(!mech?.res) return false;
+  const mx=mech.res.max, spells=getSpells();
+  return mechBonus(mx)!==1 || spells.some(s=>isPFScaling(s)||mechFlatBonus(s,mx)>0);
+}
+// Bonus de dégâts plat spécifique au sort selon la jauge (ex. Égaré du Iop à 100).
+// Renvoie des dégâts ADDITIONNELS (mis à l'échelle du niveau du sort), 0 sinon.
+function mechFlatBonus(sp,val){
+  const mech=getMech();
+  if(mech?.egareBonus && val>=(mech.res?.max||100)){
+    const b=mech.egareBonus(sp);
+    if(b>0) return scale(b,b,sp.spellLevel||S.build?.level||200);
+  }
+  return 0;
+}
 function pmObj(){ if(!S.combat.mechanics['__p']) S.combat.mechanics['__p']={}; return S.combat.mechanics['__p']; }
 function playerMaxHp(){ return getEffStats().hp||0; }
 
@@ -298,17 +316,17 @@ function resVs(el,t){
   const debuff=(t.uid!=null&&t.uid===S.targets[S.focusIdx]?.uid)?assassinatDebuff():0;
   return base+debuff;
 }
-// Dégâts d'un sort contre une cible précise, à un niveau de PF donné.
+// Dégâts d'un sort contre une cible précise, à une valeur de jauge `pf` donnée.
 function dmgVs(sp,t,pf,crit){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
   const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,lvl);
   if(!base) return 0;
-  // Pour les sorts PF-scalants on passe cb=1 (spellDmgMult corrige)
-  const isPFScaler=consumesPF(sp)||/(arnaque)/i.test(sp.name||'');
-  const cb=isPFScaler?1:(getMech()?.bonus({pf})||1);
+  // Pour les sorts qui scalent avec la jauge on passe cb=1 (spellDmgMult corrige)
+  const isPFScaler=isPFScaling(sp);
+  const cb=isPFScaler?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:resVs(sp.element,t),isCrit:crit,cb});
-  const dd=Math.round(d*spellDmgMult(sp,pf,t));
+  const dd=Math.round(d*spellDmgMult(sp,pf,t)) + mechFlatBonus(sp,pf);
   return dd + hemoBonus(dd,t,sp);
 }
 
@@ -353,7 +371,7 @@ function spellDmgMult(sp, pf, target){
 
   return m;
 }
-function consumesPF(sp){ return !!sp.isFinisher || /consomme.*point\s*faible/i.test(sp.desc||''); }
+function consumesPF(sp){ return resConsumes(sp); }
 
 // ── HÉMORRAGIE (Sram) ────────────────────────────────────────────
 // Calibré en jeu (Sram lvl125, mannequin 0 %, ~15 mesures) : un coup direct sur
@@ -383,11 +401,11 @@ function hemoBonus(dd, t, sp){
 }
 // PF généré effectivement par un sort (Assaut Brutal supprime le gain des sorts visés).
 function effPfGen(sp){ return abApplies(sp)?0:(sp.pfGen||0); }
-// Nouveau PF après avoir lancé `sp` depuis `pf`. lethal=true + Assassin → pas de gain.
+// Nouvelle valeur de jauge après lancer de `sp` depuis `pf`. Générique : délègue à
+// la mécanique de classe (resNext). Côté Sram, on transmet les règles spécifiques
+// (Assaut Brutal supprime le gain, Assassin = pas de gain sur le coup létal).
 function nextPF(pf,sp,lethal){
-  if(consumesPF(sp)) return 0;
-  if(lethal && assassinActive()) return pf; // le coup qui tue ne génère pas de PF
-  return Math.min(100, pf + effPfGen(sp));
+  return resNext(pf,sp,{ lethal, assassin:assassinActive(), suppressGen:abApplies(sp) });
 }
 // spRange : 'melee' | 'distance' — à passer depuis chaque spell (futur).
 // Pour l'instant on infère depuis la portée string si disponible.
@@ -440,10 +458,9 @@ function rankSpells(crit){
   return spells.map(sp=>{
     const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
     const mastery=elMastery(sp.element,st,sp);
-    const cb=mech?.bonus(pm)||1;
     const isPFScaler=isPFScaling(sp);
-    const cbAdj=isPFScaler?1:cb;
-    const dmg=Math.round(calcDmg({base,mastery,di,pos:S.position,resBrut:elRes(sp.element),isCrit:crit,cb:cbAdj})*spellDmgMult(sp,dispPF,S.monster));
+    const cbAdj=isPFScaler?1:mechBonus(dispPF);
+    const dmg=Math.round(calcDmg({base,mastery,di,pos:S.position,resBrut:elRes(sp.element),isCrit:crit,cb:cbAdj})*spellDmgMult(sp,dispPF,S.monster))+mechFlatBonus(sp,dispPF);
     return {spell:sp,damage:dmg,dpa:sp.apCost>0?Math.round(dmg/sp.apCost):0,pfScaler:isPFScaler};
   }).filter(r=>r.damage>0).sort((a,b)=>b.dpa-a.dpa);
 }
@@ -452,25 +469,28 @@ function rankSpells(crit){
 function computeSeq(){
   const spells=getSpells(); if(!spells.length||!S.monster) return null;
   const st=getEffStats(), ap=S.remainingAP??st.ap??6; if(ap<=0) return null;
-  const maxAP=Math.min(ap,18), mech=getMech(), isSram=S.build?.class==='sram';
-  const initPF=getPlayerMech().pf||0, di=st.degatsInfliges||0, lvl=S.build?.level||200;
+  const maxAP=Math.min(ap,18), mech=getMech();
+  // La jauge n'est suivie dans le knapsack que si elle influence les dégâts
+  // (Sram : finisseurs scalants ; Iop : palier 100). Sinon on l'ignore (perf).
+  const trackRes=tracksRes();
+  const initPF=trackRes?(resVal()):0, di=st.degatsInfliges||0, lvl=S.build?.level||200;
 
   function dmgAt(sp,pf){
     const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
-    const isPFScaler=consumesPF(sp)||/(arnaque)/i.test(sp.name||'');
-    const cb=isPFScaler?1:(mech?.bonus({pf})||1);
+    const cb=isPFScaling(sp)?1:mechBonus(pf);
     const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
-    return Math.round(d*spellDmgMult(sp,pf,S.monster));
+    return Math.round(d*spellDmgMult(sp,pf,S.monster))+mechFlatBonus(sp,pf);
   }
   const dp=Array.from({length:maxAP+1},()=>({dmg:0,pf:initPF,seq:[]}));
   for(let j=1;j<=maxAP;j++) for(const sp of spells){
     const c=sp.apCost; if(c>j) continue;
-    const prev=dp[j-c], pf=isSram?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
-    if(d>dp[j].dmg) dp[j]={dmg:d,pf:isSram?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
+    const prev=dp[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
+    if(d>dp[j].dmg) dp[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
   }
   let chosen=dp[maxAP].seq, strat='';
-  if(isSram){
-    const fins=spells.filter(s=>s.isFinisher), blds=spells.filter(s=>(s.pfGen||0)>0);
+  const hasFinishers=spells.some(s=>resConsumes(s));
+  if(trackRes && hasFinishers){
+    const fins=spells.filter(s=>resConsumes(s)), blds=spells.filter(s=>(s.pfGen||0)>0);
     if(fins.length&&blds.length){
       let bestAlt=0, bestSeq=[];
       for(const fin of fins){
@@ -494,10 +514,12 @@ function computeSeq(){
   const wd=chosen.map(sp=>{const d=dmgAt(sp,pfSim);pfSim=nextPF(pfSim,sp,false);return{spell:sp,damage:d};});
   const apUsed=chosen.reduce((s,sp)=>s+sp.apCost,0);
   const total=wd.reduce((s,r)=>s+r.damage,0);
+  const ccPF=trackRes?resVal():0;
   const totalCC=chosen.reduce((s,sp)=>{
     const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
+    const cb=isPFScaling(sp)?1:mechBonus(ccPF);
     return s+calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,
-      resBrut:elRes(sp.element),isCrit:true,cb:getMech()?.bonus(getPlayerMech())||1});
+      resBrut:elRes(sp.element),isCrit:true,cb})+mechFlatBonus(sp,ccPF);
   },0);
   const ok=getOnKillRes();
   // Reinject the on-kill refund into the knapsack: if this sequence is lethal and a
@@ -511,8 +533,8 @@ function computeSeq(){
       const rb=ok.ap, dpR=Array.from({length:rb+1},()=>({dmg:0,pf:pfSim,seq:[]}));
       for(let j=1;j<=rb;j++) for(const sp of spells){
         const c=sp.apCost; if(c>j) continue;
-        const prev=dpR[j-c], pf=isSram?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
-        if(d>dpR[j].dmg) dpR[j]={dmg:d,pf:isSram?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
+        const prev=dpR[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
+        if(d>dpR[j].dmg) dpR[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
       }
       let pf2=pfSim;
       const rwd=dpR[rb].seq.map(sp=>{const d=dmgAt(sp,pf2);pf2=nextPF(pf2,sp,false);return{spell:sp,damage:d};});
@@ -530,14 +552,14 @@ function minKill(target,budget,pf){
   // DP "coût minimal" : pour chaque total de PA ≤ budget, dégâts max atteignables.
   const spells=getSpells(); if(!spells.length) return null;
   const need=curHP(target); if(need<=0) return {seq:[],ap:0,dmg:0,pf};
-  const isSram=S.build?.class==='sram';
+  const tr=tracksRes();
   const dp=Array.from({length:budget+1},()=>({dmg:0,pf,seq:[]}));
   for(let j=1;j<=budget;j++) for(const sp of spells){
     const c=sp.apCost; if(c>j) continue;
     const prev=dp[j-c];
-    const castPf=isSram?prev.pf:0;
+    const castPf=tr?prev.pf:0;
     const d=prev.dmg+dmgVs(sp,target,castPf,S.critMode);
-    if(d>dp[j].dmg) dp[j]={dmg:d,pf:isSram?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
+    if(d>dp[j].dmg) dp[j]={dmg:d,pf:tr?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
   }
   // Plus petit coût en PA qui tue la cible.
   for(let j=1;j<=budget;j++) if(dp[j].dmg>=need) return {seq:dp[j].seq,ap:j,dmg:dp[j].dmg,pf:dp[j].pf};
@@ -549,19 +571,20 @@ function computeKills(){
   const st=getEffStats();
   let budget=S.remainingAP??st.ap??6; if(budget<=0) return null;
   const ok=getOnKillRes(); // PA/PM/PW regagnés par kill (Assassin, etc.)
-  let pf=getPlayerMech().pf||0;
+  const tr=tracksRes();
+  let pf=tr?resVal():0;
   const kills=[]; let totalDmg=0; let totalAP=0;
   // Ordre de priorité = ordre du tableau (index 0 = priorité 1).
   for(const t of alive){
     if(budget<=0) break;
     const plan=minKill(t,budget,pf);
     if(!plan || !plan.seq.length){ continue; } // pas tuable maintenant ; on tente la suivante
-    // Dégâts réels + PF reporté à la cible suivante (le dernier sort est le coup létal).
+    // Dégâts réels + jauge reportée à la cible suivante (le dernier sort est le coup létal).
     let p=pf, dmg=0;
     plan.seq.forEach((sp,k)=>{
-      dmg+=dmgVs(sp,t,S.build?.class==='sram'?p:0,S.critMode);
+      dmg+=dmgVs(sp,t,tr?p:0,S.critMode);
       const lethal=(k===plan.seq.length-1);
-      p=S.build?.class==='sram'?nextPF(p,sp,lethal):0;
+      p=tr?nextPF(p,sp,lethal):0;
     });
     kills.push({ target:t, seq:plan.seq, ap:plan.ap, dmg });
     totalAP+=plan.ap; totalDmg+=dmg;
@@ -576,11 +599,10 @@ function computeKills(){
   if(survivor && budget>0){
     const mAP=Math.min(budget,18);
     const dp=Array.from({length:mAP+1},()=>({dmg:0,pf,seq:[]}));
-    const isSram=S.build?.class==='sram';
     for(let j=1;j<=mAP;j++) for(const sp of spells){
       const c=sp.apCost; if(c>j) continue;
-      const prev=dp[j-c], d=prev.dmg+dmgVs(sp,survivor,isSram?prev.pf:0,S.critMode);
-      if(d>dp[j].dmg) dp[j]={dmg:d,pf:isSram?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
+      const prev=dp[j-c], d=prev.dmg+dmgVs(sp,survivor,tr?prev.pf:0,S.critMode);
+      if(d>dp[j].dmg) dp[j]={dmg:d,pf:tr?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
     }
     if(dp[mAP].seq.length) dump={target:survivor,seq:dp[mAP].seq,dmg:dp[mAP].dmg,ap:dp[mAP].seq.reduce((s,sp)=>s+sp.apCost,0)};
   }
@@ -655,14 +677,14 @@ function initCSQ(){
   // Reset complet : vide les étapes, remet les ressources, reset les PV du monstre.
   const st=getEffStats();
   CSQ.steps=[]; CSQ.remAP=S.remainingAP??st.ap??6; CSQ.remMP=st.mp??3; CSQ.remWP=st.wp??0;
-  CSQ.pfCur=getPlayerMech().pf||0;
+  CSQ.pfCur=tracksRes()?resVal():0;
   resetMonHP(); renderCSQ();
 }
 function refreshCSQTarget(){
   // Changement de cible seulement : ne touche pas aux étapes ni aux ressources.
   // On recalcule juste les dégâts de chaque étape vis-à-vis de la nouvelle cible focusée,
   // et on met à jour la barre PV (sans reset les PV de la cible précédente).
-  let pf=getPlayerMech().pf||0;
+  let pf=tracksRes()?resVal():0;
   CSQ.steps.forEach(s=>{
     s.dmg=spellDmgAt(s.sp,pf);
     pf=nextPF(pf,s.sp,false);
@@ -679,11 +701,10 @@ function spellDmgAt(sp,pf){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
   const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,lvl);
   if(!(base>0)) return 0;
-  const isPFScaler=consumesPF(sp)||/(arnaque)/i.test(sp.name||'');
-  const cb=isPFScaler?1:(getMech()?.bonus({pf})||1);
+  const cb=isPFScaling(sp)?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
-  const dd=Math.round(d*spellDmgMult(sp,pf,focusTgt()));
+  const dd=Math.round(d*spellDmgMult(sp,pf,focusTgt()))+mechFlatBonus(sp,pf);
   return dd + hemoBonus(dd,focusTgt(),sp);
 }
 function addToCSQ(sp){
@@ -729,12 +750,17 @@ function renderCSQ(){
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
   const sm=document.getElementById('csqsum');
   if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
-  const pr=document.getElementById('csqpfrow');
+  const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
-    pr.style.display=S.build?.class==='sram'?'':'none';
-    if(S.build?.class==='sram'){
-      document.getElementById('csqpff').style.width=Math.min(100,CSQ.pfCur)+'%';
-      document.getElementById('csqpfv').textContent=CSQ.pfCur+'/100';
+    // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
+    const show=!!mech?.res && tracksRes();
+    pr.style.display=show?'':'none';
+    if(show){
+      const mx=mech.res.max;
+      document.getElementById('csqpfl').textContent=mech.res.label;
+      const f=document.getElementById('csqpff');
+      f.style.width=Math.min(100,CSQ.pfCur/mx*100)+'%'; f.style.background=mech.res.color;
+      document.getElementById('csqpfv').textContent=CSQ.pfCur+'/'+mx;
     }
   }
 }
@@ -858,14 +884,15 @@ function renderAdvisor(){
   else tc.style.display='none';
   // Ranking
   const ranked=rankSpells(S.critMode), rl=document.getElementById('ranklist'), re=document.getElementById('rankempty');
-  const isSram=S.build?.class==='sram', realPF=getPlayerMech().pf||0, dispPF=currentPF();
+  const hasRes=!!mech?.res, resTracks=tracksRes(), dispPF=currentPF();
+  const resLbl=mech?.res?.label||'', resMax=mech?.res?.max||100;
   const baseTitle=S.critMode?'⚡★ Sorts — Dégâts CC':'⚡ Sorts — Dégâts/PA';
   const rtt=document.getElementById('ranktitle');
-  rtt.textContent=baseTitle+(isSram?` · PF ${dispPF}${S.previewMaxPF?' (aperçu)':''}`:'');
-  // Bouton aperçu PF=100 (Sram uniquement, s'il y a des sorts PF-scalants au deck)
+  rtt.textContent=baseTitle+(hasRes&&resTracks?` · ${resLbl} ${dispPF}${S.previewMaxPF?' (aperçu)':''}`:'');
+  // Bouton aperçu jauge=max (toute classe dont la jauge influence les dégâts)
   const pfBtnId='pfPreviewBtn';
   let pfBtn=document.getElementById(pfBtnId);
-  const showPFBtn=isSram && getSpells().some(isPFScaling);
+  const showPFBtn=hasRes && resTracks;
   if(showPFBtn && !pfBtn){
     pfBtn=document.createElement('button');
     pfBtn.id=pfBtnId; pfBtn.className='btn sml';
@@ -877,7 +904,7 @@ function renderAdvisor(){
     pfBtn.style.display=showPFBtn?'':'none';
     pfBtn.style.color=S.previewMaxPF?'var(--gold)':'var(--dim)';
     pfBtn.style.borderColor=S.previewMaxPF?'var(--gold)':'var(--border)';
-    pfBtn.textContent=S.previewMaxPF?'✓ Aperçu PF=100':'○ Voir dégâts à PF=100';
+    pfBtn.textContent=S.previewMaxPF?`✓ Aperçu ${resLbl}=${resMax}`:`○ Voir dégâts à ${resLbl}=${resMax}`;
   }
   if(!ranked.length){rl.innerHTML='';re.style.display='';re.textContent='Ajoute des sorts au deck et sélectionne une cible.';}
   else{
@@ -931,11 +958,11 @@ function renderDmgSeq(){
   const seq=computeSeq(), sc=document.getElementById('seqcard');
   if(seq?.chosen?.length){
     sc.style.display='';
-    const isSram=S.build?.class==='sram';
+    const mech=getMech(), showRes=!!mech?.res && tracksRes(), resMax=mech?.res?.max||100;
     const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
     let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP;
-    let pfSim=seq.initPF??getPlayerMech().pf??0;
+    let pfSim=seq.initPF??(showRes?resVal():0);
     const used=new Set();
     const updBars=()=>{
       document.getElementById('seqres').innerHTML=
@@ -944,20 +971,27 @@ function renderDmgSeq(){
     const updPF=()=>{
       const pr=document.getElementById('seqpfrow');
       if(pr){
-        pr.style.display=isSram?'':'none';
-        if(isSram){
-          document.getElementById('seqpff').style.width=Math.min(100,pfSim)+'%';
-          document.getElementById('seqpfv').textContent=pfSim+'/100';
+        pr.style.display=showRes?'':'none';
+        if(showRes){
+          document.getElementById('seqpfl').textContent=mech.res.label;
+          const f=document.getElementById('seqpff');
+          f.style.width=Math.min(100,pfSim/resMax*100)+'%'; f.style.background=mech.res.color;
+          document.getElementById('seqpfv').textContent=pfSim+'/'+resMax;
         }
       }
     };
     updBars(); updPF();
+    const resGenBadge=(sp)=>{
+      // Génération de jauge à afficher : Sram via pfGen, autres classes via resGen.
+      const g=showRes?((sp.pfGen||0)?effPfGen(sp):resGenOf(sp)):0;
+      return g>0?`<span style="font-size:9px;color:${mech.res.color}">+${g}</span>`:'';
+    };
     document.getElementById('seqsteps').innerHTML=seq.chosen.map((r,i)=>
       `<div class="ss" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
         <span>${EL[r.spell.element||'Neutre']}</span><span>${r.spell.name}</span>
         <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
         <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
-        ${r.spell.pfGen>0&&!abApplies(r.spell)?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:''}
+        ${!abApplies(r.spell)?resGenBadge(r.spell):''}
         ${abApplies(r.spell)?`<span style="font-size:9px;color:var(--sky)">🗡</span>`:''}
         ${consumesPF(r.spell)?`<span style="font-size:9px;color:var(--gold)">✦PF</span>`:''}
       </div>`
@@ -976,7 +1010,7 @@ function renderDmgSeq(){
           used.delete(i);remAP=Math.min(maxAP,remAP+ap);remMP=Math.min(maxMP,remMP+mp);remWP=Math.min(maxWP,remWP+wp);
           el.classList.remove('used');if(dmg>0)undoDmgToMon(dmg);
           // recalc pfSim from scratch
-          pfSim=seq.initPF??getPlayerMech().pf??0;
+          pfSim=seq.initPF??(showRes?resVal():0);
           seq.chosen.forEach((r,j)=>{ if(used.has(j)) pfSim=nextPF(pfSim,r.spell,false); });
         } else {
           if(ap>remAP||mp>remMP||wp>remWP)return;
@@ -989,7 +1023,7 @@ function renderDmgSeq(){
     });
     document.getElementById('seqreset').onclick=()=>{
       used.clear();remAP=seq.maxAP;remMP=maxMP;remWP=maxWP;
-      pfSim=seq.initPF??getPlayerMech().pf??0;
+      pfSim=seq.initPF??(showRes?resVal():0);
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
       resetMonHP();updBars();updPF();
     };
@@ -1362,14 +1396,16 @@ function processLine(raw){
       if(getDeck().some(s=>s.name===spell)){S.detectedName=actor;renderNameBanner();}
     }
     // Auto-detect monster: track damage targets vs player
-    // PF tracking
-    const p2=S.playerName||S.detectedName;
-    if(p2&&actor===p2){
+    // Suivi de la jauge de ressource (générique) : on incrémente selon la mécanique
+    // de classe à chaque sort lancé par le joueur. Les lignes d'état explicites du
+    // log (onState) restent prioritaires et corrigent cette estimation.
+    const p2=S.playerName||S.detectedName, mech=getMech();
+    if(p2&&actor===p2&&mech?.res){
       const dk=getDeck().find(s=>s.name===spell);
-      if(dk?.pfGen>0){
-        if(!S.combat.mechanics['__p']) S.combat.mechanics['__p']={};
-        const pm=S.combat.mechanics['__p'];
-        pm.pf=Math.min(100,(pm.pf||0)+dk.pfGen);
+      if(dk){
+        const id=mech.res.id;
+        const pm=pmObj();
+        pm[id]=resNext(pm[id]||0,dk,{lethal:false,assassin:assassinActive(),suppressGen:abApplies(dk)});
         renderAdvisor();
       }
     }
