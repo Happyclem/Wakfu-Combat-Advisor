@@ -14,6 +14,7 @@ function spellFull(s){ return {
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
+  exaltedDmg:s.exaltedDmg||0, portalDmg:s.portalDmg||0, portalBonus:s.portalBonus||0, // Eliotrope
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -274,11 +275,12 @@ function playerHpFrac(){
   return Math.max(0,Math.min(1,hp/mx));
 }
 // Multiplicateur global de dégâts pour une valeur de jauge donnée (clé selon la classe).
-// Le contexte transmet aussi la fraction de PV du joueur (Sacrieur : bonus Berserk).
+// Le contexte transmet aussi la fraction de PV du joueur (Sacrieur : bonus Berserk)
+// et les modes/compteurs actifs (Eliotrope : Don céleste +40 % DI).
 function mechBonus(val){
   const mech=getMech(); if(!mech?.bonus) return 1;
   const id=resId()||'pf';
-  return mech.bonus({[id]:val, hpFrac:playerHpFrac()});
+  return mech.bonus({[id]:val, hpFrac:playerHpFrac(), ...modeAndCounterMap()});
 }
 // La jauge influence-t-elle les dégâts via sa VALEUR ? (→ à suivre dans le knapsack DP)
 // Faux pour le Crâ (levier = toggle Tir précis) et le Sacrieur (levier = PV manquants,
@@ -987,9 +989,12 @@ function renderAdvisor(){
         // Dégât conditionnel « à la place » (Sacrieur : Aversion stabilisé, Fracasse vs Armure)
         const altOn=r.spell.altCond&&isModeOn(r.spell.altCond);
         const alt=r.spell.altDmg>0?`<span style="font-size:9px;color:${altOn?'var(--gold)':'var(--dim)'}" title="${altOn?'Condition active — dégâts majorés':'Dégât majoré si condition remplie'}">⚔${altOn?'✓':''}</span>`:'';
+        // Eliotrope : indicateurs Exalté / Portail (dégât modifié selon le mode)
+        const elioEx=r.spell.exaltedDmg>0?`<span style="font-size:9px;color:${isModeOn('exalte')?'var(--gold)':'var(--dim)'}" title="Dégât différent en mode Exalté (${r.spell.exaltedDmg})">⟳</span>`:'';
+        const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:9px;color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
         return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}
+          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')

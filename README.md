@@ -79,6 +79,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Crâ** — Précision/Affûtage + **toggle Tir précis** : chaque sort passe à ses dégâts améliorés (chiffrés depuis les effets) et consomme de la Précision
   - **Sacrieur** — Fureur + **Berserk** : bonus de dégâts selon les PV manquants du joueur (suivi via le log) + dégâts conditionnels chiffrés (Aversion stabilisé, Fracasse vs Armure). ⚠ Le % de Berserk est une estimation à confirmer in-game (isolée dans `mechanics.js`)
   - **Ecaflip** — **Dé six** : compteur de lancers qui réduit son coût en PA (−1/lancer, min 1 PA) → dégâts/PA recalculés et séquence optimale adaptée. Veine informative (pas de bonus de dégâts direct)
+  - **Eliotrope** — **Serein/Exalté + Portails + Don céleste** : trois toggles qui modifient les dégâts (mode Exalté, sort via portail, +40 % Dommages infligés du Don céleste), tous chiffrés depuis les effets
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

@@ -155,6 +155,31 @@ function parseAltDmg(effects) {
   return cond ? { altDmg: num(m[2]), altCond: cond.id } : {};
 }
 
+// Eliotrope — modes Serein/Exalté + bonus Portail. Le dégât de base `dm` = Serein
+// sans portail. On extrait :
+//   exaltedDmg : dégât en mode Exalté (« Exalté : … Dommage : N ») si différent
+//   portalDmg  : dégât si le sort passe par/sur un Portail (remplace le base)
+//   portalBonus: dégât ADDITIONNEL via Portail (« Dommage : N supplémentaires »)
+function parseEliotrope(effects, baseDmg) {
+  const out = {};
+  // Mode Exalté : segment après « Exalté : » jusqu'au prochain mot-clé.
+  const ex = effects.split(/Exalt[ée]\s*:/i)[1];
+  if (ex) {
+    const d = ex.match(/Dommage\s*:?\s*(\d+)/i);
+    if (d && num(d[1]) !== baseDmg) out.exaltedDmg = num(d[1]);
+  }
+  // Bonus Portail : « Dommage : N supplémentaires » (s'ajoute) prioritaire,
+  // sinon « (traverse|sur) un Portail … Dommage : N » (remplace).
+  const supp = effects.match(/Dommage\s*:?\s*(\d+)\s*suppl[ée]mentaires/i);
+  if (supp) {
+    out.portalBonus = num(supp[1]);
+  } else {
+    const pm = effects.match(/(?:traverse|sur|lanc[ée]\s+sur)\s+un\s+Portail[^]*?Dommage\s*:?\s*(\d+)/i);
+    if (pm && num(pm[1]) !== baseDmg) out.portalDmg = num(pm[1]);
+  }
+  return out;
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -174,6 +199,8 @@ function buildSpells(classDisplay) {
     const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
     // Sacrieur — dégât conditionnel « … à la place » (Aversion stabilisé, Fracasse vs Armure).
     const alt = (classDisplay === 'Sacrieur') ? parseAltDmg(eff) : {};
+    // Eliotrope — modes Serein/Exalté + bonus Portail.
+    const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -189,6 +216,9 @@ function buildSpells(classDisplay) {
       tpCost: tp.tpCost,     // Crâ : Précision consommée par Tir précis
       altDmg: alt.altDmg,    // dégât conditionnel « à la place » (Sacrieur)
       altCond: alt.altCond,  // id de la condition (stabilise, cible_armure)
+      exaltedDmg: elio.exaltedDmg,   // Eliotrope : dégât en mode Exalté
+      portalDmg: elio.portalDmg,     // Eliotrope : dégât via Portail (remplace)
+      portalBonus: elio.portalBonus, // Eliotrope : dégât additionnel via Portail
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

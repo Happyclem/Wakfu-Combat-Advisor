@@ -229,6 +229,43 @@
     onState(a, n, lvl, m) { if (/veine/i.test(n)) m.veine = Math.min(100, lvl); },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip };
+  // ── ELIOTROPE — Serein/Exalté + Portails + Don céleste ─────────────────────
+  // Trois leviers de dégâts, tous chiffrés (toggles) :
+  //  • Exalté (vs Serein) : certains sorts ont un dégât différent en mode Exalté.
+  //  • Portail : si le sort passe par / est lancé sur un portail, dégât majoré
+  //    (remplace `portalDmg`, ou s'ajoute `portalBonus`).
+  //  • Don céleste : +40 % Dommages infligés au prochain sort (valeur du passif de
+  //    base ; mode toggle). ⚠ Le +40 % est documenté ; les variantes de passif
+  //    (Traquenard +60 % de dos, Quiétude PA à la place…) ne sont pas modélisées.
+  const ELIO_DON_DI = 0.40; // +40 % Dommages infligés (Don céleste, prochain sort)
+  const eliotrope = {
+    res: null, // pas de jauge chiffrée ; les leviers sont des toggles
+    // Dégât de base effectif selon les modes Exalté / Portail.
+    baseDmg(sp, modes) {
+      let d = sp.damageMax || sp.damageMin || 0;
+      if (modes && modes.exalte && sp.exaltedDmg) d = sp.exaltedDmg;
+      if (modes && modes.portail) {
+        if (sp.portalDmg) d = sp.portalDmg;       // remplace
+        else if (sp.portalBonus) d += sp.portalBonus; // s'ajoute
+      }
+      return d;
+    },
+    // Don céleste : +40 % Dommages infligés sur le prochain sort (toggle global).
+    bonus(m) { return m && m.don_celeste ? 1 + ELIO_DON_DI : 1; },
+    modes: [
+      { id: 'exalte',      label: 'Exalté',       desc: 'Mode Exalté : dégâts modifiés sur certains sorts (sinon mode Serein)' },
+      { id: 'portail',     label: 'Via Portail',  desc: 'Le sort passe par / est lancé sur un portail : dégâts majorés' },
+      { id: 'don_celeste', label: 'Don céleste',  desc: '+40 % Dommages infligés sur le prochain sort' },
+    ],
+    advice() {
+      return [
+        { p: 'L', msg: `🌀 Serein / Exalté : change de mode selon le sort (active « Exalté » pour voir ses dégâts)` },
+        { p: 'L', msg: `🌀 Portails : lance tes sorts à travers/sur un portail pour majorer les dégâts` },
+        { p: 'L', msg: `✨ Don céleste : +40 % Dommages infligés sur le prochain sort (active le toggle)` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope };
 
 })(typeof window !== 'undefined' ? window : globalThis);
