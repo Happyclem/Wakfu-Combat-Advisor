@@ -7,12 +7,13 @@ function loadData(){
   GPD  = window.WCA_GENERAL_PASSIVES || [];
   CSP  = window.WCA_COMMON_SPELLS || [];
 }
-// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,desc
+// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,lvl,rng,type,los,desc
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, desc:s.desc||'',
   levelUnlock:s.lvl||0, isCommon:!!s.common,
+  range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
 }; }
 function getClassSpells(){
@@ -226,6 +227,30 @@ const MECHS = {
     bonus(m){ return 1+(m.pf||0)*.002; },
   },
 };
+// Rappels de mécanique par classe (informationnels, sans effet sur le calcul).
+// Le multiplicateur de dégâts réel (Concentration, Précision…) demande une
+// calibration en jeu : seul le Point Faible du Sram est modélisé (voir MECHS).
+const CLASS_NOTES = {
+  cra:        '🎯 Précision / Affûtage : monte la jauge avant tes gros sorts (Tir précis).',
+  iop:        '🔥 Concentration : tape pour la monter ; à 100 elle régénère du PW et booste les dégâts.',
+  feca:       '🛡 Glyphes & boucliers : pose-les sur cases vides, ils déclenchent tes effets.',
+  ecaflip:    '🎲 Sorts à hasard : Pile/Face et Trèfle modulent les dégâts et le soin.',
+  eliotrope:  '🌀 Portails : aligne-les pour la portée et les dégâts traversants.',
+  huppermage: '🔮 Runes élémentaires : combine les éléments pour déclencher les Stases.',
+  sacrier:    '🩸 Châtiments & Fureur : encaisser augmente tes dégâts.',
+  sadida:     '🌿 Poupées & graines : prépare le terrain avant de frapper.',
+  osamodas:   '🐉 Invocations & Glyphes : gère ton gardien et tes familiers.',
+  pandawa:    '🍶 Souffle & porté : déplace tes ennemis pour optimiser les combos.',
+  rogue:      '💣 Bombes : pose-les et relie-les pour des explosions en chaîne.',
+  xelor:      '⏳ Stase / PW : manipule le temps pour regagner des PA.',
+  enutrof:    '💰 Pelle & or : récolte avant de convertir en dégâts.',
+  ouginak:    '🐺 Proie & Rage : marque ta cible pour amplifier tes dégâts.',
+  eniripsa:   '💖 Mots de soin & dégâts : équilibre support et offensive.',
+  masqueraider:'🎭 Masques : change de masque selon la situation (psycho/classe/bouffon).',
+  foggernaut: '⚙ Stasis & tourelles : alimente tes machines pour les dégâts.',
+  forgelance: '🔱 Lance : gère ta portée et tes charges.',
+};
+function getClassNote(){ const n=CLASS_NOTES[S.build?.class]; return n?[{p:'L',msg:n}]:[]; }
 function getMech(){ return MECHS[S.build?.class]||null; }
 function getPlayerMech(){ return S.combat.mechanics['__p']||{}; }
 // PF utilisé pour l'AFFICHAGE des dégâts : 100 si aperçu actif, sinon PF réel courant.
@@ -827,8 +852,8 @@ function renderAdvisor(){
        <div class="gb"><div class="gf" style="width:${pct}%;background:${r.color}"></div></div>
        <span class="gv">${val}/${r.max}</span></div>`;
   } else gc.style.display='none';
-  // Tips
-  const tips=mech?.advice(pm)||[], tc=document.getElementById('tipscard');
+  // Tips : mécanique calibrée (Sram) + rappel de classe informationnel
+  const tips=[...(mech?.advice(pm)||[]), ...getClassNote()], tc=document.getElementById('tipscard');
   if(tips.length){tc.style.display='';document.getElementById('tipscontent').innerHTML=tips.map(t=>`<div class="tip ${t.p}"><div class="tipd"></div><div>${t.msg}</div></div>`).join('');}
   else tc.style.display='none';
   // Ranking
@@ -1075,6 +1100,7 @@ function renderSpellsTab(){
     byEl[el].map(sp=>{
       const inD=isInDeck(sp.name);
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:''].filter(Boolean).join(' ');
+      const meta=[sp.range?`◎${sp.range}`:'',sp.spellType==='zone'?'zone':'',sp.los===false?'sans LdV':''].filter(Boolean).join(' · ');
       return `<div class="sc ${inD?'dk':''}" data-n="${sp.name}">
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -1084,6 +1110,7 @@ function renderSpellsTab(){
             ${sp.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${sp.pfGen}PF</span>`:''}
             ${sp.isFinisher?`<span style="font-size:9px;color:var(--gold)">★</span>`:''}
           </div>
+          ${meta?`<div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px">${meta}</div>`:''}
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
         </div>
         <span style="color:${inD?'var(--gold)':'var(--dim)'};font-size:13px;flex-shrink:0">${inD?'✓':'+'}</span>

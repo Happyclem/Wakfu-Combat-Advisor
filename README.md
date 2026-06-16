@@ -71,9 +71,22 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
 ## Données
 
 - **874 monstres** avec PV, niveau et résistances élémentaires
-- **11 passifs généraux** partagés par toutes les classes
-- **Sram** : 20 passifs de classe + sorts complets avec dégâts niv. 1 et 245
-- **Féca** : 22 passifs de classe (structure prête, sorts à compléter)
+- **8 passifs généraux** + **3 sorts communs** partagés par toutes les classes
+- **18 classes** intégrées : sorts (dégâts niv. 245, portée, type, ligne de vue) et passifs
+- **Sram** : mécanique de **Point Faible** + **Hémorragie** entièrement modélisée (dégâts calibrés en jeu)
+- Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe (Concentration, Précision, Glyphes…) est rappelée en conseil mais pas encore chiffrée
+
+---
+
+## Pipeline de données
+
+Les données de jeu viennent de l'encyclopédie Wakfu, scrapées puis générées :
+
+1. **Scraping** : exécuter `extract-spells-encyclo.js` / `extract-passives-encyclo.js` (bookmarklets, voir `bookmarklets.html`) sur une page de classe de l'encyclopédie. Le CSV produit est copié dans le presse-papier.
+2. **Source** : coller le CSV dans `data-raw/Sorts_<Classe>.csv` ou `data-raw/Passifs_<Classe>.csv`. **Ces CSV sont la source de vérité.**
+3. **Génération** : lancer `node build-data.js` pour régénérer `data-game.js` et `data-commun.js`.
+
+> ⚠ Ne pas éditer `data-game.js` ni `data-commun.js` à la main — ils sont générés. Modifier les CSV puis relancer `build-data.js`.
 
 ---
 
@@ -82,10 +95,14 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
 ```
 index.html              Interface (markup uniquement)
 wca.css                 Styles
-wca.js                  Logique applicative (~80 Ko)
-data-game.js            Sorts et passifs par classe (window.WCA_SPELLS, window.WCA_GENERAL_PASSIVES)
-data-commun.js          Sorts communs à toutes les classes (window.WCA_COMMON_SPELLS)
+wca.js                  Logique applicative
+data-game.js            [GÉNÉRÉ] Sorts et passifs des 18 classes (window.WCA_SPELLS)
+data-commun.js          [GÉNÉRÉ] Sorts communs + passifs généraux (window.WCA_COMMON_SPELLS / _GENERAL_PASSIVES)
 data-monsters.js        Base de données monstres — 874 entrées (window.WCA_MONSTERS)
-extract-build-wakfuli.js  Script à coller dans la console sur wakfuli.com
-extract-build-zenith.js   Script à coller dans la console sur zenithwakfu.com
+data-raw/               CSV sources (Sorts_*.csv, Passifs_*.csv) — source de vérité
+build-data.js           Générateur : data-raw/*.csv → data-game.js + data-commun.js
+extract-spells-encyclo.js   Bookmarklet : scrape les sorts d'une classe → CSV
+extract-passives-encyclo.js Bookmarklet : scrape les passifs d'une classe → CSV
+extract-build-wakfuli.js    Script à coller dans la console sur wakfuli.com
+extract-build-zenith.js     Script à coller dans la console sur zenithwakfu.com
 ```

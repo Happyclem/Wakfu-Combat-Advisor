@@ -1,0 +1,217 @@
+/*
+ * build-data.js — générateur des données de jeu
+ * ──────────────────────────────────────────────────────────────────────────
+ * Lit les CSV de data-raw/ (scrapés depuis l'encyclopédie via les bookmarklets
+ * extract-spells-encyclo.js / extract-passives-encyclo.js) et génère :
+ *   - data-game.js   → window.WCA_SPELLS (sorts + passifs, toutes classes)
+ *   - data-commun.js → window.WCA_COMMON_SPELLS + window.WCA_GENERAL_PASSIVES
+ *
+ * Usage :  node build-data.js
+ *
+ * Les CSV sont la SOURCE DE VÉRITÉ. Ne pas éditer data-game.js à la main :
+ * relancer ce script après toute mise à jour d'un CSV.
+ */
+'use strict';
+const fs = require('fs');
+const path = require('path');
+
+const RAW = path.join(__dirname, 'data-raw');
+
+// ── Mapping nom de fichier CSV → clé de classe canonique ───────────────────
+// (mêmes clés que les extracteurs de build zenith/wakfuli et le <select> HTML)
+const CLASS_KEY = {
+  Cra: 'cra', Ecaflip: 'ecaflip', Eliotrope: 'eliotrope', Eniripsa: 'eniripsa',
+  Enutrof: 'enutrof', Feca: 'feca', Huppermage: 'huppermage', Iop: 'iop',
+  Osamodas: 'osamodas', Ouginak: 'ouginak', Pandawa: 'pandawa', Roublard: 'rogue',
+  Sacrieur: 'sacrier', Sadida: 'sadida', Sram: 'sram', Steamer: 'foggernaut',
+  Xelor: 'xelor', Zobal: 'masqueraider',
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const ELEM = { feu: 'Feu', eau: 'Eau', terre: 'Terre', air: 'Air', neutre: 'Neutre' };
+
+function clean(s) {
+  return (s || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
+}
+function num(s) { const n = parseInt(clean(s), 10); return Number.isFinite(n) ? n : 0; }
+
+// Parseur CSV minimal (séparateur ';', pas de guillemets dans nos données).
+function parseCSV(text) {
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim() !== '');
+  const header = lines.shift().split(';').map(clean);
+  return lines.map(line => {
+    const cols = line.split(';');
+    const row = {};
+    header.forEach((h, i) => { row[h] = cols[i] !== undefined ? cols[i] : ''; });
+    return row;
+  });
+}
+
+// Recompose une description lisible : effets en priorité, sinon description.
+// On garde la description courte de l'encyclopédie ; les effets détaillent le sort.
+function buildDesc(row) {
+  const eff = clean(row['Effets']);
+  const desc = clean(row['Description']);
+  if (eff && desc) return desc + '\n' + eff;
+  return eff || desc || '';
+}
+
+// Génération de Point Faible (Sram uniquement) : « Point Faible (+N Niv.) ».
+// On somme les gains INCONDITIONNELS uniquement. Un gain situé dans une clause
+// conditionnelle « Si … : … » (jusqu'au prochain «.») est exclu, car non garanti.
+// Fallback : un sort qui « génère du Point Faible » sans valeur chiffrée (effets
+// parfois vides dans l'encyclopédie, ex. Châtiment) suit la règle observée 5×PA.
+function parsePF(effects, desc, ap) {
+  // Retire les segments conditionnels « Si <cond> : <conséquences> . »
+  const unconditional = effects.replace(/\bSi\b[^:.]*:[^.]*\.?/gi, ' ');
+  let pf = 0, m;
+  const re = /Point\s*Faible\s*\(\+?\s*(\d+)\s*Niv\.?\)/gi;
+  while ((m = re.exec(unconditional)) !== null) pf += num(m[1]);
+  // Pas de valeur explicite mais le sort annonce générer du Point Faible → 5×PA.
+  if (pf === 0 && /g[ée]n[èe]re\s+du\s+point\s*faible/i.test(desc) && !isFinisher(effects, desc)) {
+    pf = 5 * (ap || 0);
+  }
+  return pf;
+}
+
+// Sort « finisseur » : consomme le Point Faible pour des dégâts supplémentaires.
+// On exige la phrase « Consomme Point Faible » ou « N % dommages … par Point Faible »
+// (et PAS « Consomme l'Hémorragie » qui contient parfois un « +1 PointFaible »).
+// On lit Effets ET Description (la colonne Effets est parfois vide).
+function isFinisher(effects, desc) {
+  const t = (effects + ' ' + desc).toLowerCase();
+  return /consomme\s+(le\s+)?point\s*faible/.test(t) ||
+         /dommages?\s+suppl.*par\s+point\s*faible/.test(t);
+}
+
+// ── Sorts de classe ─────────────────────────────────────────────────────────
+function buildSpells(classDisplay) {
+  const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
+  if (!fs.existsSync(file)) return [];
+  const rows = parseCSV(fs.readFileSync(file, 'utf8'));
+  const isSram = classDisplay === 'Sram';
+  return rows.map(r => {
+    const eff = clean(r['Effets']);
+    const descRaw = clean(r['Description']); // pour le parse PF/finisseur (effets parfois vides)
+    const desc = buildDesc(r);
+    const ap = num(r['CoutPA']);
+    const sp = {
+      n: clean(r['Nom']),
+      el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
+      ap,
+      mp: num(r['CoutPm'] || r['CoutPM']),
+      wp: num(r['CoutPW']),
+      dm: num(r['Dommage lvl245']),
+      dc: num(r['Dommage lvl245 critique']),
+      pf: isSram ? parsePF(eff, descRaw, ap) : 0,
+      fin: isSram ? isFinisher(eff, descRaw) : false,
+      lvl: num(r['NiveauDebloque']),
+      rng: clean(r['Portée']) || '',
+      type: clean(r['Type']) || '',
+      los: /^oui$/i.test(clean(r['Ligne de vue'])),
+      desc,
+    };
+    return sp;
+  }).filter(s => s.n);
+}
+
+// ── Passifs de classe ────────────────────────────────────────────────────────
+function buildPassives(classDisplay) {
+  const file = path.join(RAW, `Passifs_${classDisplay}.csv`);
+  if (!fs.existsSync(file)) return [];
+  const rows = parseCSV(fs.readFileSync(file, 'utf8'));
+  return rows.map(r => ({
+    n: clean(r['Nom']),
+    lvl: num(r['Niveau de deblocage'] || r['Niveau de déblocage']),
+    desc: clean(r['Effets']),
+  })).filter(p => p.n);
+}
+
+// ── Données communes ──────────────────────────────────────────────────────────
+function buildCommonSpells() {
+  const file = path.join(RAW, 'Sorts_commun.csv');
+  if (!fs.existsSync(file)) return [];
+  const rows = parseCSV(fs.readFileSync(file, 'utf8'));
+  return rows.map(r => ({
+    n: clean(r['Nom']),
+    el: 'Neutre',
+    ap: num(r['CoutPA']),
+    mp: num(r['CoutPM'] || r['CoutPm']),
+    wp: num(r['CoutPW']),
+    dm: 0,
+    lvl: num(r['Niveau de déblocage'] || r['Niveau de deblocage']),
+    rng: clean(r['Portée']) || '',
+    desc: clean(r['Effets']),
+  })).filter(s => s.n);
+}
+
+// Bonus de stats des passifs généraux : ces valeurs ne sont pas dans le CSV,
+// elles sont calibrées à la main et conservées entre régénérations.
+const GENERAL_PASSIVE_STATS = {
+  'Evasion':     { sbl: { esquive: 1.0 } },
+  'Interception':{ sbl: { tacle: 1.0 } },
+  'Inspiration': { sbl: { initiative: 0.5 } },
+  'Motivation':  { sb: { ap: 1, volonte: 10, degatsInfliges: -20 } },
+  'Médecine':    { sb: { degatsInfliges: -15, soinsRealises: 30 } },
+  'Rock':        { sb: { degatsInfliges: -25, soinsRealises: -50, hpPct: 60 } },
+  'Carnage':     { sb: { degatsInfliges: 15, soinsRealises: -30 } },
+};
+function buildGeneralPassives() {
+  const file = path.join(RAW, 'Passifs_commun.csv');
+  if (!fs.existsSync(file)) return [];
+  const rows = parseCSV(fs.readFileSync(file, 'utf8'));
+  return rows.map(r => {
+    const name = clean(r['Nom']);
+    const p = { n: name, lvl: num(r['Niveau de deblocage'] || r['Niveau de déblocage']), desc: clean(r['Effets']) };
+    Object.assign(p, GENERAL_PASSIVE_STATS[name] || {});
+    return p;
+  }).filter(p => p.n);
+}
+
+// ── Génération ────────────────────────────────────────────────────────────────
+function main() {
+  const spells = {};
+  let totSpells = 0, totPassives = 0, classCount = 0;
+  for (const [display, key] of Object.entries(CLASS_KEY)) {
+    const sp = buildSpells(display);
+    const pa = buildPassives(display);
+    if (!sp.length && !pa.length) { console.warn(`⚠ ${display} : aucune donnée`); continue; }
+    spells[key] = { spells: sp, passives: pa };
+    totSpells += sp.length; totPassives += pa.length; classCount++;
+    console.log(`  ${display.padEnd(11)} → ${key.padEnd(13)} ${String(sp.length).padStart(2)} sorts, ${String(pa.length).padStart(2)} passifs`);
+  }
+
+  const gameHeader =
+`// ── DONNÉES DE JEU (sorts + passifs, toutes classes) ─────────────────────────
+// ⚠ FICHIER GÉNÉRÉ — ne pas éditer à la main. Source : data-raw/Sorts_*.csv et
+// Passifs_*.csv. Régénérer avec :  node build-data.js
+// Sorts  : n, el, ap, mp, wp, dm (dommage niv.245), dc (crit niv.245),
+//          pf (Point Faible généré — Sram), fin (finisseur), lvl, rng, type, los, desc.
+// Passifs: n, lvl, desc.
+`;
+  fs.writeFileSync(
+    path.join(__dirname, 'data-game.js'),
+    gameHeader + 'window.WCA_SPELLS=' + JSON.stringify(spells) + ';\n',
+    'utf8'
+  );
+
+  const common = buildCommonSpells();
+  const general = buildGeneralPassives();
+  const commonHeader =
+`// ── DONNÉES COMMUNES (toutes classes) ─────────────────────────────
+// ⚠ FICHIER GÉNÉRÉ — ne pas éditer à la main. Source : data-raw/Sorts_commun.csv
+// et Passifs_commun.csv. Régénérer avec :  node build-data.js
+// Sorts communs (utilitaires, 0 dmg) : n, el, ap, mp, wp, dm, lvl, rng, desc.
+// Passifs : n, lvl, desc, sb (bonus stats fixe), sbl (bonus stats × niveau perso).
+`;
+  const commonBody =
+    'window.WCA_COMMON_SPELLS = ' + JSON.stringify(common, null, 2) + ';\n\n' +
+    'window.WCA_GENERAL_PASSIVES = ' + JSON.stringify(general, null, 2) + ';\n';
+  fs.writeFileSync(path.join(__dirname, 'data-commun.js'), commonHeader + commonBody, 'utf8');
+
+  console.log('───────────────────────────────────────────────');
+  console.log(`✅ data-game.js   : ${classCount} classes, ${totSpells} sorts, ${totPassives} passifs`);
+  console.log(`✅ data-commun.js : ${common.length} sorts communs, ${general.length} passifs généraux`);
+}
+
+main();
