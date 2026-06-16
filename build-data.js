@@ -90,20 +90,52 @@ function isFinisher(effects, desc) {
 }
 
 // ── Ressources de classe (générique) ────────────────────────────────────────
-// Chaque classe à jauge déclare le nom de sa ressource et le motif « (+N Niv.) »
-// pour parser le gain d'un sort. `gen` = ressource générée (inconditionnelle).
-// Le bonus de dégâts éventuel est modélisé côté runtime (mechanics.js), pas ici.
+// Chaque classe à jauge déclare comment parser le gain d'un sort :
+//   token  : motif « <Token> (+N Niv.) »  (Iop : Concentration)
+//   parse  : fonction (effets+desc) → nombre, pour les formulations en prose
+//            (Crâ : « génère N d'Affûtage et de Précision »).
+// `gen` = ressource générée (inconditionnelle). Le bonus de dégâts éventuel est
+// modélisé côté runtime (mechanics.js), pas ici.
 const RESOURCE = {
   Sram: { token: 'Point\\s*Faible' },        // déjà traité spécifiquement (pf/fin)
   Iop:  { token: 'Concentration' },           // jauge 0→100, bonus à 100
+  Cra:  { parse: parseCraGen },               // Affûtage/Précision (même valeur), prose
 };
 // Parse le gain de ressource « <Token> (+N Niv.) », gains inconditionnels seulement.
-function parseResource(effects, token) {
+function parseResource(effects, cfg) {
+  if (cfg.parse) return cfg.parse(effects);
   const unconditional = stripConditional(effects);
   let g = 0, m;
-  const re = new RegExp(token + '\\s*\\(\\+?\\s*(\\d+)\\s*Niv\\.?\\)', 'gi');
+  const re = new RegExp(cfg.token + '\\s*\\(\\+?\\s*(\\d+)\\s*Niv\\.?\\)', 'gi');
   while ((m = re.exec(unconditional)) !== null) g += num(m[1]);
   return g;
+}
+// Crâ : « Ce sort génère N d'Affûtage et de Précision. » → N (Affûtage == Précision).
+function parseCraGen(text) {
+  const m = text.match(/g[ée]n[èe]re\s+(\d+)\s+d.?Aff[ûu]tage/i);
+  return m ? num(m[1]) : 0;
+}
+// Crâ — Tir précis : version alternative du sort. On extrait les dégâts DIRECTS en
+// Tir précis et la Précision consommée (« Consomme M de Précision »).
+// `tp` = dégât total en Tir précis (omis si Tir précis ne change pas le dégât direct).
+// Deux formes : « Dommage : N » (remplace) ou « Dommage supplémentaires : N » (+ base).
+function parseTirPrecis(effects, baseDmg) {
+  const out = {};
+  const cost = effects.match(/Consomme\s+(\d+)\s+de\s+Pr[ée]cision/i);
+  if (cost) out.tpCost = num(cost[1]);
+  // Dégât de base hors Tir précis (premier « Dommage : N » de la partie normale).
+  const seg = effects.split(/Tir\s*pr[ée]cis\s*:/i)[1];
+  if (seg) {
+    const supp = seg.match(/Dommages?\s+suppl[ée]mentaires?\s*:?\s*(\d+)/i);
+    const plain = seg.match(/Dommage\s*:?\s*(\d+)/i);
+    if (supp) {
+      // « Dommage supplémentaires : N » → base + N (dégât direct).
+      if (!/sur\s+invocations/i.test(seg)) out.tp = (baseDmg || 0) + num(supp[1]);
+    } else if (plain && !/sur\s+invocations/i.test(seg.slice(0, plain.index + 30))) {
+      out.tp = num(plain[1]); // « Dommage : N » remplace le dégât de base
+    }
+  }
+  return out;
 }
 
 // ── Sorts de classe ─────────────────────────────────────────────────────────
@@ -120,7 +152,9 @@ function buildSpells(classDisplay) {
     const ap = num(r['CoutPA']);
     // Ressource de classe générique (`gen`). Pour le Sram, `pf` reste le canal
     // historique ; pour les autres classes à jauge, on remplit `gen`.
-    const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg.token) : 0;
+    const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg) : 0;
+    // Crâ — Tir précis : dégâts alternatifs + Précision consommée.
+    const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -131,7 +165,9 @@ function buildSpells(classDisplay) {
       dc: num(r['Dommage lvl245 critique']),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
       fin: isSram ? isFinisher(eff, descRaw) : false,
-      gen: gen || undefined, // ressource générée (Concentration Iop…) ; omis si 0
+      gen: gen || undefined, // ressource générée (Concentration Iop, Affûtage Crâ…) ; omis si 0
+      tp: tp.tp,             // Crâ : dégâts en Tir précis (omis si inchangé)
+      tpCost: tp.tpCost,     // Crâ : Précision consommée par Tir précis
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

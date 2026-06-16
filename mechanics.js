@@ -90,6 +90,52 @@
     onState(a, n, lvl, m) { if (/concentration/i.test(n)) m.conc = Math.min(IOP_FULL, lvl); },
   };
 
-  global.WCA_MECHANICS = { sram, iop };
+  // ── CRÂ — Affûtage / Précision / Tir précis ────────────────────────────────
+  // Le Crâ a deux jauges (même montée par sort) et un mode « Tir précis » :
+  //  • Précision (0→200) : réserve consommée par Tir précis. Jauge affichée.
+  //  • Affûtage  : à un seuil (« Pointe affûtée ») se consomme pour donner un bonus
+  //    de Dommages infligés au sort suivant. ⚠ Le seuil et le % NE SONT PAS dans les
+  //    données du jeu scrapées → non chiffré ici (signalé en conseil seulement),
+  //    pour ne pas fausser le ranking avec une valeur inventée.
+  //  • Tir précis (toggle) : chaque sort passe à sa version améliorée. On modélise
+  //    son effet le mieux documenté : les dégâts `tp` du sort (parsés des effets) et
+  //    la Précision consommée `tpCost`. Activable via le toggle situationnel.
+  //
+  // Mode `tir_precis` (clé dans S.situationalBuffs) : quand actif, un sort qui a un
+  // dégât Tir précis chiffré (`tp`) l'utilise à la place de son dégât de base.
+  const cra = {
+    res: { id: 'prec', label: 'Précision', max: 200, color: '#5ad1c8' },
+    initial: 0,
+    gen(sp) { return sp.resGen || 0; },
+    consumes() { return false; },
+    // La Précision monte de `gen` par sort ; en Tir précis, le sort consomme `tpCost`.
+    next(val, sp, ctx) {
+      let v = Math.min(200, val + this.gen(sp));
+      if (ctx && ctx.tirPrecis && sp.tpCost) v = Math.max(0, v - sp.tpCost);
+      return v;
+    },
+    bonus() { return 1; }, // pas de multiplicateur continu (le levier est Tir précis)
+    // Base de dégâts effective : en Tir précis, on prend les dégâts améliorés `tp`.
+    baseDmg(sp, modes) {
+      return (modes && modes.tir_precis && sp.tp) ? sp.tp : (sp.damageMax || sp.damageMin || 0);
+    },
+    // Mode(s) toggle exposé(s) à l'UI (système situationnel générique).
+    modes: [{
+      id: 'tir_precis', label: 'Tir précis',
+      desc: 'Version améliorée des sorts (dégâts ↑, sous l\'Armure…), consomme de la Précision',
+    }],
+    advice(m) {
+      const out = [];
+      const p = m.prec || 0;
+      out.push({ p: 'L', msg: `🎯 Précision ${p}/200 — réserve pour Tir précis (sorts améliorés)` });
+      out.push({ p: 'L', msg: `🏹 Affûtage : à Pointe affûtée, ton prochain sort gagne des Dommages infligés (bonus non chiffré dans l'outil)` });
+      return out;
+    },
+    onState(a, n, lvl, m) {
+      if (/pr[ée]cision/i.test(n)) m.prec = Math.min(200, lvl);
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra };
 
 })(typeof window !== 'undefined' ? window : globalThis);

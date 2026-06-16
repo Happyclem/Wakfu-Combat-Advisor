@@ -7,11 +7,12 @@ function loadData(){
   GPD  = window.WCA_GENERAL_PASSIVES || [];
   CSP  = window.WCA_COMMON_SPELLS || [];
 }
-// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,gen,lvl,rng,type,los,desc
+// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,gen,tp,tpCost,lvl,rng,type,los,desc
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
+  tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -259,11 +260,27 @@ function currentPF(){ return S.previewMaxPF?(getMech()?.res?.max||100):resVal();
 function isPFScaling(sp){ const mech=getMech(); return mech?.scales?!!mech.scales(sp):false; }
 // Multiplicateur global de dégâts pour une valeur de jauge donnée (clé selon la classe).
 function mechBonus(val){ const mech=getMech(); if(!mech?.bonus) return 1; const id=resId()||'pf'; return mech.bonus({[id]:val}); }
-// La jauge de la classe active influence-t-elle les dégâts ? (sinon inutile de la suivre)
+// La jauge influence-t-elle les dégâts via sa VALEUR ? (→ à suivre dans le knapsack DP)
+// Faux pour le Crâ : le levier (Tir précis) est un toggle global, pas un seuil de jauge.
 function tracksRes(){
   const mech=getMech(); if(!mech?.res) return false;
   const mx=mech.res.max, spells=getSpells();
   return mechBonus(mx)!==1 || spells.some(s=>isPFScaling(s)||mechFlatBonus(s,mx)>0);
+}
+// Faut-il AFFICHER la jauge de ressource ? (plus large : inclut les classes à modes
+// dont la jauge est informative/consommée, comme la Précision du Crâ)
+function showsRes(){ const mech=getMech(); return !!mech?.res && (tracksRes() || mechModes().length>0); }
+// Modes toggle actifs de la mécanique de classe (ex. Crâ : Tir précis).
+function mechModes(){ return getMech()?.modes||[]; }
+function modesActive(){ return mechModes().filter(md=>!!S.situationalBuffs?.[md.id]); }
+function isModeOn(id){ return !!S.situationalBuffs?.[id]; }
+// Objet { id:true } des modes actifs, passé aux hooks de la mécanique.
+function activeModeMap(){ const o={}; modesActive().forEach(md=>o[md.id]=true); return o; }
+// Valeur de dégât à mettre à l'échelle pour `sp`, selon la mécanique (Crâ : Tir précis).
+function mechBaseDmg(sp){
+  const mech=getMech();
+  if(mech?.baseDmg) return mech.baseDmg(sp,activeModeMap());
+  return sp.damageMax||sp.damageMin||0;
 }
 // Bonus de dégâts plat spécifique au sort selon la jauge (ex. Égaré du Iop à 100).
 // Renvoie des dégâts ADDITIONNELS (mis à l'échelle du niveau du sort), 0 sinon.
@@ -319,7 +336,7 @@ function resVs(el,t){
 // Dégâts d'un sort contre une cible précise, à une valeur de jauge `pf` donnée.
 function dmgVs(sp,t,pf,crit){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
-  const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,lvl);
+  const base=scale(0,mechBaseDmg(sp),lvl);
   if(!base) return 0;
   // Pour les sorts qui scalent avec la jauge on passe cb=1 (spellDmgMult corrige)
   const isPFScaler=isPFScaling(sp);
@@ -405,7 +422,8 @@ function effPfGen(sp){ return abApplies(sp)?0:(sp.pfGen||0); }
 // la mécanique de classe (resNext). Côté Sram, on transmet les règles spécifiques
 // (Assaut Brutal supprime le gain, Assassin = pas de gain sur le coup létal).
 function nextPF(pf,sp,lethal){
-  return resNext(pf,sp,{ lethal, assassin:assassinActive(), suppressGen:abApplies(sp) });
+  return resNext(pf,sp,{ lethal, assassin:assassinActive(), suppressGen:abApplies(sp),
+    tirPrecis:isModeOn('tir_precis') });
 }
 // spRange : 'melee' | 'distance' — à passer depuis chaque spell (futur).
 // Pour l'instant on infère depuis la portée string si disponible.
@@ -456,7 +474,7 @@ function rankSpells(crit){
   const st=getEffStats(), di=st.degatsInfliges||0, lvl=S.build?.level||200;
   const mech=getMech(), pm=getPlayerMech(), dispPF=currentPF();
   return spells.map(sp=>{
-    const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
+    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
     const mastery=elMastery(sp.element,st,sp);
     const isPFScaler=isPFScaling(sp);
     const cbAdj=isPFScaler?1:mechBonus(dispPF);
@@ -476,7 +494,7 @@ function computeSeq(){
   const initPF=trackRes?(resVal()):0, di=st.degatsInfliges||0, lvl=S.build?.level||200;
 
   function dmgAt(sp,pf){
-    const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
+    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
     const cb=isPFScaling(sp)?1:mechBonus(pf);
     const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
     return Math.round(d*spellDmgMult(sp,pf,S.monster))+mechFlatBonus(sp,pf);
@@ -516,7 +534,7 @@ function computeSeq(){
   const total=wd.reduce((s,r)=>s+r.damage,0);
   const ccPF=trackRes?resVal():0;
   const totalCC=chosen.reduce((s,sp)=>{
-    const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,sp.spellLevel||lvl);
+    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
     const cb=isPFScaling(sp)?1:mechBonus(ccPF);
     return s+calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,
       resBrut:elRes(sp.element),isCrit:true,cb})+mechFlatBonus(sp,ccPF);
@@ -677,14 +695,14 @@ function initCSQ(){
   // Reset complet : vide les étapes, remet les ressources, reset les PV du monstre.
   const st=getEffStats();
   CSQ.steps=[]; CSQ.remAP=S.remainingAP??st.ap??6; CSQ.remMP=st.mp??3; CSQ.remWP=st.wp??0;
-  CSQ.pfCur=tracksRes()?resVal():0;
+  CSQ.pfCur=showsRes()?resVal():0;
   resetMonHP(); renderCSQ();
 }
 function refreshCSQTarget(){
   // Changement de cible seulement : ne touche pas aux étapes ni aux ressources.
   // On recalcule juste les dégâts de chaque étape vis-à-vis de la nouvelle cible focusée,
   // et on met à jour la barre PV (sans reset les PV de la cible précédente).
-  let pf=tracksRes()?resVal():0;
+  let pf=showsRes()?resVal():0;
   CSQ.steps.forEach(s=>{
     s.dmg=spellDmgAt(s.sp,pf);
     pf=nextPF(pf,s.sp,false);
@@ -699,7 +717,7 @@ function rbar(v,max,col,lbl){
 }
 function spellDmgAt(sp,pf){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
-  const base=scale(sp.damageMin||0,sp.damageMax||sp.damageMin||0,lvl);
+  const base=scale(0,mechBaseDmg(sp),lvl);
   if(!(base>0)) return 0;
   const cb=isPFScaling(sp)?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
@@ -753,7 +771,7 @@ function renderCSQ(){
   const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
     // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
-    const show=!!mech?.res && tracksRes();
+    const show=showsRes();
     pr.style.display=show?'':'none';
     if(show){
       const mx=mech.res.max;
@@ -884,15 +902,16 @@ function renderAdvisor(){
   else tc.style.display='none';
   // Ranking
   const ranked=rankSpells(S.critMode), rl=document.getElementById('ranklist'), re=document.getElementById('rankempty');
-  const hasRes=!!mech?.res, resTracks=tracksRes(), dispPF=currentPF();
+  const hasRes=!!mech?.res, resTracks=showsRes(), dispPF=currentPF();
   const resLbl=mech?.res?.label||'', resMax=mech?.res?.max||100;
   const baseTitle=S.critMode?'⚡★ Sorts — Dégâts CC':'⚡ Sorts — Dégâts/PA';
   const rtt=document.getElementById('ranktitle');
   rtt.textContent=baseTitle+(hasRes&&resTracks?` · ${resLbl} ${dispPF}${S.previewMaxPF?' (aperçu)':''}`:'');
-  // Bouton aperçu jauge=max (toute classe dont la jauge influence les dégâts)
+  // Bouton aperçu jauge=max : seulement si la VALEUR de jauge change les dégâts
+  // (Sram PF, Iop Concentration). Pas pour le Crâ (levier = toggle Tir précis).
   const pfBtnId='pfPreviewBtn';
   let pfBtn=document.getElementById(pfBtnId);
-  const showPFBtn=hasRes && resTracks;
+  const showPFBtn=hasRes && tracksRes();
   if(showPFBtn && !pfBtn){
     pfBtn=document.createElement('button');
     pfBtn.id=pfBtnId; pfBtn.className='btn sml';
@@ -922,9 +941,12 @@ function renderAdvisor(){
         const pf=r.spell.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:'';
         const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon le Point Faible">⤢PF</span>`:'';
         const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
+        // Crâ : indicateur Tir précis (dégât amélioré dispo / coût Précision quand actif)
+        const tpOn=isModeOn('tir_precis');
+        const tp=r.spell.tp>0?`<span style="font-size:9px;color:${tpOn?'var(--gold)':'var(--dim)'}" title="${tpOn?'Tir précis actif — consomme '+r.spell.tpCost+' Précision':'Dégât amélioré en Tir précis'}">🎯${tpOn&&r.spell.tpCost?`-${r.spell.tpCost}`:''}</span>`:'';
         return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}
+          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')
@@ -958,7 +980,7 @@ function renderDmgSeq(){
   const seq=computeSeq(), sc=document.getElementById('seqcard');
   if(seq?.chosen?.length){
     sc.style.display='';
-    const mech=getMech(), showRes=!!mech?.res && tracksRes(), resMax=mech?.res?.max||100;
+    const mech=getMech(), showRes=showsRes(), resMax=mech?.res?.max||100;
     const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
     let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP;
@@ -1069,22 +1091,24 @@ function renderSpellsTab(){
   if(S.build?.spells?.length>MAX_DECK){ S.build.spells=S.build.spells.slice(0,MAX_DECK); save(); }
   const deck=getDeck(), all=getClassSpells(), lvl=S.build?.level||200;
   document.getElementById('deckcount').textContent=`${deck.length}/${MAX_DECK}`;
-  // Sorts situationnels Sram (toggle)
+  // Toggles situationnels : Sram (Assassinat/Surineur/PF) + modes de mécanique
+  // (Crâ : Tir précis). Système unifié, stocké dans S.situationalBuffs.
   const sitEl=document.getElementById('sitbuffs');
   if(sitEl){
+    const deckNames=new Set(getDeck().map(s=>(s.name||'').toLowerCase()));
+    const toggles=[];
     if(S.build?.class==='sram'){
-      const deckNames=new Set(getDeck().map(s=>(s.name||'').toLowerCase()));
-      const visible=Object.entries(SITUATIONAL).filter(([,v])=>v.cls==='sram'&&(!v.spell||deckNames.has(v.spell.toLowerCase())));
-      sitEl.style.display=visible.length?'':'none';
-      sitEl.innerHTML=visible
-        .map(([id,v])=>{
-          const on=sitActive(id);
-          return `<button class="btn sml${on?' on':''}" data-sit="${id}"
-            style="color:${on?'var(--gold)':'var(--dim)'};border-color:${on?'var(--gold)':'var(--border)'};white-space:nowrap">
-            ${on?'✓':'○'} ${v.label}</button>`;
-        }).join('');
-      sitEl.querySelectorAll('[data-sit]').forEach(b=>b.addEventListener('click',()=>toggleSit(b.dataset.sit)));
-    } else { sitEl.style.display='none'; }
+      Object.entries(SITUATIONAL).filter(([,v])=>v.cls==='sram'&&(!v.spell||deckNames.has(v.spell.toLowerCase())))
+        .forEach(([id,v])=>toggles.push({id,label:v.label,on:sitActive(id)}));
+    }
+    // Modes de la mécanique de classe (Crâ : Tir précis…)
+    mechModes().forEach(md=>toggles.push({id:md.id,label:md.label,desc:md.desc,on:isModeOn(md.id)}));
+    sitEl.style.display=toggles.length?'':'none';
+    sitEl.innerHTML=toggles.map(t=>
+      `<button class="btn sml${t.on?' on':''}" data-sit="${t.id}"${t.desc?` title="${t.desc.replace(/"/g,'&quot;')}"`:''}
+        style="color:${t.on?'var(--gold)':'var(--dim)'};border-color:${t.on?'var(--gold)':'var(--border)'};white-space:nowrap">
+        ${t.on?'✓':'○'} ${t.label}</button>`).join('');
+    sitEl.querySelectorAll('[data-sit]').forEach(b=>b.addEventListener('click',()=>toggleSit(b.dataset.sit)));
   }
   // Deck
   const de=document.getElementById('decklist');

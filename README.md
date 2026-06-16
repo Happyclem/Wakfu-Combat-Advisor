@@ -73,9 +73,10 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
 - **874 monstres** avec PV, niveau et résistances élémentaires
 - **8 passifs généraux** + **3 sorts communs** partagés par toutes les classes
 - **18 classes** intégrées : sorts (dégâts niv. 245, portée, type, ligne de vue) et passifs
-- **Mécaniques modélisées en profondeur** (jauge suivie + bonus de dégâts chiffré) :
+- **Mécaniques modélisées en profondeur** (jauge suivie + dégâts ajustés) :
   - **Sram** — Point Faible (génération/consommation, finisseurs) + Hémorragie, calibré en jeu
   - **Iop** — Concentration (0→100, palier ×1.10 + bonus Égaré sur Fulgur/Colère à 100)
+  - **Crâ** — Précision/Affûtage + **toggle Tir précis** : chaque sort passe à ses dégâts améliorés (chiffrés depuis les effets) et consomme de la Précision
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---
