@@ -1,11 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Tourelle Ardente;;;;;;;;;;;;;;
-Tourelle Tactique;;;;;;;;;;;;;;
-Mukltimukltu;;;;;;;;;;;;;;
-Pulsar;;;;;;;;;;;;;;
-Crépuscule;;;;;;;;;;;;;;
-Aube;;;;;;;;;;;;;;
-Harponnage;;;;;;;;;;;;;;
-Ancrage;;;;;;;;;;;;;;
-Téléportation;;;;;;;;;;;;;;
-Surcharge;;;;;;;;;;;;;;
+Courant;;3;0;0;eau;zone;1-4;oui;Inflige des dommages et pousse la cible. Si la cible percute un autre combattant ou un obstacle, alors la cible subit des dommages de collision. Si le Steamer a deux niveaux de Surpression, les cibles sont poussées plus loin.;Dommage : 55 Pousse de 1 case ( Collision : 55) +1 niveau de Surpression sur le lanceur Au niveau 2 de Surpression : - Pousse de 4 cases plutôt que 1;2;2;55;69
+Évaporation;;4;0;0;eau;monocible;2-3;oui;Le Steamer saute sur la cellule ciblée. Il inflige des dommages eau sur les ennemis qu'il survole de cette manière. Si le Steamer a deux niveaux de Surpression, il peut se déplacer plus loin.;Dommage : 111 (jusqu'à la case ciblée) - Se téléporte sur la case +1 niveau de Surpression sur le lanceur Au niveau 2 de Surpression : - Le sort gagne 4 Portée;4;5;111;139
+Ecume;;3;0;0;eau;zone;1-3;oui;Inflige des dommages en zone. Si le Steamer a deux niveaux de Surpression, il regagne les PA dépensés pour le sort.;Dommage : 98 +1 niveau de Surpression sur le lanceur Au niveau 2 de Surpression : - Le lanceur regagne 3 PA;3;3;98;123
+Flibuste;;3;0;0;eau;monocible;3-4;oui;Inflige des dommages sans ligne de vue. Si le Steamer a deux niveaux de Surpression, il peut réduire les coups critiques et la parade de la cible.;Dommage : 98 +1 niveau de Surpression sur le lanceur Au niveau 2 de Surpression : -30 % Coup critique et Parade (2 tours);3;3;98;123
+Dissolution;;4;0;0;eau;zone;1-3;oui;Inflige des dommages en ligne et à portée restreinte. Si le Steamer a deux niveaux de Surpression, il peut appliquer un puissant poison qui inflige des dommages à la fin du tour de la cible pendant deux tours. À chaque fois que le poison est déclenché, le Steamer regagne un niveau de Surpression.;Dommage : 141 +1 niveau de Surpression sur le lanceur Au niveau 2 de Surpression applique Dissolution (Niv. 141) (2 tours) : En fin de tour : - Dommage : 141 - Surpression (+1 Niv.);4;5;141;176
+À la masse;;3;0;0;terre;monocible;1-1;oui;Génère de l'Armure sur le Steamer, le montant d'Armure absorbera les prochains dommages subis. Si le sort est lancé sur un allié, l'allié gagne aussi de l'Armure.;Lancé sur : Dommage : 98 Lancé sur : 1 438 Armure 1 438 Armure;3;3;98;123
+Piétinement;;3;0;0;terre;monocible;1-3;oui;Lancé sur un ennemi, inflige des dommages et retire des Points de Mouvement à la cible. Lancé sur un allié, le stabilise.;Lancé sur allié : - Stabilisé -2 PM max (1 tour) Lancé sur ennemi : - Dommage : 83 - -4 PM;3;3;83;104
+Pilonnage;;2;0;0;terre;monocible;1-4;oui;Inflige des dommages en croix. La puissance des dommages du sort augmente à chaque utilisation.;Ce sort doit être lancé sur une entité Dommage : 55 Dommage : 27 supplémentaires à chaque fois que ce sort est lancé pendant le tour en cours;2;2;55;69
+Marteau aimant;;4;0;0;terre;monocible;1-4;oui;Lancé sur un combattant, celui-ci est attiré près du Steamer. Si la cible est ennemie, le Steamer lui inflige des dommages. Si la cible est alliée, le Steamer la protège en lui donnant un montant d'Armure.;Lancé sur allié : - Attire de 2 cases - Armure : 6 % des PV max du lanceur Lancé sur ennemi : - Dommage : 111 - Attire de 2 cases - Sur le lanceur : 245 Tacle;4;5;111;139
+Choc;;6;0;0;terre;monocible;1-3;oui;Inflige des dommages plus élevés pour chaque Point de Stasis possédé par le Steamer au moment de lancer le sort.;Dommage : 211 - 5 % dommages supp. par PS courant du lanceur (max 50 %);6;7;211;264
+Feu ardent;;2;0;0;feu;zone;3-6;oui;Inflige des dommages en zone. Cette attaque à distance est souple d'utilisation.;Dommage : 55 Lancé sur tourelle : - La zone d'effet devient (2);2;2;55;69
+Crache flammes;;4;0;0;feu;zone;1-3;oui;Inflige des dommages et retire de la portée sur la cible : ses sorts se lanceront moins loin.;Dommage : 131 et -2 Portée (1 tour) Lancé sur tourelle : - La zone d'effet devient;4;5;131;164
+Calcination;;4;0;0;feu;zone;3-6;oui;Inflige des dommages élevés, mais ne peut pas être lancé sur des cibles étant déjà dans le champ de vision du Steamer. Il doit s'agir d'une cible qui est cachée derrière un obstacle ou un autre combattant.;Ne peut être lancé que hors de la ligne de vue Dommage : 164 Lancé sur tourelle : - La zone d'effet devient;5;6;164;205
+Flambage;;3;0;0;feu;zone;1-5;oui;Inflige des dommages. Si le Steamer cible sa propre tourelle avec ce sort, il enflamme les cases autour. Ces cases infligent des dommages feu aux cibles commençant ou terminant leur tour dessus.;Dommage : 91 Lancé sur tourelle : - Pose un glyphe Flambage (2-3) - En début et fin de tour : - Dommage : 102;3;3;91;114
+Sabordage;;5;0;0;feu;monocible;1-4;oui;Inflige des dommages Feu. Les dommages sont plus importants si la cible est au contact d'une tourelle du Steamer.;Dommage : 164 Si la tourelle est au contact de la cible : - Dommages : 32 supplémentaires par niveau de Tourelle;5;6;164;205

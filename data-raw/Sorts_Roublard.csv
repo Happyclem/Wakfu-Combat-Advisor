@@ -1,12 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Bombe Incandescente;;;;;;;;;;;;;;
-Bombe Aqueuse;;;;;;;;;;;;;;
-Bombe Fulminante;;;;;;;;;;;;;;
-Mèche;;;;;;;;;;;;;;
-Coup de Pied;;;;;;;;;;;;;;
-Sabordage;;;;;;;;;;;;;;
-Crochetage;;;;;;;;;;;;;;
-Tir de Roublard;;;;;;;;;;;;;;
-Tromblon;;;;;;;;;;;;;;
-Botte Secrète;;;;;;;;;;;;;;
-Mine;;;;;;;;;;;;;;
+Mitraille;;3;0;0;terre;monocible;3-4;oui;Tout en s'éloignant, le Roublard assène un bon coup de Mitraille dans les entrailles des fous qui seraient dans sa ligne de mire. Si le sort est lancé sur une bombe, elle est téléportée 2 cases plus loin. Si la case est occupée, la bombe échange de position avec la cible.;Dommage : 98 S'éloigne de 2 cases Lancé sur : - Téléporte la 2 cases plus loin - Échange de position si la case est occupée;3;3;98;123
+Tromblon;;4;0;0;terre;zone;3-4;oui;Inflige des dommages et pousse la cible. Si le sort est lancé sur une bombe, les effets sont joués en croix autour d'elle.;Dommage : 121 Pousse de 2 cases Lancé sur : - Les effets sont joués en;4;5;121;152
+Balle plombante;;5;0;0;terre;zone;3-5;oui;Ce sort retire des PM aux cibles du Roublard en mode Fuyard, ou gagne des niveaux de Retour de dague en mode Fourbe. Si le sort est lancé sur une bombe, les effets sont joués en ligne.;Dommage : 164 Fuyard : -4 PM Fourbe : Retour de dague (+1 Niv.) Lancé sur : - Les effets sont joués en;5;6;164;205
+Dague boomerang;;3;0;0;terre;zone;3-5;oui;En Fourbe, le Roublard inflige des dommages à sa cible et lui applique un état. En Fuyard, le Roublard fait des dommages en zone boomerang, et déclenche les états préalablement posés : il inflige ainsi des dommages en plus en croix autour de chaque cible concernée.;Fourbe : - Dommage : 91 - Retour de dague (+1 Niv.) Fuyard : - Dommage : 91 en zone boomerang - Déclenche les Retour de dague;3;3;91;114
+Pulsar;;2;0;0;terre;monocible;3-4;oui;Le Roublard peut charger son Pulsar pour faire des dommages dévastateurs.;Sur le Roublard : - Pulsar (+1 Niv.) Sur une autre cible : - Dommage : 91 Par niveau de Pulsar : - Dommage : 91 supplémentaires;3;3;91;114
+Coup rapide;;2;0;0;air;monocible;3-5;oui;« Il vaut mieux un petit coup rapide bien placé qu’un gros coup à côté. » - Katsumimi la Roublarde;Dommage : 55 1 PM (1 tour);2;2;55;69
+Tricherie;;3;0;0;air;monocible;3-4;oui;Le Roublard vole de la vie à sa cible. Si le sort est lancé sur une bombe, le Roublard échange de position avec.;Dommage : 83 et vole 100 % Lancé sur : - Échange de position avec;3;3;83;104
+Espingole;;5;0;0;air;monocible;3-6;oui;Ce tir rebondit d'un ennemi à l'autre, infligeant de plus en plus de dommages. Les bombes du Roublard sont concernées par les rebonds, mais ne subissent pas de dommages.;Dommage : 127 2 rebonds en : - 1er : Dommage : 153 - 2ème : Dommage : 178 Si une bombe a servi pour un rebond : - 10 % dommages supplémentaires;5;6;127;159
+Longue lame;;6;0;0;air;monocible;3-4;oui;Lorsqu’elle est entre de bonnes mains cette épée peut sembler magique. Si le Roublard est en Fourbe, il applique un état à la cible : à la fin du tour, s'il se situe à 6 cases ou plus, la cible subira des dommages en plus.;Dommage : 197 Fourbe : - Fourbe lame (Niv. 197) - À la fin du tour du Roublard, s'il est à 6 cases ou plus : - Dommage : 197;6;7;197;246
+Oblitération;;4;0;0;air;zone;3-3;oui;Inflige des dommages air sur une ligne de 3 cases. Les cibles touchées sont téléportées plus loin.;Dommage : 131 Les entités dans la zone sont téléportées 3 cases plus loin;4;5;131;164
+Barbrûlé;;2;0;0;feu;monocible;3-5;oui;Le Roublard peut lancer ce sort sur une bombe. De cette manière, les dommages sont répliqués au contact de sa bombe, et le Roublard gagne de la Poudre pour chaque cible touchée.;Dommage : 60 Lancé sur : - Les dommages sont effectués en - gagne 1 Poudre par combattant au contact de la (max 3/tour) - La perd 1 niveau;2;2;60;76
+Bombe collante;;2;0;0;feu;zone;3-4;oui;Pose une bombe collante sur la cible. Lorsque la cible meurt ou que trois tours passent, une explosion se déclenche autour de la cible. Si la cible est une bombe, elle est stabilisée (ne peut plus être déplacée) et explose si elle subit des dommages.;Bombe collante (Niv. 111) Si la cible meurt ou que 3 tours passent : - Dommage : 111 Lancé sur : - Stabilisé - La explose si elle subit des dommages Ne peut pas poser de;4;5;111;139
+Exécution;;4;0;0;feu;monocible;3-4;oui;Si le Roublard tue sa cible ennemie avec ce sort, il gagne de la Poudre.;Dommage : 131 Si ce sort tue un ennemi, gagne 2 Poudre et 2 PA;4;5;131;164
+Croisement;;3;0;0;feu;zone;4-10;oui;Ce tir ne se lance qu'en diagonale mais à très longue portée. Il a pour objectif d’atteindre des cibles placées dans des angles morts pour en faire des cibles mortes. Les bombes alignées avec la cible sont attirées vers le point d'impact.;Dommage : 98 Attire de 5 cases les;3;3;98;123
+Perforation;;6;0;0;feu;monocible;3-5;oui;Ce tir permet au Roublard de briser l'armure de sa cible puis d'infliger des dommages colossaux. Un sort très précieux contre, entre autres, ces petits malins de Fécas.;Si la cible a de l'Armure : - Dommage : 131 (sur l'Armure) Dommage : 229;4;5;229;286

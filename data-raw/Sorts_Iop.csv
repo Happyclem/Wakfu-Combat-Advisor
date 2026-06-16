@@ -1,14 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Bond;;;;;;;;;;;;;;
-Épée Céleste;;;;;;;;;;;;;;
-Fendoir;;;;;;;;;;;;;;
-Massacre;;;;;;;;;;;;;;
-Colère de Iop;;;;;;;;;;;;;;
-Charge;;;;;;;;;;;;;;
-Intimidation;;;;;;;;;;;;;;
-Tannée;;;;;;;;;;;;;;
-Furie;;;;;;;;;;;;;;
-Concentration;;;;;;;;;;;;;;
-Anéantissement;;;;;;;;;;;;;;
-Coup Bas;;;;;;;;;;;;;;
-Uppercut;;;;;;;;;;;;;;
+Épée céleste;;2;0;0;feu;zone;1-4;oui;Inflige des dommages en zone : les dommages sont plus élevés sur les cibles qui ont tous leurs points de vie.;Dommage : 65 - 25 % dommages supplémentaires sur les cibles ayant 65 % ou plus de leurs PV courants Concentration (+10 Niv.);2;2;65;82
+Fulgur;;3;0;0;feu;monocible;1-3;oui;Inflige des dommages sur la cible et lui applique un état Égaré. Lorsque le Iop atteint 100 de Concentration, l'état Égaré inflige des dommages supplémentaires.;Dommage : 83 Égaré (Niv. 55) - Lorsque le Iop atteint 100 de Concentration : - Dommage : 55 Concentration (+15 Niv.);3;3;83;104
+Super Iop Punch;;4;0;0;feu;monocible;1-2;oui;Ce sort inflige des dommages. Lorsque ce sort achève une cible, le Iop regagne des Points d'Action (PA) et de la Concentration. La Concentration est un état qui permet de régénérer des Points de Wakfu (PW) et d'infliger plus de dommages.;Dommage : 141 Si ce sort tue un combattant, regagne 2 PA et Concentration (+50 Niv.) Concentration (+20 Niv.);4;5;141;176
+Jugement;;1;0;0;feu;monocible;1-2;oui;Inflige des dommages à un ennemi et lui applique une vulnérabilité aux prochains dommages feu subis. Lancé sur un allié, augmente les dommages du prochain sort de cet allié.;Lancé sur ennemi : - Dommage : 30 - Jugement (Niv. 15) - Le prochain sort feu subi par le porteur de l'état inflige 15 % Dommages supplémentaires Lancé sur allié : - Préparation (+10 Niv.) Concentration (+5 Niv.);1;1;30;38
+Colère de Iop;;6;0;0;feu;zone;;oui;Inflige des dommages tout autour du Iop, appliquant l'état Égaré aux ennemis touchés. Lorsque le Iop atteint 100 de Concentration, l'état Égaré inflige des dommages supplémentaires.;Dommage : 182 Égaré (Niv.91) - Lorsque le Iop atteint 100 de Concentration : - Dommage : 91 Concentration (+40 Niv.);6;7;182;228
+Ébranler;;2;0;0;terre;monocible;1-3;oui;Inflige des dommages sur la cible et lui applique l'état Ébranlé. Les pertes d'Armure subies sont augmentées de 30 % pendant 1 tour.;Dommage : 70 Ébranlé - Augmente les dommages subis sur Armure de 30 % Concentration (+10 Niv.);2;2;70;88
+Roknocerok;;4;0;0;terre;monocible;1-3;oui;Inflige des dommages sur la cible. Si la cible possède de l'Armure, ce sort lui inflige une perte d'Armure supplémentaire.;Dommage : 121, passe sous l'Armure - La cible perd la même valeur en Armure Concentration (+20 Niv.);4;5;121;152
+Fendoir;;3;0;0;terre;zone;1-4;oui;Ce sort de zone est versatile : dans une zone d'effet en croix, les ennemis subissent des dommages et les alliés gagnent de l'Armure et de la Parade. Pour chaque cible alliée ou ennemie touchée, le Iop gagne lui-même en Armure.;En zone croix : - Dommage : 55 - 20 Armure et 25 % Parade (1 tour) Par cible touchée : - 20 Armure Concentration (+15 Niv.);2;2;55;69
+Charge;;1;0;0;terre;monocible;1-4;oui;Le Iop se rapproche au contact de sa cible avant de lui infliger des dommages. Lancé plusieurs tours de suite sur la même cible, la Charge inflige davantage de dommages.;Le coût de ce sort est variable Par case de distance jusqu'à la cible (minimum 1) : - Charge coûte 1 PA supplémentaire - Dommage : 30 - Se rapproche au contact de la cible - Concentration (+5 Niv.) Charge en cours;1;1;30;38
+Ravage;;5;0;0;terre;zone;0-2;oui;Ce sort inflige des dommages en zone autour du Iop. Si le sort est lancé sur une case libre, le Iop se téléporte dessus avant d'infliger les dommages. En fonction du nombre de cibles touchées, le Iop gagne davantage de Concentration.;Se téléporte sur la case Dommage : 164 Concentration (+25 Niv.) - +5 niveaux par cible touchée;5;6;164;205
+Jabs;;3;0;0;air;monocible;1-1;oui;Ce sort augmente davantage la Concentration du Iop. La Concentration est un état qui permet de régénérer des Points de Wakfu (PW) et d'infliger plus de dommages.;Dommage : 98 Concentration (+25 Niv.);3;3;98;123
+Rafale;;1;0;0;air;monocible;1-3;oui;La cible du sort est attirée vers le Iop.;Dommage : 32 Attire de 1 case Concentration (+5 Niv.);1;1;32;41
+Torgnole;;2;0;0;air;monocible;1-2;oui;Ce sort augmente davantage la Concentration du Iop. La Concentration est un état qui permet de régénérer des Points de Wakfu (PW) et d'infliger plus de dommages.;Dommage : 65 Concentration (+15 Niv.);2;2;65;82
+Tannée;;4;0;0;air;monocible;1-1;oui;Inflige des dommages air très élevés. La cible gagne ensuite un montant d'Armure équivalent à la moitié des dommages subis. Cette Armure ne peut pas être augmentée ni diminuée par les caractéristiques Armure donnée et Armure reçue.;Dommage : 197 - 50 % des dommages sont convertis en Armure Concentration (+20 Niv.);6;8;197;246
+Épée de Iop;;3;0;0;air;zone;1-4;oui;En zone, ce sort inflige des dommages légers aux ennemis et augmente les dommages des alliés.;En zone croix : - Dommage : 83 - 10 % Dommages infligés (2 tours) Concentration (+15 Niv.);3;3;83;104

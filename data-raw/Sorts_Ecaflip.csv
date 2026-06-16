@@ -1,12 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Roue de la Fortune;;;;;;;;;;;;;;
-Pile ou Face;;;;;;;;;;;;;;
-Griffe Symbolique;;;;;;;;;;;;;;
-Tarot Bonus;;;;;;;;;;;;;;
-Esquive Féline;;;;;;;;;;;;;;
-Croc Givré;;;;;;;;;;;;;;
-Rekop;;;;;;;;;;;;;;
-Trêfle;;;;;;;;;;;;;;
-Bond du Félin;;;;;;;;;;;;;;
-Fute-Fute;;;;;;;;;;;;;;
-Réflexes Félins;;;;;;;;;;;;;;
+Langue rapeuse;;3;0;0;eau;monocible;1-5;oui;Attire la cible vers le lanceur du sort. Soigne les alliés, inflige des dommages aux ennemis.;Attire de 2 cases Dommage : 98 Soin : 53;3;3;98;123
+Lacérations;;4;0;0;eau;monocible;2-4;oui;L'Ecaflip se téléporte à plusieurs cases de distance tout en faisant des dommages sur son passage. Si des alliés sont sur son chemin, ils sont soignés.;Sur le chemin : - Dommage : 98 (mêlée) - Soin : 50 Se téléporte sur la case;3;3;98;123
+Capucine;;4;0;0;eau;monocible;0-4;oui;Les dommages de ce sort sont effectués sous forme de rebonds. Si le sort cible un ennemi A, le sort rebondit sur un ennemi B à 3 cases ou moins de l'ennemi A. Puis, le sort rebondit sur un ennemi C à 3 cases ou moins du combattant B. Le fonctionnement est le même si le sort est lancé sur un allié, mais là, le sort fera des rebonds de soin.;Dommage : 111 2 rebonds en de taille 3 : - 1er : Dommage : 139 - 2ème : Dommage : 167 Soin : 61 2 rebonds en de taille 3 : - 1er : Soin : 78 - 2ème : Soin : 95;4;5;111;139
+Bas les pattes;;2;0;0;eau;monocible;1-1;oui;Ce sort pousse la cible d'une case par sort eau lancé au préalable dans le tour.;Par sort eau lancé dans le tour : - Pousse de 1 case Dommage : 65 Soin : 35;2;2;65;82
+Pupuce;;4;0;0;eau;monocible;0-2;oui;Ce sort très puissant a un effet différent selon la cible sur laquelle il est lancé : sur un allié, il va soigner, augmenter les Points de Mouvement (PM) et les Points de Wakfu (PW). En revanche, sur un ennemi, le sort va réduire ses PW et sa vie.;Lancé sur allié : - 1 PM (1 tour) - 1 PW - Soin : 50 Lancé sur ennemi : - -1 PW - Dommage : 141;4;5;141;176
+Craps;;2;0;0;feu;monocible;3-7;oui;Inflige des dommages feu sur une cible et applique de la Préparation à l'Ecaflip. La Préparation augmente les dommages du prochain sort.;Dommage : 60 Préparation : entre 1 et 60;2;2;60;76
+Dé du chateux;;3;0;0;feu;monocible;1-3;oui;Les dommages de ce sort sont variables. Si l'Ecaflip tue un ennemi avec, il gagne 2 PA au tour suivant.;Dommage : 51 Dommage : entre 25 et 51 Si le sort tue un combattant : - 2 PA max en début de tour suivant;2;2;51;63
+Dé six;;6;0;0;feu;monocible;1-3;oui;La prochaine fois que ce sort est lancé, il coûte moins cher.;Dommage : 247 À chaque utilisation du sort : - Le prochain Dé six coûte 1 PA de moins - L'effet est cumulable - L'effet est retiré lorsque le tarot est mélangé;7;8;247;308
+Roulette à dés;;5;0;0;feu;zone;;oui;Ce sort de zone se produit autour de l'Ecaflip. Il inflige des dommages aux ennemis et soigne les alliés.;Dommage : 139 Soin : 77 5 % à 30 % Dommages infligés;5;6;139;174
+Feulement;;6;0;0;feu;zone;1-3;oui;Ce sort de zone permet à l'Ecaflip de regagner de la vie et de l'armure en fonction du nombre d'adversaires dans la zone d'effet.;Dommage : 197 Par cible touchée : - 5 % PV max en vol de vie - 5 % PV max en Armure;6;7;197;246
+Pile ou face;;3;0;0;terre;monocible;1-3;oui;Lancé sur un ennemi, ce sort lui inflige des dommages et régénère l'Ecaflip à une hauteur des PV perdus par la cible. Lancé sur un allié, ce sort soigne à la fois l'allié et l'Ecaflip.;Lancé sur ennemi : - Dommage : 91 - 50 % vie volée Lancé sur allié : - et : Soin : 50;3;3;91;114
+All in;;1;0;0;terre;monocible;1-4;oui;Ce sort utilise les PA restants de l'Ecaflip (max 10). Plus il met de PA en jeu, plus il inflige des dommages. L'Ecaflip a ensuite 50 % de chances de récupérer la totalité des PA utilisés par ce sort.;Par PA du sort (max 10) : - Dommage : 19 50 % de regagner le coût en PA du sort - +5 % par carte dans la défausse;1;1;19;24
+Bataille;;4;0;0;terre;monocible;1-3;oui;L'Ecaflip joue à la bataille avec sa cible. En cas de victoire, l'Ecaflip gagne des PA et des Coups critiques. En cas de défaite, c'est l'inverse : il perd des PA courants.;Dommage : 164 L'Ecaflip a 50 % de gagner la bataille : - 2 PA - 20 % Coup critique (2 tours) Sinon : - -2 PA;5;6;164;205
+Tout ou rien;;2;0;0;terre;monocible;1-2;oui;Ce sort inflige des dommages élevés. En revanche, l'Ecaflip a une chance sur deux de se blesser lui-même.;Tout ou Rien : - Dommage : 98 - et Dommage : 98 (50 %);3;3;98;123
+Trois cartes;;5;0;0;terre;zone;1-3;oui;L'Ecaflip projette trois cartes en ligne. Selon le nombre de cibles touchées, l'Ecaflip gagne des résistances.;Dommage : 139 Soin : 71 Par combattant touché (1/tour) : - 30 Résistance élémentaire;5;6;139;174

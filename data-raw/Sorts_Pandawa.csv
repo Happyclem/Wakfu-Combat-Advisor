@@ -1,12 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Tonneau;;;;;;;;;;;;;;
-Karcham;;;;;;;;;;;;;;
-Vapeur;;;;;;;;;;;;;;
-Souffle Glacé;;;;;;;;;;;;;;
-Lait Bambou;;;;;;;;;;;;;;
-Picole;;;;;;;;;;;;;;
-Stabilisation;;;;;;;;;;;;;;
-Explosion de Flamme;;;;;;;;;;;;;;
-Pandatak;;;;;;;;;;;;;;
-Chamrak;;;;;;;;;;;;;;
-Porteur;;;;;;;;;;;;;;
+Souffle Laiteux;;2;0;0;eau;monocible;1-3;oui;Le Pandawa souffle sur sa cible et lui inflige des dégâts d’Eau bien sentis. De plus, ce souffle imbibe la cible ! Si le Pandawa lance un allié avec ce sort, l'allié est soigné.;Dommage : 65 Imbibé (Niv. 2) Si le Pandawa porte un , devient : - Jette la cible sur la case - Soin : 66 sur la cible;2;2;65;82
+Nuage Laiteux;;4;0;0;eau;zone;1-5;oui;Le Pandawa crée un Nuage Laiteux qui inflige des dégâts et imbibe les cibles ! Lancé sur le Tonneau, cela crée un Nuage de Lait qui soigne toutes les cibles présentes dessus à leur début de tour.;Lancé sur cible : - Dommage : 131 - Imbibé (Niv. 4) Lancé sur le : - Pose un Nuage de Lait niv. 92;4;5;131;164
+Tekilait;;3;0;0;eau;monocible;0-4;oui;Tekilait réalise un soin sur sa cible. Il permet également, si le Pandawa est aligné avec sa cible, de le pousser de deux cases.;Soin : 50 Imbibé (Niv. 3) Si la cible est alignée : Pousse de 2 cases;;;;
+Vague de Lait;;6;0;0;eau;zone;2-6;oui;Créant une Vague de Lait, le Pandawa consomme l'Imbibé de son allié pour le soigner. Il peut aussi s'en servir pour faire des dégâts à un adversaire. Lancé sur le Tonneau, les dégâts passent en zone.;Dommage : 262 Lancé sur : - Dommage : 223 Lancé sur : - Soin : 100 (+15 % par niv. de Imbibé) - Consomme Imbibé;8;10;262;328
+Fontaine de Laiqueur;;5;0;0;eau;zone;1-5;oui;Partageur, le Pandawa paie sa tournée, tout en blessant ses ennemis : si le sort est lancé sur le Tonneau, toutes les cibles seront irrésistiblement attirées vers lui !;Dommage : 139 Imbibé (Niv. 6) Si lancé sur : - La zone devient - Attire de 2 cases vers le;5;6;139;174
+Souffle Enflammé;;2;0;0;feu;monocible;1-3;oui;Le Pandawa souffle vers ses adversaires et leur inflige des dégâts de Feu ! De plus il leur retire des résistances si elles sont Imbibées !;Dommage : 60 Si la cible est Imbibé : -7 Résist. par niv. de Imbibé - Consomme Imbibé;2;2;60;76
+Tournée Générale;;3;0;0;feu;zone;1-4;oui;Tournée Générale permet au Pandawa d'infliger généreusement des dégâts Feu tout en s'enflammant. Lancés sur le Tonneau, celui-ci est détruit mais applique une grande quantité d'Imbibé autour de lui.;Lancé sur cible : - Dommage : 98 - Enflammé (Niv. 91) Lancé sur : - Dommage : 76 - Imbibé (Niv. 10) - Détruit;3;3;98;123
+Coup Laiteux;;2;0;0;feu;zone;2-2;oui;Le Pandawa échaude et inflige des dommages en zone sur ses ennemis, avant de se téléporter sur la case ciblée.;Dommage : 65 Imbibé (Niv. 2) Si lancé sur case vide : - Téléporte sur la case;2;2;65;82
+Flasque Explosive;;4;0;0;feu;monocible;2-4;oui;Le Pandawa lance une flasque remplie de Lait de Bambou qui explose sur ses adversaires.;Dommage : 111 Imbibé (Niv. 4) Si le Pandawa porte, devient : - Jette la cible sur la case - Dommage : 167 - Imbibé (Niv. 4);4;5;111;139
+Toilaitage;;5;0;0;feu;zone;3-4;oui;Amateur de dégâts collatéraux, Toilaitage permet au Pandawa de nettoyer une grande zone. Si son Tonneau est dans la zone, il inflige plus de dommages.;Dommage : 133 Imbibé (Niv. 5) Si le est dans la zone : - Dommage : 13 supp.;5;6;133;167
+Triple Karma Leet;;2;0;0;terre;monocible;1-1;oui;Le Pandawa inflige des dégâts tout en repoussant son adversaire. S'il porte son Tonneau, il attirera son adversaire au lieu de le repousser !;Dommage : 65 Imbibé (Niv. 2) Si le Pandawa porte son : - Augmente de 2 la Portée max du sort - Attire de 2 cases Sinon : Pousse de 2 cases;2;2;65;82
+Six Roses;;4;0;0;terre;monocible;1-1;oui;Six Roses inflige de gros dégâts Terre, imbibe la cible et enflamme le Pandawa ! Si le Pandawa porte son Tonneau, il s'applique une Armure en fonction du niveau d'Imbibé de sa cible.;Si le Pandawa porte son : - Armure : 319 par niv. de Imbibé - Consomme Imbibé Sinon : - Imbibé (Niv. 4) Dommage : 131 Enflammé (Niv. 91);4;5;131;164
+Frappe Fût;;2;0;0;terre;zone;;oui;Le Pandawa inflige des dégâts et imbibe les cibles autour de lui. Si le Pandawa porte son Tonneau, il augmente son Tacle et ses résistances.;Dommage : 60 Imbibé (Niv. 2) Si le Pandawa porte son : - Frappe Fût (Niv. 244);2;2;60;76
+Lucha L'ambrée;;4;0;0;terre;zone;1-2;oui;Le Pandawa utilise son Tonneau pour faire des dégâts à distance et imbiber les cibles ! Si le Pandawa porte un personnage, il le lance en infligeant des dégâts et en retirant des PM dans la zone.;Dommage : 111 (+10 % quand il porte son ) Imbibé (Niv. 4) Si le Pandawa porte un ou , devient : - Jette la cible sur la case - Dommage : 111 - -2 PM;4;5;111;139
+Blitzkriek;;6;0;0;terre;zone;2-4;oui;Le Pandawa inflige des dégâts en zone. Ses cibles ennemies sont échaudées, et le lanceur du sort se téléporte à la position ciblée s'il portait son Tonneau.;Echaudé (Niv. 3) Dommage : 178 (+10 % quand il porte son ) Imbibé (Niv. 7) Si le Pandawa porte son : - Téléporte sur la case;7;8;178;223

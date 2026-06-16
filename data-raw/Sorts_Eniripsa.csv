@@ -1,12 +1,16 @@
 Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
-Mot Curatif;;;;;;;;;;;;;;
-Mot Stimulant;;;;;;;;;;;;;;
-Mot Lénifiant;;;;;;;;;;;;;;
-Mot d'Épine;;;;;;;;;;;;;;
-Mot Préventif;;;;;;;;;;;;;;
-Mot de Régénération;;;;;;;;;;;;;;
-Coupure;;;;;;;;;;;;;;
-Maladie;;;;;;;;;;;;;;
-Fièvre;;;;;;;;;;;;;;
-Mot Interdit;;;;;;;;;;;;;;
-Hormones;;;;;;;;;;;;;;
+Vivification;;2;0;0;eau;monocible;1-6;oui;Soigne l'allié ciblé et lui donne un petit gain d'esquive. Ce sort possède une grande portée.;Soin : 35 49 Esquive Dommage : 65;4;5;65;82
+Mot soignant;;3;0;0;eau;monocible;0-5;oui;Soigne l'allié ciblé et lui offre un bonus de portée pendant un tour. Chaque point de portée permet d'augmenter la portée maximale des sorts à portée modifiable.;Soin : 50 1 Portée (max 3) Dommage : 91;6;7;91;114
+Infusion;;4;0;0;eau;monocible;1-3;oui;Lancé sur un allié, l'allié ciblé est soigné pendant plusieurs tours de suite.;Soin : 33 En début de tour : - Soin : 33 (3 tours) (cumulable) Dommage : 121;4;5;121;152
+Revitalisation;;3;0;0;eau;zone;1-2;oui;Soigne les alliés en zone et leur procure un bonus sur les dommages qu'ils infligent.;Soin : 42 10 % Dommages infligés (max 20 %) Dommage : 76 Si l'Eniripsa possède >= 80 % PV : - La zone d'effet du sort devient;6;7;76;95
+Reconstitution;;5;0;0;eau;monocible;1-3;oui;Reconstitution peut cibler à travers les obstacles. Il soigne l'allié ciblé et augmente les soins réalisés par l'Eniripsa pour le reste de son tour.;Soin : 100 - Soin : 100 - 20 % Soins réalisés (1 tour) Dommage : 182;6;7;182;228
+Anatomie;;3;0;0;air;monocible;1-4;oui;Inflige des dommages air qui passent sous l'Armure. Ces dommages sont plus élevés si la cible possède beaucoup de PV.;Si la cible possède plus de 80 % de ses PV : - Dommage : 152 (passe sous l'Armure) Sinon : - Dommage : 91 (passe sous l'Armure);5;6;152;190
+Psychose;;3;0;0;air;zone;3-4;oui;Ce sort de zone affaiblit tous les combattants dans sa zone d'effet pendant un tour, en plus d'infliger des dommages.;Dommage : 83 -20 % Dommages infligés -20 % Coup critique;3;3;83;104
+Colli-mateur;;2;0;0;air;monocible;1-4;oui;Inflige des dommages air sur la cible et la rend sensible aux collisions. Pour provoquer une collision, il faut pousser un obstacle contre un autre.;Dommage : 60 Collisions douloureuses (Niv. 30) En subissant une collision : - Dommage : 30;2;2;60;76
+Fiole infectée;;4;0;0;air;monocible;1-3;oui;Ce sort vole la vie de sa cible : une première fois lors du premier lancer, une seconde fois à la fin du tour de la cible.;Dommage : 102 - 100 % vie volée Gangrène (Niv. 102) En fin de tour : - Dommage : 102 - 100 % vie volée;4;5;102;127
+Torpeur;;5;0;0;air;monocible;1-4;oui;Si l'Eniripsa possède une grande quantité de PV, ce sort inflige plus de dommages, mais blesse également l'Eniripsa lanceur.;Dommage : 164 Si l'Eniripsa possède >= 80 % PV : - Dommage : 65 supplémentaires - Dommage : 65;5;6;164;205
+Explo-soin;;3;0;0;feu;zone;1-5;oui;Inflige des dommages feu aux ennemis en zone. Pose une Marque itsade : l'Eniripsa inflige des dommages feu autour de la cible lorsqu'elle passe KO.;Marque itsade (Niv. 111) Dommage : 83;3;3;83;104
+Cure alternative;;2;0;0;feu;monocible;1-3;oui;Soigne un allié. La cible captera ensuite 20 % des soins que l'Eniripsa réalise sur d'autres combattants que la cible, jusqu'à ce que la cible atteigne 100 % de ses PV.;Soin : 33 Marque husse (Niv. 490);;;;
+Feu gardien;;4;0;0;feu;monocible;1-2;oui;Soigne un allié et lui applique une marque : si l'allié perd des PV et tombe sous 50 % de ses PV max, il est soigné une seconde fois par l'Eniripsa.;Soin : 61 Marque eting (Niv. 245);;;;
+Corro-soin;;5;0;0;feu;zone;2-3;oui;La cible devient marquée : les trois prochains sorts de dommages directs et monocible qu'elle subit sont renforcés. De plus, une partie des dommages infligés à la cible est redistribuée sous forme de soin autour de la cible.;Dommage : 164 Marque amil (+1 Niv.);5;6;164;205
+Flamme purificatrice;;3;0;0;feu;zone;1-3;oui;Ce sort inflige des dommages aux ennemis et soigne les alliés. Il applique également une marque, quelle que soit l'équipe de la cible : la cible gagne 1 PM et déclenche la marque lorsqu'elle finit son tour au contact d'un allié de l'Eniripsa. Une fois déclenchée, la marque soigne les alliés de l'Eniripsa à proximité du porteur de la marque.;Soin : 50 Dommage : 91 Marque unt (Niv. 42) Si l'Eniripsa possède >= 80 % PV : - La zone d'effet du sort devient;3;3;91;114
