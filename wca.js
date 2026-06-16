@@ -137,6 +137,14 @@ function toggleSit(id){
   else { if(!S.situationalBuffs) S.situationalBuffs={}; S.situationalBuffs[id]=!S.situationalBuffs[id]; }
   save(); renderAdvisor(); renderSpellsTab();
 }
+// Incrémente/décrémente un compteur de mécanique (Ecaflip : Dé six lancés).
+function bumpCounter(id,delta){
+  const def=mechCounters().find(c=>c.id===id); if(!def) return;
+  if(!S.situationalBuffs) S.situationalBuffs={};
+  const v=Math.max(0,Math.min(def.max||99,(counterVal(id))+delta));
+  S.situationalBuffs[id]=v;
+  save(); renderAdvisor(); renderSpellsTab();
+}
 
 const BDEFS = {
   guilde:  {hpPct:10, degatsInfliges:2, soinsRealises:2, tacle:5, esquive:5},
@@ -295,6 +303,21 @@ function mechBaseDmg(sp){
   const mech=getMech();
   if(mech?.baseDmg) return mech.baseDmg(sp,activeModeMap());
   return sp.damageMax||sp.damageMin||0;
+}
+// Compteurs de mécanique (ex. Ecaflip : Dé six lancés). Valeur entière dans situationalBuffs.
+function mechCounters(){ return getMech()?.counters||[]; }
+function counterVal(id){ return (S.situationalBuffs?.[id]|0)||0; }
+// Map { id:valeur } des compteurs, fusionnée aux modes pour les hooks de mécanique.
+function modeAndCounterMap(){
+  const o=activeModeMap();
+  mechCounters().forEach(c=>{ o[c.id]=counterVal(c.id); });
+  return o;
+}
+// Coût en PA EFFECTIF de `sp` (mécanique : Ecaflip Dé six réduit le coût).
+function effApCost(sp){
+  const mech=getMech(); let ap=sp.apCost||0;
+  if(mech?.costMod) ap+=mech.costMod(sp,modeAndCounterMap());
+  return Math.max(0,ap);
 }
 // Bonus de dégâts plat spécifique au sort selon la jauge (ex. Égaré du Iop à 100).
 // Renvoie des dégâts ADDITIONNELS (mis à l'échelle du niveau du sort), 0 sinon.
@@ -493,7 +516,8 @@ function rankSpells(crit){
     const isPFScaler=isPFScaling(sp);
     const cbAdj=isPFScaler?1:mechBonus(dispPF);
     const dmg=Math.round(calcDmg({base,mastery,di,pos:S.position,resBrut:elRes(sp.element),isCrit:crit,cb:cbAdj})*spellDmgMult(sp,dispPF,S.monster))+mechFlatBonus(sp,dispPF);
-    return {spell:sp,damage:dmg,dpa:sp.apCost>0?Math.round(dmg/sp.apCost):0,pfScaler:isPFScaler};
+    const apc=effApCost(sp);
+    return {spell:sp,damage:dmg,dpa:apc>0?Math.round(dmg/apc):0,pfScaler:isPFScaler,apEff:apc};
   }).filter(r=>r.damage>0).sort((a,b)=>b.dpa-a.dpa);
 }
 
@@ -515,7 +539,7 @@ function computeSeq(){
   }
   const dp=Array.from({length:maxAP+1},()=>({dmg:0,pf:initPF,seq:[]}));
   for(let j=1;j<=maxAP;j++) for(const sp of spells){
-    const c=sp.apCost; if(c>j) continue;
+    const c=effApCost(sp); if(c>j) continue;
     const prev=dp[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
     if(d>dp[j].dmg) dp[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
   }
@@ -526,10 +550,10 @@ function computeSeq(){
     if(fins.length&&blds.length){
       let bestAlt=0, bestSeq=[];
       for(const fin of fins){
-        const aL=maxAP-fin.apCost; if(aL<0) continue;
+        const aL=maxAP-effApCost(fin); if(aL<0) continue;
         const dpF=Array.from({length:aL+1},()=>({pf:initPF,dmg:0,seq:[]}));
         for(let j=1;j<=aL;j++) for(const sp of blds){
-          const c=sp.apCost; if(c>j) continue;
+          const c=effApCost(sp); if(c>j) continue;
           const prev=dpF[j-c], pf2=nextPF(prev.pf,sp,false);
           if(pf2>dpF[j].pf||(pf2===dpF[j].pf&&prev.dmg+dmgAt(sp,prev.pf)>dpF[j].dmg))
             dpF[j]={pf:pf2,dmg:prev.dmg+dmgAt(sp,prev.pf),seq:[...prev.seq,sp]};
@@ -544,7 +568,7 @@ function computeSeq(){
   if(!chosen.length) return null;
   let pfSim=initPF;
   const wd=chosen.map(sp=>{const d=dmgAt(sp,pfSim);pfSim=nextPF(pfSim,sp,false);return{spell:sp,damage:d};});
-  const apUsed=chosen.reduce((s,sp)=>s+sp.apCost,0);
+  const apUsed=chosen.reduce((s,sp)=>s+effApCost(sp),0);
   const total=wd.reduce((s,r)=>s+r.damage,0);
   const ccPF=trackRes?resVal():0;
   const totalCC=chosen.reduce((s,sp)=>{
@@ -564,7 +588,7 @@ function computeSeq(){
     if(lethal && ok.ap>0){
       const rb=ok.ap, dpR=Array.from({length:rb+1},()=>({dmg:0,pf:pfSim,seq:[]}));
       for(let j=1;j<=rb;j++) for(const sp of spells){
-        const c=sp.apCost; if(c>j) continue;
+        const c=effApCost(sp); if(c>j) continue;
         const prev=dpR[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
         if(d>dpR[j].dmg) dpR[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
       }
@@ -587,7 +611,7 @@ function minKill(target,budget,pf){
   const tr=tracksRes();
   const dp=Array.from({length:budget+1},()=>({dmg:0,pf,seq:[]}));
   for(let j=1;j<=budget;j++) for(const sp of spells){
-    const c=sp.apCost; if(c>j) continue;
+    const c=effApCost(sp); if(c>j) continue;
     const prev=dp[j-c];
     const castPf=tr?prev.pf:0;
     const d=prev.dmg+dmgVs(sp,target,castPf,S.critMode);
@@ -632,11 +656,11 @@ function computeKills(){
     const mAP=Math.min(budget,18);
     const dp=Array.from({length:mAP+1},()=>({dmg:0,pf,seq:[]}));
     for(let j=1;j<=mAP;j++) for(const sp of spells){
-      const c=sp.apCost; if(c>j) continue;
+      const c=effApCost(sp); if(c>j) continue;
       const prev=dp[j-c], d=prev.dmg+dmgVs(sp,survivor,tr?prev.pf:0,S.critMode);
       if(d>dp[j].dmg) dp[j]={dmg:d,pf:tr?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
     }
-    if(dp[mAP].seq.length) dump={target:survivor,seq:dp[mAP].seq,dmg:dp[mAP].dmg,ap:dp[mAP].seq.reduce((s,sp)=>s+sp.apCost,0)};
+    if(dp[mAP].seq.length) dump={target:survivor,seq:dp[mAP].seq,dmg:dp[mAP].dmg,ap:dp[mAP].seq.reduce((s,sp)=>s+effApCost(sp),0)};
   }
   return { kills, dump, killCount:kills.length, totalAP, totalDmg,
     aliveCount:alive.length, refundAP:ok.ap||0, budgetStart:S.remainingAP??st.ap??6 };
@@ -742,7 +766,7 @@ function spellDmgAt(sp,pf){
 function addToCSQ(sp){
   if(!S.monster){alert("Sélectionne une cible d'abord.");return;}
   if(!S.build) return;
-  const ap=sp.apCost||0,mp=sp.mpCost||0,wp=sp.wpCost||0;
+  const ap=effApCost(sp),mp=sp.mpCost||0,wp=sp.wpCost||0;
   if(ap>CSQ.remAP||mp>CSQ.remMP||wp>CSQ.remWP){
     const el=document.getElementById('csqres');
     if(el){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);}
@@ -951,7 +975,9 @@ function renderAdvisor(){
       `<div class="elhdr" style="font-size:10px;color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
       byEl[el].map(r=>{
         const isBest=r.spell.name===bestName;
-        const co=[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
+        // Coût PA effectif (Ecaflip Dé six réduit) — affiché barré si différent du coût de base.
+        const apc=r.apEff??r.spell.apCost, apTxt=apc!==r.spell.apCost?`<s style="color:var(--dim)">${r.spell.apCost}</s>${apc}PA`:(r.spell.apCost?`${r.spell.apCost}PA`:'');
+        const co=[apTxt,r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
         const pf=r.spell.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:'';
         const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon le Point Faible">⤢PF</span>`:'';
         const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
@@ -1120,12 +1146,24 @@ function renderSpellsTab(){
     }
     // Modes de la mécanique de classe (Crâ : Tir précis…)
     mechModes().forEach(md=>toggles.push({id:md.id,label:md.label,desc:md.desc,on:isModeOn(md.id)}));
-    sitEl.style.display=toggles.length?'':'none';
+    // Compteurs (Ecaflip : Dé six lancés) — affichés en stepper −/valeur/+
+    const counters=mechCounters();
+    sitEl.style.display=(toggles.length||counters.length)?'':'none';
     sitEl.innerHTML=toggles.map(t=>
       `<button class="btn sml${t.on?' on':''}" data-sit="${t.id}"${t.desc?` title="${t.desc.replace(/"/g,'&quot;')}"`:''}
         style="color:${t.on?'var(--gold)':'var(--dim)'};border-color:${t.on?'var(--gold)':'var(--border)'};white-space:nowrap">
-        ${t.on?'✓':'○'} ${t.label}</button>`).join('');
+        ${t.on?'✓':'○'} ${t.label}</button>`).join('')
+      + counters.map(c=>{
+        const v=counterVal(c.id);
+        return `<span class="cntr" title="${(c.desc||'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ${v?'var(--gold)':'var(--border)'};border-radius:5px;padding:1px 4px;white-space:nowrap">
+          <span style="font-size:10px;color:${v?'var(--gold)':'var(--dim)'}">${c.label}</span>
+          <button class="btn sml" data-cnt="${c.id}" data-d="-1" style="padding:0 5px">−</button>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--gold);min-width:10px;text-align:center">${v}</span>
+          <button class="btn sml" data-cnt="${c.id}" data-d="1" style="padding:0 5px">+</button>
+        </span>`;
+      }).join('');
     sitEl.querySelectorAll('[data-sit]').forEach(b=>b.addEventListener('click',()=>toggleSit(b.dataset.sit)));
+    sitEl.querySelectorAll('[data-cnt]').forEach(b=>b.addEventListener('click',()=>bumpCounter(b.dataset.cnt,parseInt(b.dataset.d))));
   }
   // Deck
   const de=document.getElementById('decklist');

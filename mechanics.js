@@ -190,6 +190,45 @@
     onState(a, n, lvl, m) { if (/fureur/i.test(n)) m.fureur = Math.min(100, lvl); },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier };
+  // ── ECAFLIP — Veine / hasard / Dé six ──────────────────────────────────────
+  // Classe du hasard : pas de multiplicateur de dégâts lié à une jauge dans les
+  // données. La Veine (0→100) donne surtout soins/résistances (informative ici).
+  // Le vrai levier CHIFFRÉ est le sort « Dé six » : à chaque lancer dans le tour,
+  // son coût baisse d'1 PA (cumulable, min 1 PA) → son dégât/PA grimpe fortement.
+  // On le modélise via un compteur (mode `de_six` = nb de lancers déjà faits).
+  const DESIX_MIN_AP = 1;
+  const ecaflip = {
+    res: { id: 'veine', label: 'Veine', max: 100, color: '#e6b800' },
+    initial: 0,
+    gen() { return 0; },           // la Veine ne vient pas des sorts élémentaires
+    consumes() { return false; },
+    next(val) { return val; },
+    bonus() { return 1; },         // pas de bonus de dégâts continu
+    // Modificateur de COÛT en PA selon les modes (Dé six : -1 PA par lancer déjà fait).
+    costMod(sp, modes) {
+      if (/d[ée]\s*six/i.test(sp.name || '')) {
+        const n = (modes && modes.de_six) | 0;       // nb de Dé six déjà lancés
+        const newAp = Math.max(DESIX_MIN_AP, (sp.apCost || 0) - n);
+        return newAp - (sp.apCost || 0);             // delta (négatif)
+      }
+      return 0;
+    },
+    // Compteur exposé à l'UI (stepper) plutôt qu'un simple toggle on/off.
+    counters: [{
+      id: 'de_six', label: 'Dé six lancés', max: 5,
+      desc: 'Chaque Dé six lancé dans le tour réduit le coût du suivant d\'1 PA (min 1 PA)',
+    }],
+    advice(m) {
+      const out = [];
+      const v = m.veine || 0;
+      out.push({ p: 'L', msg: `🎲 Veine ${v}/100 (chance : soins, résistances, cartes — pas de bonus de dégâts direct)` });
+      out.push({ p: 'L', msg: `🃏 Mise sur le Coup critique (active le mode ★) : c'est ton vrai levier de dégâts` });
+      out.push({ p: 'L', msg: `🎯 Dé six : relance-le dans le tour, son coût baisse d'1 PA à chaque fois (combo signature)` });
+      return out;
+    },
+    onState(a, n, lvl, m) { if (/veine/i.test(n)) m.veine = Math.min(100, lvl); },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip };
 
 })(typeof window !== 'undefined' ? window : globalThis);
