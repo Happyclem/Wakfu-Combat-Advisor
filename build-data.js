@@ -180,6 +180,25 @@ function parseEliotrope(effects, baseDmg) {
   return out;
 }
 
+// Eniripsa — dégâts conditionnels selon les PV (évalués automatiquement) :
+//   lowTgtDmg     : dégât si la CIBLE a < 80 % PV (« Sinon : Dommage : N »).
+//                   Le base `dm` est alors le cas cible ≥ 80 % PV (Anatomie).
+//   selfHpBonus   : dégât ADDITIONNEL si l'ENIRIPSA a ≥ 80 % PV (Torpeur).
+function parseEniripsa(effects, baseDmg) {
+  const out = {};
+  // « Si la cible possède plus de 80 % … Dommage : A … Sinon : … Dommage : B »
+  if (/cible\s+poss[èe]de\s+plus\s+de\s+80\s*%/i.test(effects)) {
+    const sinon = effects.split(/Sinon\s*:/i)[1];
+    if (sinon) { const d = sinon.match(/Dommage\s*:?\s*(\d+)/i); if (d) out.lowTgtDmg = num(d[1]); }
+  }
+  // « Si l'Eniripsa possède >= 80 % PV : - Dommage : N supplémentaires »
+  if (/Eniripsa\s+poss[èe]de\s*>?=?\s*80\s*%/i.test(effects)) {
+    const seg = effects.split(/Eniripsa\s+poss[èe]de[^:]*:/i)[1];
+    if (seg) { const d = seg.match(/Dommage\s*:?\s*(\d+)\s*suppl[ée]mentaires/i); if (d) out.selfHpBonus = num(d[1]); }
+  }
+  return out;
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -201,6 +220,8 @@ function buildSpells(classDisplay) {
     const alt = (classDisplay === 'Sacrieur') ? parseAltDmg(eff) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
+    // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
+    const eni = (classDisplay === 'Eniripsa') ? parseEniripsa(eff, num(r['Dommage lvl245'])) : {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -219,6 +240,8 @@ function buildSpells(classDisplay) {
       exaltedDmg: elio.exaltedDmg,   // Eliotrope : dégât en mode Exalté
       portalDmg: elio.portalDmg,     // Eliotrope : dégât via Portail (remplace)
       portalBonus: elio.portalBonus, // Eliotrope : dégât additionnel via Portail
+      lowTgtDmg: eni.lowTgtDmg,       // Eniripsa : dégât si cible < 80 % PV (Anatomie)
+      selfHpBonus: eni.selfHpBonus,   // Eniripsa : dégât bonus si Eni >= 80 % PV (Torpeur)
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

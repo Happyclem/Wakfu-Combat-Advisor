@@ -15,6 +15,7 @@ function spellFull(s){ return {
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
   exaltedDmg:s.exaltedDmg||0, portalDmg:s.portalDmg||0, portalBonus:s.portalBonus||0, // Eliotrope
+  lowTgtDmg:s.lowTgtDmg||0, selfHpBonus:s.selfHpBonus||0, // Eniripsa : dégâts conditionnels PV
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -300,10 +301,21 @@ function modesActive(){ return mechModes().filter(md=>!!S.situationalBuffs?.[md.
 function isModeOn(id){ return !!S.situationalBuffs?.[id]; }
 // Objet { id:true } des modes actifs, passé aux hooks de la mécanique.
 function activeModeMap(){ const o={}; modesActive().forEach(md=>o[md.id]=true); return o; }
-// Valeur de dégât à mettre à l'échelle pour `sp`, selon la mécanique (Crâ : Tir précis).
-function mechBaseDmg(sp){
+// Fraction de PV courants d'une cible (1 = pleine vie). Null si inconnue.
+function targetHpFrac(t){ if(!t) return null; const mx=t._maxHp||t.hp||0; if(!mx) return null; return Math.max(0,Math.min(1,(t._currentHp??mx)/mx)); }
+// Contexte transmis aux hooks de dégât : modes/compteurs actifs + conditions de PV
+// auto-évaluées (Eniripsa : Anatomie selon PV cible, Torpeur selon PV de l'Eniripsa).
+function dmgContext(target){
+  const o=modeAndCounterMap();
+  o.hpFrac=playerHpFrac();
+  o.tgtHpFrac=targetHpFrac(target!==undefined?target:S.monster);
+  return o;
+}
+// Valeur de dégât à mettre à l'échelle pour `sp`, selon la mécanique (Crâ : Tir précis,
+// Eliotrope : Exalté/Portail, Eniripsa : conditions de PV).
+function mechBaseDmg(sp,target){
   const mech=getMech();
-  if(mech?.baseDmg) return mech.baseDmg(sp,activeModeMap());
+  if(mech?.baseDmg) return mech.baseDmg(sp,dmgContext(target));
   return sp.damageMax||sp.damageMin||0;
 }
 // Compteurs de mécanique (ex. Ecaflip : Dé six lancés). Valeur entière dans situationalBuffs.
@@ -375,7 +387,7 @@ function resVs(el,t){
 // Dégâts d'un sort contre une cible précise, à une valeur de jauge `pf` donnée.
 function dmgVs(sp,t,pf,crit){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
-  const base=scale(0,mechBaseDmg(sp),lvl);
+  const base=scale(0,mechBaseDmg(sp,t),lvl);
   if(!base) return 0;
   // Pour les sorts qui scalent avec la jauge on passe cb=1 (spellDmgMult corrige)
   const isPFScaler=isPFScaling(sp);
@@ -992,9 +1004,11 @@ function renderAdvisor(){
         // Eliotrope : indicateurs Exalté / Portail (dégât modifié selon le mode)
         const elioEx=r.spell.exaltedDmg>0?`<span style="font-size:9px;color:${isModeOn('exalte')?'var(--gold)':'var(--dim)'}" title="Dégât différent en mode Exalté (${r.spell.exaltedDmg})">⟳</span>`:'';
         const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:9px;color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
+        // Eniripsa : dégât conditionnel sur les PV (auto selon l'état réel)
+        const eniHp=(r.spell.lowTgtDmg>0||r.spell.selfHpBonus>0)?`<span style="font-size:9px;color:var(--dim)" title="${r.spell.lowTgtDmg>0?'Dégât plein si la cible a ≥ 80 % PV':'Bonus si l’Eniripsa a ≥ 80 % PV'}">❤</span>`:'';
         return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}
+          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')

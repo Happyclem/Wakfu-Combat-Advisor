@@ -80,6 +80,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Sacrieur** — Fureur + **Berserk** : bonus de dégâts selon les PV manquants du joueur (suivi via le log) + dégâts conditionnels chiffrés (Aversion stabilisé, Fracasse vs Armure). ⚠ Le % de Berserk est une estimation à confirmer in-game (isolée dans `mechanics.js`)
   - **Ecaflip** — **Dé six** : compteur de lancers qui réduit son coût en PA (−1/lancer, min 1 PA) → dégâts/PA recalculés et séquence optimale adaptée. Veine informative (pas de bonus de dégâts direct)
   - **Eliotrope** — **Serein/Exalté + Portails + Don céleste** : trois toggles qui modifient les dégâts (mode Exalté, sort via portail, +40 % Dommages infligés du Don céleste), tous chiffrés depuis les effets
+  - **Eniripsa** — dégâts **conditionnels sur les PV** (auto) : Anatomie (plein si la cible a ≥ 80 % PV, réduit sinon), Torpeur (+bonus si l'Eniripsa a ≥ 80 % PV). Classe surtout support (Marques/Propagateur non chiffrés)
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

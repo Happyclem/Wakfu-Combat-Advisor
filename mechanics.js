@@ -266,6 +266,43 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope };
+  // ── ENIRIPSA — soigneuse, dégâts conditionnels sur les PV ──────────────────
+  // Surtout support (Marques, Propagateur, soins). Côté dégâts, deux conditions
+  // CHIFFRÉES évaluées automatiquement selon les PV réels (suivis via le log) :
+  //  • Anatomie : dégât plein si la CIBLE a ≥ 80 % PV (base `dm`), réduit `lowTgtDmg`
+  //    si la cible est sous 80 % PV.
+  //  • Torpeur : +`selfHpBonus` si l'ENIRIPSA a ≥ 80 % PV.
+  // Quand les PV ne sont pas suivis (pas de log), on suppose le cas favorable
+  // (cible pleine vie, Eniripsa plein) — l'aperçu reste optimiste et cohérent.
+  const ENI_HP_THRESHOLD = 0.80;
+  const eniripsa = {
+    res: null, // pas de jauge de dégâts (Propagateur = support, non chiffré ici)
+    baseDmg(sp, ctx) {
+      let d = sp.damageMax || sp.damageMin || 0;
+      // Anatomie : si la cible est connue ET sous 80 % PV → dégât réduit.
+      if (sp.lowTgtDmg && ctx && ctx.tgtHpFrac != null && ctx.tgtHpFrac < ENI_HP_THRESHOLD) {
+        d = sp.lowTgtDmg;
+      }
+      // Torpeur : +bonus si l'Eniripsa a ≥ 80 % PV (ou PV inconnus → supposé plein).
+      if (sp.selfHpBonus && (ctx == null || ctx.hpFrac == null || ctx.hpFrac >= ENI_HP_THRESHOLD)) {
+        d += sp.selfHpBonus;
+      }
+      return d;
+    },
+    advice(m) {
+      const out = [];
+      const hp = m && m.hpFrac;
+      if (hp != null && hp < ENI_HP_THRESHOLD) {
+        out.push({ p: 'M', msg: `💉 Eniripsa sous 80 % PV : Torpeur perd son bonus de dégâts (remonte tes PV)` });
+      } else {
+        out.push({ p: 'L', msg: `💉 Eniripsa ≥ 80 % PV : Torpeur tape plus fort` });
+      }
+      out.push({ p: 'L', msg: `🎯 Anatomie : dégâts pleins sur les cibles à ≥ 80 % PV (ouvre avec)` });
+      out.push({ p: 'L', msg: `🩹 Classe support : Marques & Propagateur pour le soin/contrôle (non chiffrés ici)` });
+      return out;
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa };
 
 })(typeof window !== 'undefined' ? window : globalThis);
