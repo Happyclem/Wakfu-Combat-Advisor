@@ -145,6 +145,7 @@ function parseTirPrecis(effects, baseDmg) {
 const ALT_COND = [
   { id: 'stabilise',    re: /stabilis[ée]/i },
   { id: 'cible_armure', re: /la\s+cible\s+poss[èe]de\s+de\s+l.?Armure/i },
+  { id: 'tresors',      re: /l.?Enutrof\s+a\s+l.?[ée]tat\s+Tr[ée]sors/i }, // Enutrof : Epuration
 ];
 function parseAltDmg(effects) {
   // On cherche un « Dommage : N à la place » et la condition « Si … : » qui le précède.
@@ -216,8 +217,8 @@ function buildSpells(classDisplay) {
     const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg) : 0;
     // Crâ — Tir précis : dégâts alternatifs + Précision consommée.
     const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
-    // Sacrieur — dégât conditionnel « … à la place » (Aversion stabilisé, Fracasse vs Armure).
-    const alt = (classDisplay === 'Sacrieur') ? parseAltDmg(eff) : {};
+    // Dégât conditionnel « … à la place » (Sacrieur : stabilisé/Armure ; Enutrof : Trésors).
+    const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof') ? parseAltDmg(eff) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).

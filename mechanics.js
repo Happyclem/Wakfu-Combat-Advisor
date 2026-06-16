@@ -303,6 +303,34 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa };
+  // ── ENUTROF — Trésors / forme Phorzerker ───────────────────────────────────
+  // Deux leviers. Un seul est chiffré côté DÉGÂTS :
+  //  • Trésors (état accumulé, max 2-3) : consommé par certains sorts. Le seul à
+  //    augmenter les dégâts est Epuration (212 → 266 si Trésors). Toggle `tresors`.
+  //    (Taxe/Pelle mêlée consomment Trésors pour des effets PA/PM, pas du dégât.)
+  //  • Phorzerker (forme) : change surtout les EFFETS (traverse Armure, échange de
+  //    position…). Le bonus de Dommages infligés de « Bestialité » n'est pas chiffré
+  //    dans les données → mode informatif (toggle `phorzerker`, sans effet calcul).
+  const enutrof = {
+    res: null,
+    // Dégât conditionnel activé par un toggle (Epuration : Trésors).
+    baseDmg(sp, modes) {
+      if (sp.altDmg && sp.altCond && modes && modes[sp.altCond]) return sp.altDmg;
+      return sp.damageMax || sp.damageMin || 0;
+    },
+    modes: [
+      { id: 'tresors',    label: 'Trésors',    desc: 'L\'Enutrof a l\'état Trésors : Epuration consomme l\'état pour des dégâts majorés' },
+      { id: 'phorzerker', label: 'Phorzerker', desc: 'Forme Phorzerker : change les effets des sorts (bonus de dégâts « Bestialité » non chiffré ici)' },
+    ],
+    advice() {
+      return [
+        { p: 'L', msg: `💰 Trésors : garde-le pour Epuration (dégâts majorés), ou consomme-le sur Taxe/Pelle mêlée pour le contrôle` },
+        { p: 'L', msg: `⛏ Phorzerker : forme offensive (traverse l'Armure, vol de vie) — bonus de dégâts non chiffré dans l'outil` },
+        { p: 'L', msg: `🪨 Gisements : Coup de grisou & Coulée de lave tournent autour de tes Gisements posés` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof };
 
 })(typeof window !== 'undefined' ? window : globalThis);
