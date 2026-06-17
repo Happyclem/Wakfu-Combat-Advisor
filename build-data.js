@@ -147,6 +147,9 @@ const ALT_COND = [
   { id: 'cible_armure', re: /la\s+cible\s+poss[èe]de\s+de\s+l.?Armure/i },
   { id: 'tresors',      re: /l.?Enutrof\s+a\s+l.?[ée]tat\s+Tr[ée]sors/i }, // Enutrof : Epuration
   { id: 'hors_ldv',     re: /n.?est\s+pas\s+dans\s+la\s+ligne\s+de\s+vue/i }, // Osamodas : Corbeau
+  { id: 'self_high_hp', re: /poss[èe]de\s+plus\s+de\s+80\s*%\s+de\s+ses\s+PV/i }, // Ouginak : ≥80 % PV (auto)
+  { id: 'bastonne',     re: /cible\s+est\s+Bastonn[ée]/i },   // Ouginak : Bastonnade
+  { id: 'contact',      re: /au\s+contact\s+de\s+l.?Ouginak/i }, // Ouginak : Balayage
 ];
 function parseAltDmg(effects) {
   // On cherche un « Dommage : N à la place » et la condition « Si … : » qui le précède.
@@ -238,7 +241,7 @@ function buildSpells(classDisplay) {
     const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
     // Dégât conditionnel « … à la place » (Sacrieur : stabilisé/Armure ; Enutrof : Trésors ;
     // Osamodas : Corbeau hors ligne de vue, Fouet vs invocation [hors champ : invocations non suivies]).
-    const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof' || classDisplay === 'Osamodas') ? parseAltDmg(eff) : {};
+    const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof' || classDisplay === 'Osamodas' || classDisplay === 'Ouginak') ? parseAltDmg(eff) : {};
     // Osamodas — Forme draconique : dégât alternatif.
     const osa = (classDisplay === 'Osamodas') ? parseOsamodas(eff, num(r['Dommage lvl245'])) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.

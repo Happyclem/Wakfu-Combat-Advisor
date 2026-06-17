@@ -411,6 +411,43 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas };
+  // ── OUGINAK — PV élevés / Proie / Rage ─────────────────────────────────────
+  // Thème : l'Ouginak frappe plus fort quand il a beaucoup de PV, et selon l'état
+  // de la cible. Dégâts conditionnels CHIFFRÉS (« … à la place ») :
+  //  • Plombage : 98 → 131 si l'Ouginak a ≥ 80 % PV (AUTO via ctx.hpFrac).
+  //  • Bastonnade : 83 → 251 si la cible est Bastonné (toggle `bastonne`).
+  //  • Balayage : 131 → 164 si la cible est au contact (toggle `contact`).
+  // La Rage / l'Ougigarou (mode loup-garou) n'ont pas de bonus de dégâts de base
+  // chiffré dans les données (les passifs ne donnent que des malus/conditions) → conseil.
+  const OUGI_HP_THRESHOLD = 0.80;
+  const ouginak = {
+    res: null,
+    baseDmg(sp, ctx) {
+      if (sp.altDmg && sp.altCond) {
+        // Condition auto sur les PV de l'Ouginak.
+        if (sp.altCond === 'self_high_hp') {
+          if (ctx == null || ctx.hpFrac == null || ctx.hpFrac >= OUGI_HP_THRESHOLD) return sp.altDmg;
+        } else if (ctx && ctx[sp.altCond]) {
+          return sp.altDmg; // condition via toggle (bastonne, contact)
+        }
+      }
+      return sp.damageMax || sp.damageMin || 0;
+    },
+    modes: [
+      { id: 'bastonne', label: 'Cible Bastonné', desc: 'Bastonnade triple ses dégâts sur une cible déjà touchée par Bastonnade (83 → 251)' },
+      { id: 'contact',  label: 'Cible au contact', desc: 'Balayage inflige ses dégâts majorés si la cible est au contact (131 → 164)' },
+    ],
+    advice(m) {
+      const out = [];
+      const hp = m && m.hpFrac;
+      if (hp != null && hp < OUGI_HP_THRESHOLD) out.push({ p: 'M', msg: `🐺 Sous 80 % PV : Plombage perd son bonus de dégâts (remonte tes PV)` });
+      else out.push({ p: 'L', msg: `🐺 ≥ 80 % PV : Plombage frappe plus fort (98 → 131)` });
+      out.push({ p: 'L', msg: `🦴 Bastonnade : retape une cible déjà Bastonné pour ×3 dégâts (active le toggle)` });
+      out.push({ p: 'L', msg: `⚔ Proie / Ougigarou : marque ta Proie et passe en loup-garou pour tes combos (bonus non chiffrés ici)` });
+      return out;
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak };
 
 })(typeof window !== 'undefined' ? window : globalThis);
