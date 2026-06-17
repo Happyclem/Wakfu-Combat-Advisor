@@ -19,6 +19,7 @@ function spellFull(s){ return {
   bqScale:s.bqScale||0, // Huppermage : scaling sur la jauge de BQ
   dracoDmg:s.dracoDmg||0, // Osamodas : dégât en Forme draconique
   tonneauDmg:s.tonneauDmg||0, tonneauMult:s.tonneauMult||0, // Pandawa : Tonneau porté
+  chargePerLvl:s.chargePerLvl||0, // Roublard : dégât par charge de Pulsar
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -358,15 +359,16 @@ function effApCost(sp){
   if(mech?.costMod) ap+=mech.costMod(sp,modeAndCounterMap());
   return Math.max(0,ap);
 }
-// Bonus de dégâts plat spécifique au sort selon la jauge (ex. Égaré du Iop à 100).
-// Renvoie des dégâts ADDITIONNELS (mis à l'échelle du niveau du sort), 0 sinon.
+// Bonus de dégâts plat spécifique au sort (mis à l'échelle du niveau du sort).
+// Deux sources : Égaré du Iop à jauge max, et `flatBonus(sp,ctx)` (Roublard : Pulsar
+// chargé → +chargePerLvl × niveau de charge). Renvoie des dégâts ADDITIONNELS, 0 sinon.
 function mechFlatBonus(sp,val){
-  const mech=getMech();
+  const mech=getMech(); let bonus=0;
   if(mech?.egareBonus && val>=(mech.res?.max||100)){
-    const b=mech.egareBonus(sp);
-    if(b>0) return scale(b,b,sp.spellLevel||S.build?.level||200);
+    const b=mech.egareBonus(sp); if(b>0) bonus+=b;
   }
-  return 0;
+  if(mech?.flatBonus){ bonus+=mech.flatBonus(sp,modeAndCounterMap())||0; }
+  return bonus>0 ? scale(bonus,bonus,sp.spellLevel||S.build?.level||200) : 0;
 }
 function pmObj(){ if(!S.combat.mechanics['__p']) S.combat.mechanics['__p']={}; return S.combat.mechanics['__p']; }
 function playerMaxHp(){ return getEffStats().hp||0; }

@@ -222,6 +222,15 @@ function parseOsamodas(effects, baseDmg) {
   return (d && num(d[1]) !== baseDmg) ? { dracoDmg: num(d[1]) } : {};
 }
 
+// Roublard — Pulsar : dégât chargeable.
+//   chargePerLvl : dégât ADDITIONNEL par niveau de charge (« Par niveau de Pulsar :
+//                  Dommage : N supplémentaires » → N). Le joueur charge en lançant
+//                  le sort sur lui-même, puis le décharge sur une cible.
+function parseRoublard(effects) {
+  const m = effects.match(/Par\s+niveau\s+de\s+Pulsar\s*:\s*-?\s*Dommage\s*:?\s*(\d+)\s*suppl[ée]mentaires/i);
+  return m ? { chargePerLvl: num(m[1]) } : {};
+}
+
 // Pandawa — Tonneau porté : modifie les dégâts.
 //   tonneauDmg  : dégât quand le Pandawa porte son Tonneau (« Si … porte … Dommage : N »).
 //   tonneauMult : multiplicateur « (+N % quand il porte son Tonneau) » (ex. 10 → ×1.10).
@@ -261,6 +270,8 @@ function buildSpells(classDisplay) {
     const osa = (classDisplay === 'Osamodas') ? parseOsamodas(eff, num(r['Dommage lvl245'])) : {};
     // Pandawa — Tonneau porté : dégât alternatif / multiplicateur.
     const pan = (classDisplay === 'Pandawa') ? parsePandawa(eff, num(r['Dommage lvl245'])) : {};
+    // Roublard — Pulsar chargeable.
+    const rog = (classDisplay === 'Roublard') ? parseRoublard(eff) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
@@ -291,6 +302,7 @@ function buildSpells(classDisplay) {
       dracoDmg: osa.dracoDmg,         // Osamodas : dégât en Forme draconique
       tonneauDmg: pan.tonneauDmg,     // Pandawa : dégât en portant le Tonneau
       tonneauMult: pan.tonneauMult,   // Pandawa : % de dégâts en plus avec le Tonneau
+      chargePerLvl: rog.chargePerLvl, // Roublard : dégât par niveau de charge (Pulsar)
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

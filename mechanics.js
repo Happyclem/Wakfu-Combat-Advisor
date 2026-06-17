@@ -479,6 +479,33 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa };
+  // ── ROUBLARD — Bombes / Pulsar / Fourbe-Fuyard ─────────────────────────────
+  // L'essentiel des dégâts du Roublard vient de ses BOMBES (explosions différées en
+  // zone, combos) — non simulées ici. Côté sorts directs, un levier CHIFFRÉ : le sort
+  // PULSAR se charge. Chaque charge ajoute `chargePerLvl` (91) de dégâts au déchargement.
+  // On suit la charge via un compteur (`pulsar` = niveau accumulé).
+  // Les modes Fourbe/Fuyard changent surtout des effets (les dégâts directs sont
+  // identiques entre modes dans les données) → conseil.
+  const roublard = {
+    res: null,
+    // Dégât plat additionnel : Pulsar chargé (+chargePerLvl par niveau de charge).
+    flatBonus(sp, modes) {
+      if (sp.chargePerLvl) { const n = (modes && modes.pulsar) | 0; return sp.chargePerLvl * n; }
+      return 0;
+    },
+    counters: [{
+      id: 'pulsar', label: 'Charges Pulsar', max: 6,
+      desc: 'Chaque charge de Pulsar (lancé sur soi) ajoute 91 de dégâts au déchargement',
+    }],
+    advice() {
+      return [
+        { p: 'L', msg: `💣 Bombes : le cœur de tes dégâts passe par leurs explosions différées (non simulées ici) — aligne-les pour les Murs de poudre` },
+        { p: 'L', msg: `🔋 Pulsar : charge-le (lancé sur toi) puis décharge — +91 dégâts par charge (règle le compteur)` },
+        { p: 'L', msg: `🎭 Fourbe / Fuyard : alterne les modes (Ruse) pour les effets de tes sorts et Tir surprise` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard };
 
 })(typeof window !== 'undefined' ? window : globalThis);
