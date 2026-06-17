@@ -91,7 +91,8 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Sadida** — **Engrainé** : compteur qui amplifie Tremblement de Terre (+30/niveau). Poupées/Arbres/poisons (cœur des dégâts) en conseil
   - **Steamer** — jauge de **Stasis (PS)** : Choc gagne +5 % de dégâts par PS (max +50 %) ; **Pilonnage** (compteur, +27/répétition dans le tour). Tourelles en conseil (non simulées)
   - **Xélor** — **Taque/Tique** : toggle qui applique ±20 % Dommages infligés selon la parité du tour (pair +20 %, impair −20 %). Cadran/contrôle en conseil
-- Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
+  - **Zobal** — passifs offensifs **chiffrés** (Brute +25 %, Érosion −25 %) + toggle « Au contact » (+15 % DI). Masques & collisions en conseil
+- **Les 18 classes sont modélisées en profondeur.** Là où une mécanique repose sur des éléments non simulés (invocations, bombes, tourelles, poupées) ou sur des bonus non chiffrés dans les données, l'outil le signale clairement en conseil plutôt que d'inventer une valeur.
 
 ---
 

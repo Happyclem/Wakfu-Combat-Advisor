@@ -201,6 +201,10 @@ const PASSIVE_FX = {
   // à la proximité du Tonneau → informatif ; Tonneau Agressif est géré par le mode).
   cyanose:                            { sb:{ degatsInfliges:15 } },     // +15 % DI (-50 Rés)
   cocktail:                           { sb:{ degatsInfliges:-10 } },    // -10 % DI (+20 % soins)
+  // Zobal — passifs à % Dommages infligés PERMANENT (Au contact +15 % est conditionnel
+  // au corps-à-corps → géré par le mode ; Virevolte est positionnel).
+  brute:                              { sb:{ degatsInfliges:25 } },     // +25 % DI (-40 % Armure)
+  _rosion:                            { sb:{ degatsInfliges:-25 } },    // -25 % DI (retire Rés)
 };
 function mkPassive(p, isGeneral){
   const id=(p.n||'').toLowerCase().replace(/[^a-z0-9]/g,'_');

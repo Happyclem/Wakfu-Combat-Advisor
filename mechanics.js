@@ -604,6 +604,27 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida, foggernaut, xelor };
+  // ── ZOBAL — Masques / collisions ───────────────────────────────────────────
+  // Classe de masques (Psychopathe/Classe/Bouffon) et de collisions. Son levier de
+  // dégâts passe par des PASSIFS à % Dommages infligés, chiffrés (cf. PASSIVE_FX :
+  // Brute +25 %, Érosion −25 %). Le passif « Au contact » (+15 % DI au corps-à-corps)
+  // est conditionnel → exposé en toggle `au_contact`.
+  const ZOBAL_CONTACT_DI = 0.15;
+  const masqueraider = {
+    res: null,
+    bonus(m) { return m && m.au_contact ? 1 + ZOBAL_CONTACT_DI : 1; }, // passif Au contact
+    modes: [
+      { id: 'au_contact', label: 'Au contact (fin de tour)', desc: 'Passif « Au contact » : +15 % Dommages infligés si un combattant est à ton contact en fin de tour' },
+    ],
+    advice() {
+      return [
+        { p: 'L', msg: `🎭 Masques (Psychopathe / Classe / Bouffon) : change selon la situation (offensif, polyvalent, mobilité)` },
+        { p: 'L', msg: `💥 Collisions : pousse tes ennemis contre des obstacles pour des dégâts/effets bonus (Poussées violentes)` },
+        { p: 'L', msg: `⚔ Passifs offensifs (Brute +25 %, Au contact +15 %…) : pense à les activer, ils sont pris en compte` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida, foggernaut, xelor, masqueraider };
 
 })(typeof window !== 'undefined' ? window : globalThis);
