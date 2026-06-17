@@ -90,6 +90,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Roublard** — **Pulsar chargeable** : compteur de charges (+91 dégâts/charge) → dégâts/PA recalculés et séquence adaptée. Bombes (cœur des dégâts) & modes Fourbe/Fuyard en conseil
   - **Sadida** — **Engrainé** : compteur qui amplifie Tremblement de Terre (+30/niveau). Poupées/Arbres/poisons (cœur des dégâts) en conseil
   - **Steamer** — jauge de **Stasis (PS)** : Choc gagne +5 % de dégâts par PS (max +50 %) ; **Pilonnage** (compteur, +27/répétition dans le tour). Tourelles en conseil (non simulées)
+  - **Xélor** — **Taque/Tique** : toggle qui applique ±20 % Dommages infligés selon la parité du tour (pair +20 %, impair −20 %). Cadran/contrôle en conseil
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

@@ -572,6 +572,38 @@
     onState(a, n, lvl, m) { if (/stasis|\bPS\b/i.test(n)) m.ps = Math.min(STEAMER_PS_MAX, lvl); },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida, foggernaut };
+  // ── XÉLOR — Temps / heure courante / tour pair-impair ──────────────────────
+  // Classe de CONTRÔLE (retraits de PA, téléportations, Cadran) : peu de gros
+  // multiplicateurs de dégâts directs. Son seul levier de dégâts chiffré est le
+  // passif « Taque, Tique » : +20 % Dommages infligés les tours PAIRS, −20 % les
+  // tours IMPAIRS. Modélisé par un toggle `tour_pair` (à activer si le passif est
+  // équipé). Le Cadran / l'heure courante donnent surtout du placement → conseil.
+  const XELOR_PARITY_DI = 0.20;
+  const xelor = {
+    res: null,
+    // Taque, Tique : ±20 % DI selon la parité du tour (toggle `tour_pair`).
+    bonus(m) {
+      if (m && m.taque_tique) return m.tour_pair ? 1 + XELOR_PARITY_DI : 1 - XELOR_PARITY_DI;
+      return 1;
+    },
+    modes: [
+      { id: 'taque_tique', label: 'Passif Taque/Tique', desc: 'Le passif « Taque, Tique » est équipé : ±20 % Dommages infligés selon la parité du tour' },
+      { id: 'tour_pair',   label: 'Tour pair',          desc: 'Tour en cours pair (avec Taque/Tique : +20 % DI ; sinon les tours impairs donnent −20 %)' },
+    ],
+    advice(m) {
+      const out = [];
+      if (m && m.taque_tique) {
+        out.push(m.tour_pair
+          ? { p: 'M', msg: `⏳ Tour PAIR + Taque/Tique : +20 % Dommages infligés — c'est ton tour de burst` }
+          : { p: 'M', msg: `⏳ Tour IMPAIR + Taque/Tique : −20 % Dommages infligés — temporise, garde tes ressources` });
+      } else {
+        out.push({ p: 'L', msg: `⏳ Si tu joues « Taque, Tique » : active-le pour voir l'effet ±20 % DI selon la parité du tour` });
+      }
+      out.push({ p: 'L', msg: `🕐 Cadran & heure courante : sers-t'en pour téléporter, retirer des PA et positionner (contrôle)` });
+      return out;
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida, foggernaut, xelor };
 
 })(typeof window !== 'undefined' ? window : globalThis);
