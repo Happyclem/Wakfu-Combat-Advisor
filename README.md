@@ -88,6 +88,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Ouginak** — dégâts **conditionnels** : Plombage (auto, ≥ 80 % PV → 98/131), Bastonnade (toggle, cible Bastonné → ×3), Balayage (toggle, contact → 131/164). Rage/Ougigarou en conseil
   - **Pandawa** — **Tonneau porté** : toggle qui modifie les dégâts (Flasque 111 → 167, Lucha/Blitzkriek +10 %) + 10 % Dommages infligés (Tonneau Agressif) ; passifs offensifs chiffrés (Cyanose +15 %). Imbibé/ivresse en conseil
   - **Roublard** — **Pulsar chargeable** : compteur de charges (+91 dégâts/charge) → dégâts/PA recalculés et séquence adaptée. Bombes (cœur des dégâts) & modes Fourbe/Fuyard en conseil
+  - **Sadida** — **Engrainé** : compteur qui amplifie Tremblement de Terre (+30/niveau). Poupées/Arbres/poisons (cœur des dégâts) en conseil
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

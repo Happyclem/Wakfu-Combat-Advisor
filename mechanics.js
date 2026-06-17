@@ -506,6 +506,29 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard };
+  // ── SADIDA — Poupées / Engrainé ────────────────────────────────────────────
+  // Classe d'invocateur : l'essentiel des dégâts vient des POUPÉES, ARBRES et POISONS
+  // (via les Arbres) — non simulés ici. Côté sorts directs, un levier CHIFFRÉ :
+  // Tremblement de Terre = 60 + 30 × niveau d'Engrainé (compteur `engraine`).
+  const sadida = {
+    res: null,
+    flatBonus(sp, modes) {
+      if (sp.chargePerLvl) { const n = (modes && modes.engraine) | 0; return sp.chargePerLvl * n; }
+      return 0;
+    },
+    counters: [{
+      id: 'engraine', label: 'Engrainé', max: 10,
+      desc: 'Chaque niveau d\'Engrainé ajoute 30 de dégâts à Tremblement de Terre',
+    }],
+    advice() {
+      return [
+        { p: 'L', msg: `🌳 Poupées & Arbres : le gros de tes dégâts passe par tes invocations et leurs poisons (non simulés ici) — sème tes graines` },
+        { p: 'L', msg: `🌱 Engrainé : monte le niveau de tes poupées/arbres pour amplifier Tremblement de Terre (+30/niveau) — règle le compteur` },
+        { p: 'L', msg: `☠ Toxines / poisons : empile-les via tes Arbres pour des dégâts indirects continus` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida };
 
 })(typeof window !== 'undefined' ? window : globalThis);

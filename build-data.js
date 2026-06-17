@@ -222,12 +222,13 @@ function parseOsamodas(effects, baseDmg) {
   return (d && num(d[1]) !== baseDmg) ? { dracoDmg: num(d[1]) } : {};
 }
 
-// Roublard — Pulsar : dégât chargeable.
-//   chargePerLvl : dégât ADDITIONNEL par niveau de charge (« Par niveau de Pulsar :
-//                  Dommage : N supplémentaires » → N). Le joueur charge en lançant
-//                  le sort sur lui-même, puis le décharge sur une cible.
-function parseRoublard(effects) {
-  const m = effects.match(/Par\s+niveau\s+de\s+Pulsar\s*:\s*-?\s*Dommage\s*:?\s*(\d+)\s*suppl[ée]mentaires/i);
+// Dégât chargeable « Par niveau de <X> : Dommage(s) supplémentaires : N » → N.
+// Un état/compteur s'accumule puis ajoute N de dégâts par niveau à un sort donné.
+// Roublard : Pulsar (charge sur soi). Sadida : Engrainé (Tremblement de Terre).
+function parseChargeable(effects) {
+  // « Par niveau de/d'<X> : … Dommage(s) [supplémentaires] : N » — robuste à
+  // l'apostrophe (d'Engrainé) et au « de » (de Pulsar).
+  const m = effects.match(/Par\s+niveau\s+d[^:]*:[^:]*?Dommages?\s*(?:suppl[ée]mentaires)?\s*:\s*(\d+)/i);
   return m ? { chargePerLvl: num(m[1]) } : {};
 }
 
@@ -270,8 +271,8 @@ function buildSpells(classDisplay) {
     const osa = (classDisplay === 'Osamodas') ? parseOsamodas(eff, num(r['Dommage lvl245'])) : {};
     // Pandawa — Tonneau porté : dégât alternatif / multiplicateur.
     const pan = (classDisplay === 'Pandawa') ? parsePandawa(eff, num(r['Dommage lvl245'])) : {};
-    // Roublard — Pulsar chargeable.
-    const rog = (classDisplay === 'Roublard') ? parseRoublard(eff) : {};
+    // Dégât chargeable (Roublard : Pulsar ; Sadida : Engrainé / Tremblement de Terre).
+    const rog = (classDisplay === 'Roublard' || classDisplay === 'Sadida') ? parseChargeable(eff) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
