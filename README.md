@@ -82,6 +82,8 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Eliotrope** — **Serein/Exalté + Portails + Don céleste** : trois toggles qui modifient les dégâts (mode Exalté, sort via portail, +40 % Dommages infligés du Don céleste), tous chiffrés depuis les effets
   - **Eniripsa** — dégâts **conditionnels sur les PV** (auto) : Anatomie (plein si la cible a ≥ 80 % PV, réduit sinon), Torpeur (+bonus si l'Eniripsa a ≥ 80 % PV). Classe surtout support (Marques/Propagateur non chiffrés)
   - **Enutrof** — **Trésors** : toggle qui majore Epuration (212 → 266). Forme Phorzerker informative (bonus de dégâts non chiffré dans les données)
+  - **Féca** — passifs offensifs **chiffrés** (+10 % à +25 % Dommages infligés selon le passif actif) appliqués au ranking. Glyphes & boucliers en conseil
+  - **Huppermage** — jauge de **BQ** (Brise Quadramentale) : Rayon crépusculaire scale dessus (+0,5 % de dégâts par % de BQ, ×1,50 à 100). Runes & Feu-Follet en conseil
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

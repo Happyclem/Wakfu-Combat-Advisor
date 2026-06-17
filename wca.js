@@ -16,6 +16,7 @@ function spellFull(s){ return {
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
   exaltedDmg:s.exaltedDmg||0, portalDmg:s.portalDmg||0, portalBonus:s.portalBonus||0, // Eliotrope
   lowTgtDmg:s.lowTgtDmg||0, selfHpBonus:s.selfHpBonus||0, // Eniripsa : dégâts conditionnels PV
+  bqScale:s.bqScale||0, // Huppermage : scaling sur la jauge de BQ
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -180,8 +181,14 @@ function getEffStats(){
 // All passive data is sourced from the embedded JSON: SPD[class].passives
 // for class passives, GPD (d-gp) for the general passives. No hard-coded lists.
 // Mechanical behaviours absent from the scraped JSON, layered by passive id.
+// `sb` = bonus de stats appliqué quand le passif est actif (cf. getEffStats).
 const PASSIVE_FX = {
   assassin: { ok:{ap:1,mp:1,wp:1,hp:20} }, // on kill: +1PA 1PM 1PW +20% PV (no PF gain)
+  // Féca — passifs à % Dommages infligés PERMANENT (les conditionnels comme
+  // Carapace d'épines / Œil pour œil restent informatifs, non chiffrés ici).
+  la_meilleure_d_fense_est_l_attaque: { sb:{ degatsInfliges:10 } },     // +10 % DI
+  qui_veut_la_paix_pr_pare_la_guerre: { sb:{ degatsInfliges:25 } },     // +25 % DI (dès le début de combat)
+  protecteur_du_troupeau:             { sb:{ degatsInfliges:-20, hpPct:300 } }, // -20 % DI, +300 % PV
 };
 function mkPassive(p, isGeneral){
   const id=(p.n||'').toLowerCase().replace(/[^a-z0-9]/g,'_');
@@ -257,8 +264,13 @@ function getPlayerMech(){ return S.combat.mechanics['__p']||{}; }
 // ── ACCÈS GÉNÉRIQUE À LA RESSOURCE DE CLASSE ──────────────────────
 // resId() = clé de jauge de la classe active ('pf' Sram, 'conc' Iop…), null sinon.
 function resId(){ return getMech()?.res?.id||null; }
-// Valeur courante de la jauge (lue depuis l'état joueur).
-function resVal(m){ const id=resId(); return id?((m||getPlayerMech())[id]||0):0; }
+// Valeur courante de la jauge (lue depuis l'état joueur ; défaut = `initial` de la
+// mécanique si non encore suivie, ex. BQ de l'Huppermage qui démarre pleine).
+function resVal(m){
+  const mech=getMech(), id=mech?.res?.id; if(!id) return 0;
+  const v=(m||getPlayerMech())[id];
+  return v!=null?v:(mech.initial||0);
+}
 // Génération de ressource d'un sort selon la mécanique active.
 function resGenOf(sp){ const mech=getMech(); return mech?.gen?mech.gen(sp):(sp.resGen||0); }
 // Le sort consomme/vide la jauge ? (finisseur Sram). Faux si la classe n'en a pas.
@@ -283,6 +295,9 @@ function mechBonus(val){
   const id=resId()||'pf';
   return mech.bonus({[id]:val, hpFrac:playerHpFrac(), ...modeAndCounterMap()});
 }
+// Multiplicateur de dégâts d'UN sort selon la valeur de jauge (Huppermage : Rayon
+// crépusculaire ×(1+0.5%·BQ)). 1 si la mécanique n'a pas de scaling par sort.
+function mechSpellScale(sp,val){ const mech=getMech(); return mech?.spellScale?mech.spellScale(sp,val):1; }
 // La jauge influence-t-elle les dégâts via sa VALEUR ? (→ à suivre dans le knapsack DP)
 // Faux pour le Crâ (levier = toggle Tir précis) et le Sacrieur (levier = PV manquants,
 // pas la valeur de Fureur). On teste le bonus à PLEINE vie pour isoler l'effet jauge.
@@ -394,7 +409,7 @@ function dmgVs(sp,t,pf,crit){
   const cb=isPFScaler?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:resVs(sp.element,t),isCrit:crit,cb});
-  const dd=Math.round(d*spellDmgMult(sp,pf,t)) + mechFlatBonus(sp,pf);
+  const dd=Math.round(d*spellDmgMult(sp,pf,t)*mechSpellScale(sp,pf)) + mechFlatBonus(sp,pf);
   return dd + hemoBonus(dd,t,sp);
 }
 
@@ -529,7 +544,7 @@ function rankSpells(crit){
     const mastery=elMastery(sp.element,st,sp);
     const isPFScaler=isPFScaling(sp);
     const cbAdj=isPFScaler?1:mechBonus(dispPF);
-    const dmg=Math.round(calcDmg({base,mastery,di,pos:S.position,resBrut:elRes(sp.element),isCrit:crit,cb:cbAdj})*spellDmgMult(sp,dispPF,S.monster))+mechFlatBonus(sp,dispPF);
+    const dmg=Math.round(calcDmg({base,mastery,di,pos:S.position,resBrut:elRes(sp.element),isCrit:crit,cb:cbAdj})*spellDmgMult(sp,dispPF,S.monster)*mechSpellScale(sp,dispPF))+mechFlatBonus(sp,dispPF);
     const apc=effApCost(sp);
     return {spell:sp,damage:dmg,dpa:apc>0?Math.round(dmg/apc):0,pfScaler:isPFScaler,apEff:apc};
   }).filter(r=>r.damage>0).sort((a,b)=>b.dpa-a.dpa);
@@ -549,7 +564,7 @@ function computeSeq(){
     const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
     const cb=isPFScaling(sp)?1:mechBonus(pf);
     const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
-    return Math.round(d*spellDmgMult(sp,pf,S.monster))+mechFlatBonus(sp,pf);
+    return Math.round(d*spellDmgMult(sp,pf,S.monster)*mechSpellScale(sp,pf))+mechFlatBonus(sp,pf);
   }
   const dp=Array.from({length:maxAP+1},()=>({dmg:0,pf:initPF,seq:[]}));
   for(let j=1;j<=maxAP;j++) for(const sp of spells){
@@ -774,7 +789,7 @@ function spellDmgAt(sp,pf){
   const cb=isPFScaling(sp)?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
     pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
-  const dd=Math.round(d*spellDmgMult(sp,pf,focusTgt()))+mechFlatBonus(sp,pf);
+  const dd=Math.round(d*spellDmgMult(sp,pf,focusTgt())*mechSpellScale(sp,pf))+mechFlatBonus(sp,pf);
   return dd + hemoBonus(dd,focusTgt(),sp);
 }
 function addToCSQ(sp){
@@ -993,7 +1008,8 @@ function renderAdvisor(){
         const apc=r.apEff??r.spell.apCost, apTxt=apc!==r.spell.apCost?`<s style="color:var(--dim)">${r.spell.apCost}</s>${apc}PA`:(r.spell.apCost?`${r.spell.apCost}PA`:'');
         const co=[apTxt,r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
         const pf=r.spell.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:'';
-        const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon le Point Faible">⤢PF</span>`:'';
+        const scLbl=getMech()?.res?.label||'jauge';
+        const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon ${scLbl}">⤢${scLbl}</span>`:'';
         const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
         // Crâ : indicateur Tir précis (dégât amélioré dispo / coût Précision quand actif)
         const tpOn=isModeOn('tir_precis');

@@ -331,6 +331,55 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof };
+  // ── FÉCA — Glyphes / Boucliers / passifs offensifs ─────────────────────────
+  // Classe tank/support sans jauge de dégâts. Son levier offensif passe par des
+  // PASSIFS à % Dommages infligés, désormais chiffrés (cf. PASSIVE_FX dans wca.js,
+  // appliqués via le système de bonus de stats des passifs actifs) :
+  //   La meilleure défense est l'attaque (+10 %), Qui veut la paix… (+25 %),
+  //   Protecteur du troupeau (-20 %, +300 % PV).
+  // Les bonus conditionnels (Carapace d'épines selon l'Armure, Œil pour œil quand
+  // l'Armure est perdue) restent en conseil, non chiffrés.
+  const feca = {
+    res: null,
+    advice() {
+      return [
+        { p: 'L', msg: `🛡 Glyphes : tes sorts élémentaires posent un glyphe sur case vide (dégâts indirects de zone)` },
+        { p: 'L', msg: `🔥 Boucliers Feu/Eau/Terre : posés sur les alliés, ils donnent DI / Portée / PM (passif Boucliers élémentaires)` },
+        { p: 'L', msg: `⚔ Pense à activer tes passifs offensifs (+10 % à +25 % Dommages infligés) — ils sont pris en compte dans le ranking` },
+      ];
+    },
+  };
+
+  // ── HUPPERMAGE — Runes / Brise Quadramentale (BQ) ──────────────────────────
+  // Classe des Runes élémentaires. Levier de dégâts CHIFFRÉ : la jauge de BQ
+  // (Brise Quadramentale, 0→100) fait scaler Rayon crépusculaire : +`bqScale` %
+  // de dégâts par % de BQ restante (0.5 → +50 % à 100 BQ). On suit la BQ comme une
+  // jauge réglable. Les bonus de Runes (Disque luminescent +10 % de dos à 3 runes,
+  // Universalité +15 % DI en fin de tour…) sont trop conditionnels → en conseil.
+  const huppermage = {
+    res: { id: 'bq', label: 'BQ', max: 100, color: '#9b6dff' },
+    initial: 100, // la BQ démarre pleine et se consomme ; on part au max pour l'aperçu
+    gen() { return 0; },
+    consumes() { return false; },
+    next(val) { return val; },
+    bonus() { return 1; }, // pas de bonus global ; le scaling est par sort (spellScale)
+    // Multiplicateur de dégâts d'un sort selon la BQ (Rayon crépusculaire).
+    spellScale(sp, val) {
+      if (sp.bqScale) return 1 + sp.bqScale * (val || 0) / 100;
+      return 1;
+    },
+    scales(sp) { return !!sp.bqScale; }, // ce sort varie avec la jauge
+    advice(m) {
+      const bq = m.bq != null ? m.bq : 100;
+      return [
+        { p: 'L', msg: `🔮 BQ ${bq}/100 : Rayon crépusculaire gagne +0,5 % de dégâts par % de BQ (×${(1 + 0.5 * bq / 100).toFixed(2)})` },
+        { p: 'L', msg: `🌈 Runes : combine les 4 éléments ; à 3 runes Disque luminescent ajoute +10 % de dos, à 4 runes ta BQ se régénère plus vite` },
+        { p: 'L', msg: `✨ Feu-Follet : relais pour propager tes sorts et sauvegarder des runes` },
+      ];
+    },
+    onState(a, n, lvl, m) { if (/\bBQ\b|quadramental/i.test(n)) m.bq = Math.min(100, lvl); },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage };
 
 })(typeof window !== 'undefined' ? window : globalThis);

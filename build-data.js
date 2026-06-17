@@ -200,6 +200,14 @@ function parseEniripsa(effects, baseDmg) {
   return out;
 }
 
+// Huppermage — dégâts qui scalent avec la jauge de BQ (Brise Quadramentale).
+//   bqScale : % de dégâts supplémentaires par % de BQ restante (Rayon crépusculaire :
+//             « 0.5 % Dommages supplémentaires par %BQ restante » → 0.5).
+function parseHuppermage(effects) {
+  const m = effects.match(/([\d.]+)\s*%\s*Dommages?\s+suppl[ée]mentaires\s+par\s*%?\s*BQ/i);
+  return m ? { bqScale: parseFloat(m[1]) } : {};
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -223,6 +231,8 @@ function buildSpells(classDisplay) {
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
     const eni = (classDisplay === 'Eniripsa') ? parseEniripsa(eff, num(r['Dommage lvl245'])) : {};
+    // Huppermage — scaling sur la jauge de BQ.
+    const hup = (classDisplay === 'Huppermage') ? parseHuppermage(eff) : {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -243,6 +253,7 @@ function buildSpells(classDisplay) {
       portalBonus: elio.portalBonus, // Eliotrope : dégât additionnel via Portail
       lowTgtDmg: eni.lowTgtDmg,       // Eniripsa : dégât si cible < 80 % PV (Anatomie)
       selfHpBonus: eni.selfHpBonus,   // Eniripsa : dégât bonus si Eni >= 80 % PV (Torpeur)
+      bqScale: hup.bqScale,           // Huppermage : % dégâts par %BQ (Rayon crépusculaire)
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',
