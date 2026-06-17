@@ -146,6 +146,7 @@ const ALT_COND = [
   { id: 'stabilise',    re: /stabilis[ée]/i },
   { id: 'cible_armure', re: /la\s+cible\s+poss[èe]de\s+de\s+l.?Armure/i },
   { id: 'tresors',      re: /l.?Enutrof\s+a\s+l.?[ée]tat\s+Tr[ée]sors/i }, // Enutrof : Epuration
+  { id: 'hors_ldv',     re: /n.?est\s+pas\s+dans\s+la\s+ligne\s+de\s+vue/i }, // Osamodas : Corbeau
 ];
 function parseAltDmg(effects) {
   // On cherche un « Dommage : N à la place » et la condition « Si … : » qui le précède.
@@ -208,6 +209,16 @@ function parseHuppermage(effects) {
   return m ? { bqScale: parseFloat(m[1]) } : {};
 }
 
+// Osamodas — Forme draconique : dégât alternatif du sort en forme draconique
+//   dracoDmg : dégât en forme draconique (« Forme draconique … Dommage : N »),
+//              omis s'il est identique au dégât de base.
+function parseOsamodas(effects, baseDmg) {
+  const seg = effects.split(/Forme\s+draconique/i)[1];
+  if (!seg) return {};
+  const d = seg.match(/Dommage\s*:?\s*(\d+)/i);
+  return (d && num(d[1]) !== baseDmg) ? { dracoDmg: num(d[1]) } : {};
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -225,8 +236,11 @@ function buildSpells(classDisplay) {
     const gen = (resCfg && !isSram) ? parseResource(eff + ' ' + descRaw, resCfg) : 0;
     // Crâ — Tir précis : dégâts alternatifs + Précision consommée.
     const tp = (classDisplay === 'Cra') ? parseTirPrecis(eff, num(r['Dommage lvl245'])) : {};
-    // Dégât conditionnel « … à la place » (Sacrieur : stabilisé/Armure ; Enutrof : Trésors).
-    const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof') ? parseAltDmg(eff) : {};
+    // Dégât conditionnel « … à la place » (Sacrieur : stabilisé/Armure ; Enutrof : Trésors ;
+    // Osamodas : Corbeau hors ligne de vue, Fouet vs invocation [hors champ : invocations non suivies]).
+    const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof' || classDisplay === 'Osamodas') ? parseAltDmg(eff) : {};
+    // Osamodas — Forme draconique : dégât alternatif.
+    const osa = (classDisplay === 'Osamodas') ? parseOsamodas(eff, num(r['Dommage lvl245'])) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
@@ -254,6 +268,7 @@ function buildSpells(classDisplay) {
       lowTgtDmg: eni.lowTgtDmg,       // Eniripsa : dégât si cible < 80 % PV (Anatomie)
       selfHpBonus: eni.selfHpBonus,   // Eniripsa : dégât bonus si Eni >= 80 % PV (Torpeur)
       bqScale: hup.bqScale,           // Huppermage : % dégâts par %BQ (Rayon crépusculaire)
+      dracoDmg: osa.dracoDmg,         // Osamodas : dégât en Forme draconique
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

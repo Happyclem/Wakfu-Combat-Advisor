@@ -380,6 +380,37 @@
     onState(a, n, lvl, m) { if (/\bBQ\b|quadramental/i.test(n)) m.bq = Math.min(100, lvl); },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage };
+  // ── OSAMODAS — Forme draconique / invocations ──────────────────────────────
+  // Classe d'invocateur : une grande part de ses dégâts vient de ses familiers
+  // (non simulés ici). Côté Osamodas lui-même, deux leviers CHIFFRÉS :
+  //  • Forme draconique (toggle) : +25 % Dommages infligés (passif Puissance
+  //    draconique) ET dégât majoré sur certains sorts (`dracoDmg` : Souffle du
+  //    dragon 164→244, Tornade de plumes 83→91).
+  //  • Corbeau incendiaire (toggle hors ligne de vue) : 83 → 111 (`altDmg`).
+  const OSA_DRACO_DI = 0.25; // +25 % Dommages infligés en forme draconique
+  const osamodas = {
+    res: null,
+    // Dégât effectif : forme draconique (dracoDmg) ou condition « à la place » (altDmg).
+    baseDmg(sp, modes) {
+      if (modes && modes.draconique && sp.dracoDmg) return sp.dracoDmg;
+      if (sp.altDmg && sp.altCond && modes && modes[sp.altCond]) return sp.altDmg;
+      return sp.damageMax || sp.damageMin || 0;
+    },
+    // +25 % Dommages infligés en forme draconique (passif Puissance draconique).
+    bonus(m) { return m && m.draconique ? 1 + OSA_DRACO_DI : 1; },
+    modes: [
+      { id: 'draconique', label: 'Forme draconique', desc: '+25 % Dommages infligés (Puissance draconique) + dégâts draconiques de certains sorts' },
+      { id: 'hors_ldv',   label: 'Cible hors LdV',   desc: 'Corbeau incendiaire inflige ses dégâts majorés sur une cible hors ligne de vue' },
+    ],
+    advice() {
+      return [
+        { p: 'L', msg: `🐲 Forme draconique : +25 % Dommages infligés (avec Puissance draconique) — active-la pour voir tes dégâts boostés` },
+        { p: 'L', msg: `🦅 Invocations : l'essentiel de tes dégâts passe par tes familiers (non simulés ici) — garde-en une en vie` },
+        { p: 'L', msg: `⚔ Passifs offensifs (Force-Taure, Guerrier invocateur…) : pense à les activer, ils sont pris en compte` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas };
 
 })(typeof window !== 'undefined' ? window : globalThis);
