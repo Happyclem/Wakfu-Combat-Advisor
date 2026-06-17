@@ -232,6 +232,19 @@ function parseChargeable(effects) {
   return m ? { chargePerLvl: num(m[1]) } : {};
 }
 
+// Steamer — Choc scale avec les Points de Stasis (PS) : « 5 % dommages supp. par PS
+// courant (max 50 %) ». psScale = % par PS ; psCap = plafond du bonus (%).
+function parseSteamerPS(effects) {
+  const m = effects.match(/([\d.]+)\s*%\s*dommages?\s+supp[^]*?par\s+PS[^]*?\(max\s+([\d.]+)\s*%/i);
+  return m ? { psScale: parseFloat(m[1]), psCap: parseFloat(m[2]) } : {};
+}
+// Steamer — Pilonnage : « N supplémentaires à chaque fois que ce sort est lancé pendant
+// le tour ». castBonus = dégât ajouté par lancer précédent du sort dans le tour.
+function parseSteamerCast(effects) {
+  const m = effects.match(/Dommage\s*:?\s*(\d+)\s*suppl[ée]mentaires\s+à\s+chaque\s+fois\s+que\s+ce\s+sort\s+est\s+lanc/i);
+  return m ? { castBonus: num(m[1]) } : {};
+}
+
 // Pandawa — Tonneau porté : modifie les dégâts.
 //   tonneauDmg  : dégât quand le Pandawa porte son Tonneau (« Si … porte … Dommage : N »).
 //   tonneauMult : multiplicateur « (+N % quand il porte son Tonneau) » (ex. 10 → ×1.10).
@@ -273,6 +286,8 @@ function buildSpells(classDisplay) {
     const pan = (classDisplay === 'Pandawa') ? parsePandawa(eff, num(r['Dommage lvl245'])) : {};
     // Dégât chargeable (Roublard : Pulsar ; Sadida : Engrainé / Tremblement de Terre).
     const rog = (classDisplay === 'Roublard' || classDisplay === 'Sadida') ? parseChargeable(eff) : {};
+    // Steamer — Choc (scaling PS) + Pilonnage (bonus par lancer dans le tour).
+    const stm = (classDisplay === 'Steamer') ? { ...parseSteamerPS(eff), ...parseSteamerCast(eff) } : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
@@ -303,7 +318,9 @@ function buildSpells(classDisplay) {
       dracoDmg: osa.dracoDmg,         // Osamodas : dégât en Forme draconique
       tonneauDmg: pan.tonneauDmg,     // Pandawa : dégât en portant le Tonneau
       tonneauMult: pan.tonneauMult,   // Pandawa : % de dégâts en plus avec le Tonneau
-      chargePerLvl: rog.chargePerLvl, // Roublard : dégât par niveau de charge (Pulsar)
+      chargePerLvl: rog.chargePerLvl, // Roublard/Sadida : dégât par niveau de charge
+      psScale: stm.psScale, psCap: stm.psCap, // Steamer : scaling de Choc sur les PS
+      castBonus: stm.castBonus,       // Steamer : Pilonnage +N par lancer dans le tour
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

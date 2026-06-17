@@ -19,7 +19,8 @@ function spellFull(s){ return {
   bqScale:s.bqScale||0, // Huppermage : scaling sur la jauge de BQ
   dracoDmg:s.dracoDmg||0, // Osamodas : dégât en Forme draconique
   tonneauDmg:s.tonneauDmg||0, tonneauMult:s.tonneauMult||0, // Pandawa : Tonneau porté
-  chargePerLvl:s.chargePerLvl||0, // Roublard : dégât par charge de Pulsar
+  chargePerLvl:s.chargePerLvl||0, // Roublard/Sadida : dégât par charge
+  psScale:s.psScale||0, psCap:s.psCap||0, castBonus:s.castBonus||0, // Steamer : Choc (PS) / Pilonnage
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,

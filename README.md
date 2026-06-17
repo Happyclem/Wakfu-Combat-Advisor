@@ -89,6 +89,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Pandawa** — **Tonneau porté** : toggle qui modifie les dégâts (Flasque 111 → 167, Lucha/Blitzkriek +10 %) + 10 % Dommages infligés (Tonneau Agressif) ; passifs offensifs chiffrés (Cyanose +15 %). Imbibé/ivresse en conseil
   - **Roublard** — **Pulsar chargeable** : compteur de charges (+91 dégâts/charge) → dégâts/PA recalculés et séquence adaptée. Bombes (cœur des dégâts) & modes Fourbe/Fuyard en conseil
   - **Sadida** — **Engrainé** : compteur qui amplifie Tremblement de Terre (+30/niveau). Poupées/Arbres/poisons (cœur des dégâts) en conseil
+  - **Steamer** — jauge de **Stasis (PS)** : Choc gagne +5 % de dégâts par PS (max +50 %) ; **Pilonnage** (compteur, +27/répétition dans le tour). Tourelles en conseil (non simulées)
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

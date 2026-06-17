@@ -529,6 +529,49 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida };
+  // ── STEAMER — Stasis (PS) / Pilonnage / Tourelles ──────────────────────────
+  // Plusieurs leviers CHIFFRÉS côté sorts directs (les Tourelles font une partie des
+  // dégâts mais ne sont pas simulées) :
+  //  • Stasis (PS, jauge) : Choc gagne +psScale % par PS courant, plafonné à psCap %.
+  //    On suit les PS comme une jauge (max 10 → +50 % à PS plein avec Choc).
+  //  • Pilonnage (compteur) : +castBonus (27) par lancer déjà effectué dans le tour.
+  const STEAMER_PS_MAX = 10;
+  const foggernaut = {
+    res: { id: 'ps', label: 'Stasis (PS)', max: STEAMER_PS_MAX, color: '#3fb6c8' },
+    initial: 0,
+    gen() { return 0; },
+    consumes() { return false; },
+    next(val) { return val; },
+    bonus() { return 1; }, // pas de bonus global ; scaling par sort (Choc) ci-dessous
+    // Choc : ×(1 + min(psScale·PS, psCap)/100). Autres sorts inchangés.
+    spellScale(sp, val) {
+      if (sp.psScale) {
+        const pct = Math.min(sp.psCap || Infinity, sp.psScale * (val || 0));
+        return 1 + pct / 100;
+      }
+      return 1;
+    },
+    scales(sp) { return !!sp.psScale; },
+    // Pilonnage : +castBonus par lancer déjà fait ce tour (compteur `pilonnage`).
+    flatBonus(sp, modes) {
+      if (sp.castBonus) { const n = (modes && modes.pilonnage) | 0; return sp.castBonus * n; }
+      return 0;
+    },
+    counters: [{
+      id: 'pilonnage', label: 'Pilonnages déjà lancés', max: 6,
+      desc: 'Chaque Pilonnage déjà lancé ce tour ajoute 27 de dégâts au suivant',
+    }],
+    advice(m) {
+      const ps = m.ps != null ? m.ps : 0;
+      return [
+        { p: 'L', msg: `⚙ Stasis ${ps}/${STEAMER_PS_MAX} : Choc gagne +5 % de dégâts par PS (max +50 %) — accumule avant de frapper` },
+        { p: 'L', msg: `🔨 Pilonnage : enchaîne-le dans le tour, +27 dégâts à chaque répétition (règle le compteur)` },
+        { p: 'L', msg: `🤖 Tourelles : une partie de tes dégâts passe par elles (non simulées) — place-les près de tes cibles (Sabordage)` },
+      ];
+    },
+    onState(a, n, lvl, m) { if (/stasis|\bPS\b/i.test(n)) m.ps = Math.min(STEAMER_PS_MAX, lvl); },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa, rogue: roublard, sadida, foggernaut };
 
 })(typeof window !== 'undefined' ? window : globalThis);
