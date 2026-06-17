@@ -222,6 +222,21 @@ function parseOsamodas(effects, baseDmg) {
   return (d && num(d[1]) !== baseDmg) ? { dracoDmg: num(d[1]) } : {};
 }
 
+// Pandawa — Tonneau porté : modifie les dégâts.
+//   tonneauDmg  : dégât quand le Pandawa porte son Tonneau (« Si … porte … Dommage : N »).
+//   tonneauMult : multiplicateur « (+N % quand il porte son Tonneau) » (ex. 10 → ×1.10).
+function parsePandawa(effects, baseDmg) {
+  const out = {};
+  const mult = effects.match(/\(\+\s*(\d+)\s*%\s*quand\s+il\s+porte\s+son/i);
+  if (mult) out.tonneauMult = num(mult[1]);
+  const seg = effects.split(/Si\s+le\s+Pandawa\s+porte/i)[1];
+  if (seg) {
+    const d = seg.match(/Dommage\s*:?\s*(\d+)/i);
+    if (d && num(d[1]) !== baseDmg) out.tonneauDmg = num(d[1]);
+  }
+  return out;
+}
+
 // ── Sorts de classe ─────────────────────────────────────────────────────────
 function buildSpells(classDisplay) {
   const file = path.join(RAW, `Sorts_${classDisplay}.csv`);
@@ -244,6 +259,8 @@ function buildSpells(classDisplay) {
     const alt = (classDisplay === 'Sacrieur' || classDisplay === 'Enutrof' || classDisplay === 'Osamodas' || classDisplay === 'Ouginak') ? parseAltDmg(eff) : {};
     // Osamodas — Forme draconique : dégât alternatif.
     const osa = (classDisplay === 'Osamodas') ? parseOsamodas(eff, num(r['Dommage lvl245'])) : {};
+    // Pandawa — Tonneau porté : dégât alternatif / multiplicateur.
+    const pan = (classDisplay === 'Pandawa') ? parsePandawa(eff, num(r['Dommage lvl245'])) : {};
     // Eliotrope — modes Serein/Exalté + bonus Portail.
     const elio = (classDisplay === 'Eliotrope') ? parseEliotrope(eff, num(r['Dommage lvl245'])) : {};
     // Eniripsa — dégâts conditionnels selon les PV (cible / soi-même).
@@ -272,6 +289,8 @@ function buildSpells(classDisplay) {
       selfHpBonus: eni.selfHpBonus,   // Eniripsa : dégât bonus si Eni >= 80 % PV (Torpeur)
       bqScale: hup.bqScale,           // Huppermage : % dégâts par %BQ (Rayon crépusculaire)
       dracoDmg: osa.dracoDmg,         // Osamodas : dégât en Forme draconique
+      tonneauDmg: pan.tonneauDmg,     // Pandawa : dégât en portant le Tonneau
+      tonneauMult: pan.tonneauMult,   // Pandawa : % de dégâts en plus avec le Tonneau
       lvl: num(r['NiveauDebloque']),
       rng: clean(r['Portée']) || '',
       type: clean(r['Type']) || '',

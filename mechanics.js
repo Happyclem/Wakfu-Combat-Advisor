@@ -448,6 +448,37 @@
     },
   };
 
-  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak };
+  // ── PANDAWA — Tonneau / Imbibé ─────────────────────────────────────────────
+  // Mécanique centrée sur le TONNEAU (porté ou non, change quasi tous les sorts) et
+  // l'Imbibé (état sur la cible, surtout consommé pour soin/résistances → non chiffré
+  // côté dégâts). Levier CHIFFRÉ = Tonneau porté (toggle `tonneau`) :
+  //  • dégât alternatif `tonneauDmg` (Flasque Explosive 111 → 167) ;
+  //  • multiplicateur `tonneauMult` (Lucha, Blitzkriek : +10 %) ;
+  //  • +10 % Dommages infligés global (passif Tonneau Agressif).
+  const PANDA_TONNEAU_DI = 0.10; // +10 % DI quand le Tonneau est porté (Tonneau Agressif)
+  const pandawa = {
+    res: null,
+    baseDmg(sp, modes) {
+      let d = sp.damageMax || sp.damageMin || 0;
+      if (modes && modes.tonneau) {
+        if (sp.tonneauDmg) d = sp.tonneauDmg;             // dégât remplacé (Flasque)
+        if (sp.tonneauMult) d = Math.round(d * (1 + sp.tonneauMult / 100)); // ×(1+N%) (Lucha…)
+      }
+      return d;
+    },
+    bonus(m) { return m && m.tonneau ? 1 + PANDA_TONNEAU_DI : 1; }, // Tonneau Agressif
+    modes: [
+      { id: 'tonneau', label: 'Tonneau porté', desc: 'Le Pandawa porte son Tonneau : dégâts modifiés + 10 % Dommages infligés (Tonneau Agressif)' },
+    ],
+    advice() {
+      return [
+        { p: 'L', msg: `🛢 Tonneau porté : modifie tes sorts (jets, dégâts) et +10 % Dommages infligés avec Tonneau Agressif — active le toggle` },
+        { p: 'L', msg: `🥛 Imbibé : empile-le sur tes cibles, puis consomme-le (Souffle Enflammé, Vague de Lait) pour résistances/soin` },
+        { p: 'L', msg: `🍺 Ivre / Gueule de Bois / Sobre : tes états d'ivresse donnent PA/PM/PW (gère ton cycle)` },
+      ];
+    },
+  };
+
+  global.WCA_MECHANICS = { sram, iop, cra, sacrier, ecaflip, eliotrope, eniripsa, enutrof, feca, huppermage, osamodas, ouginak, pandawa };
 
 })(typeof window !== 'undefined' ? window : globalThis);

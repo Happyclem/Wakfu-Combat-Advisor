@@ -86,6 +86,7 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Huppermage** — jauge de **BQ** (Brise Quadramentale) : Rayon crépusculaire scale dessus (+0,5 % de dégâts par % de BQ, ×1,50 à 100). Runes & Feu-Follet en conseil
   - **Osamodas** — **Forme draconique** : toggle +25 % Dommages infligés + dégâts draconiques (Souffle du dragon 164 → 244) ; Corbeau incendiaire hors LdV (83 → 111) ; passifs offensifs chiffrés. Invocations en conseil (non simulées)
   - **Ouginak** — dégâts **conditionnels** : Plombage (auto, ≥ 80 % PV → 98/131), Bastonnade (toggle, cible Bastonné → ×3), Balayage (toggle, contact → 131/164). Rage/Ougigarou en conseil
+  - **Pandawa** — **Tonneau porté** : toggle qui modifie les dégâts (Flasque 111 → 167, Lucha/Blitzkriek +10 %) + 10 % Dommages infligés (Tonneau Agressif) ; passifs offensifs chiffrés (Cyanose +15 %). Imbibé/ivresse en conseil
 - Les autres classes utilisent le calcul de dégâts générique ; leur ressource de classe est rappelée en conseil mais pas encore chiffrée (en cours d'ajout, une par une)
 
 ---

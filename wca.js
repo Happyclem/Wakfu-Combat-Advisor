@@ -18,6 +18,7 @@ function spellFull(s){ return {
   lowTgtDmg:s.lowTgtDmg||0, selfHpBonus:s.selfHpBonus||0, // Eniripsa : dégâts conditionnels PV
   bqScale:s.bqScale||0, // Huppermage : scaling sur la jauge de BQ
   dracoDmg:s.dracoDmg||0, // Osamodas : dégât en Forme draconique
+  tonneauDmg:s.tonneauDmg||0, tonneauMult:s.tonneauMult||0, // Pandawa : Tonneau porté
   levelUnlock:s.lvl||0, isCommon:!!s.common,
   range:s.rng||'', spellType:s.type||'', los:s.los!==false,
   spellLevel: S.build?.level||200,
@@ -194,6 +195,10 @@ const PASSIVE_FX = {
   // invocations, non simulées, pour booster l'Osamodas lui-même).
   guerrier_invocateur:                { sb:{ degatsInfliges:20 } },     // +20 % DI (invos -20 %)
   synergie_animale:                   { sb:{ degatsInfliges:-20 } },    // -20 % DI perso (invos +20 %)
+  // Pandawa — passifs à % Dommages infligés PERMANENT (Buvette +20 % est conditionnel
+  // à la proximité du Tonneau → informatif ; Tonneau Agressif est géré par le mode).
+  cyanose:                            { sb:{ degatsInfliges:15 } },     // +15 % DI (-50 Rés)
+  cocktail:                           { sb:{ degatsInfliges:-10 } },    // -10 % DI (+20 % soins)
 };
 function mkPassive(p, isGeneral){
   const id=(p.n||'').toLowerCase().replace(/[^a-z0-9]/g,'_');
