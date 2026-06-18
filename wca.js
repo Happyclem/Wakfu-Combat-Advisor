@@ -1703,23 +1703,102 @@ document.addEventListener('dragleave',()=>{dc=Math.max(0,dc-1);if(!dc)dov.classL
 document.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('Files'))e.preventDefault();});
 document.addEventListener('drop',async e=>{e.preventDefault();dc=0;dov.classList.remove('on');if(e.target.closest('#dz'))return;const fi=Array.from(e.dataTransfer?.items||[]).find(i=>i.kind==='file');if(fi)await attachFile(fi.getAsFile(),document.getElementById('fromstart').checked);});
 
-// ── TABS ─────────────────────────────────────────────────────────
-document.querySelectorAll('.lt').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.lt').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.lp').forEach(p=>p.classList.toggle('on',p.id==='lp-'+b.dataset.lp));
-}));
-document.querySelectorAll('.ctt').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.ctt').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.cp').forEach(p=>p.classList.toggle('on',p.id==='cp-'+b.dataset.cp));
-}));
-// Onglets du panneau droit : Événements | Sorts & Passifs
-document.querySelectorAll('.rtt').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.rtt').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.rp').forEach(p=>p.classList.toggle('on',p.id==='rp-'+b.dataset.rp));
-  // Le bouton « vider les événements » n'a de sens que sur l'onglet Événements.
-  const clr=document.getElementById('clrfeed'); if(clr) clr.style.display=b.dataset.rp==='events'?'':'none';
-}));
-function openRightTab(rp){ const b=document.querySelector(`.rtt[data-rp="${rp}"]`); if(b) b.click(); }
+// ── DOCKING : zones (gauche/centre/droite) à onglets déplaçables ──────────────
+// Chaque panneau (.lp/.cp/.rp tagué data-dock) est déplaçable entre les 3 zones.
+// On déplace l'ÉLÉMENT du panneau (contenu/IDs inchangés) ; aucun renderer n'est touché.
+const DOCK = (()=>{
+  const ZONES=['left','center','right'];
+  // Registre des panneaux découverts dans #dockpool (ordre = ordre du DOM).
+  const panels={}; // id -> {id,title,el,defZone}
+  document.querySelectorAll('[data-dock]').forEach(el=>{
+    panels[el.dataset.dock]={ id:el.dataset.dock, title:el.dataset.title||el.dataset.dock,
+      el, defZone:el.dataset.zone||'center' };
+  });
+  const defaultLayout=()=>{
+    const o={left:[],center:[],right:[]};
+    Object.values(panels).forEach(p=>o[p.defZone].push(p.id));
+    return o;
+  };
+  // État persistant : { zones:{left:[ids],center:[…],right:[…]}, active:{zone:id} }
+  function loadLayout(){
+    const s=S.dock;
+    if(s&&s.zones&&ZONES.every(z=>Array.isArray(s.zones[z]))){
+      // filtre les ids inconnus + rattache les panneaux orphelins à leur zone par défaut
+      const seen=new Set();
+      ZONES.forEach(z=>{ s.zones[z]=s.zones[z].filter(id=>panels[id]&&!seen.has(id)&&seen.add(id)); });
+      Object.values(panels).forEach(p=>{ if(!seen.has(p.id)) s.zones[p.defZone].push(p.id); });
+      return s;
+    }
+    return { zones:defaultLayout(), active:{} };
+  }
+  let L=null;
+  const zoneEl=z=>document.querySelector(`.dz[data-zone="${z}"]`);
+  function persist(){ S.dock=L; save(); }
+  function render(){
+    ZONES.forEach(z=>{
+      const dz=zoneEl(z); if(!dz) return;
+      const tabs=dz.querySelector('.dz-tabs'), body=dz.querySelector('.dz-body');
+      const ids=L.zones[z];
+      dz.classList.toggle('dz-empty', ids.length===0);
+      if(ids.length && !ids.includes(L.active[z])) L.active[z]=ids[0];
+      tabs.innerHTML='';
+      ids.forEach(id=>{
+        const p=panels[id]; if(!p) return;
+        const t=document.createElement('button');
+        t.className='dz-tab'+(L.active[z]===id?' on':''); t.textContent=p.title;
+        t.draggable=true; t.dataset.dockTab=id; t.dataset.zone=z;
+        t.addEventListener('click',()=>{ L.active[z]=id; persist(); render(); });
+        tabs.appendChild(t);
+        // place l'élément du panneau dans le corps de la zone (déplacement DOM, pas de clonage)
+        if(p.el.parentElement!==body) body.appendChild(p.el);
+        p.el.classList.toggle('dock-active', L.active[z]===id);
+      });
+    });
+    // resizers : masqués si une zone adjacente est vide
+    const lr=document.querySelector('.dz-resizer[data-res="left"]');
+    const rr=document.querySelector('.dz-resizer[data-res="right"]');
+    if(lr) lr.classList.toggle('hidden', L.zones.left.length===0);
+    if(rr) rr.classList.toggle('hidden', L.zones.right.length===0);
+  }
+  // Drag & drop : un onglet glissé est re-parenté dans la zone de drop.
+  let dragId=null, dragFrom=null;
+  document.addEventListener('dragstart',e=>{
+    const t=e.target.closest?.('.dz-tab'); if(!t) return;
+    dragId=t.dataset.dockTab; dragFrom=t.dataset.zone; t.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move';
+  });
+  document.addEventListener('dragend',()=>{
+    document.querySelectorAll('.dz-tab.dragging').forEach(t=>t.classList.remove('dragging'));
+    document.querySelectorAll('.dz.dropok').forEach(z=>z.classList.remove('dropok'));
+  });
+  ZONES.forEach(z=>{
+    const dz=zoneEl(z); if(!dz) return;
+    dz.addEventListener('dragover',e=>{ if(dragId){ e.preventDefault(); dz.classList.add('dropok'); } });
+    dz.addEventListener('dragleave',e=>{ if(!dz.contains(e.relatedTarget)) dz.classList.remove('dropok'); });
+    dz.addEventListener('drop',e=>{
+      e.preventDefault(); dz.classList.remove('dropok');
+      if(!dragId||!L) return;
+      L.zones[dragFrom]=L.zones[dragFrom].filter(x=>x!==dragId);
+      if(!L.zones[z].includes(dragId)) L.zones[z].push(dragId);
+      L.active[z]=dragId; dragId=dragFrom=null;
+      persist(); render();
+    });
+  });
+  // API : afficher un panneau par son id (active son onglet dans sa zone courante).
+  function show(id){
+    if(!L) return; const p=panels[id]; if(!p) return;
+    const z=ZONES.find(zz=>L.zones[zz].includes(id)); if(!z) return;
+    L.active[z]=id; persist(); render();
+  }
+  function reset(){ L={ zones:defaultLayout(), active:{} }; persist(); render(); }
+  // init() est appelé APRÈS load() (l'état S.dock doit être chargé avant loadLayout).
+  function init(){ L=loadLayout(); render(); }
+  return { show, reset, render, init };
+})();
+// Remappe les anciennes API d'ouverture d'onglet vers le moteur de docking.
+function openLeftTab(lp){ DOCK.show(lp==='target'?'cible':lp); }
+function openCenterTab(cp){ DOCK.show(cp); }
+function openRightTab(rp){ DOCK.show(rp); }
 function setPosition(pos){
   document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===pos));
   S.position=pos; save(); renderAdvisor();
@@ -1730,8 +1809,6 @@ function toggleCrit(){
 }
 document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>setPosition(b.dataset.pos)));
 document.getElementById('crit-btn').addEventListener('click',toggleCrit);
-function openLeftTab(lp){ const b=document.querySelector(`.lt[data-lp="${lp}"]`); if(b) b.click(); }
-function openCenterTab(cp){ const b=document.querySelector(`.ctt[data-cp="${cp}"]`); if(b) b.click(); }
 // ── RACCOURCIS CLAVIER COMBAT (ignorés dans les champs de saisie) ──
 function setupShortcuts(){
   document.addEventListener('keydown',e=>{
@@ -1746,21 +1823,24 @@ function setupShortcuts(){
   });
 }
 
-// ── RESIZE ───────────────────────────────────────────────────────
+// ── RESIZE (largeur des zones gauche/droite via --cl/--cr) ───────────────────
 (function(){
-  function mk(id,side){
-    const h=document.getElementById(id); if(!h) return;
+  function curW(side){
+    const z=document.querySelector(`.dz[data-zone="${side}"]`);
+    return z?z.getBoundingClientRect().width:300;
+  }
+  function mk(side){
+    const h=document.querySelector(`.dz-resizer[data-res="${side}"]`); if(!h) return;
     let sx,sv;
     h.addEventListener('mousedown',e=>{
-      e.preventDefault(); h.classList.add('drag'); sx=e.clientX;
-      const cols=getComputedStyle(document.getElementById('app')).gridTemplateColumns.split(' ');
-      sv=side==='left'?parseInt(cols[0]):parseInt(cols[4]);
-      const mv=e=>{const v=Math.max(180,Math.min(600,side==='left'?sv+e.clientX-sx:sv-(e.clientX-sx)));document.documentElement.style.setProperty(side==='left'?'--cl':'--cr',v+'px');};
+      e.preventDefault(); h.classList.add('drag'); sx=e.clientX; sv=curW(side);
+      const mv=e=>{const v=Math.max(180,Math.min(600,side==='left'?sv+e.clientX-sx:sv-(e.clientX-sx)));
+        document.documentElement.style.setProperty(side==='left'?'--cl':'--cr',v+'px');};
       const up=()=>{h.classList.remove('drag');document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);};
       document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
     });
   }
-  mk('rl','left'); mk('rr','right');
+  mk('left'); mk('right');
 })();
 
 // ── RENDER ALL ───────────────────────────────────────────────────
@@ -1778,10 +1858,19 @@ function applyZoom(){
   }
   document.documentElement.style.setProperty('--zoom', z); // conservé si du CSS le référence
 }
+// Taille du texte : saisie en POURCENTAGE (80–150 %), convertie vers le facteur de zoom.
+const FONT_PCT_MIN=80, FONT_PCT_MAX=150;
 function setupFontSlider(){
-  const sl=document.getElementById('fontslider'); if(!sl) return;
-  sl.value=S.zoom||1;
-  sl.addEventListener('input',()=>{ S.zoom=parseFloat(sl.value)||1; applyZoom(); save(); });
+  const inp=document.getElementById('fontsize'); if(!inp) return;
+  inp.value=Math.round((S.zoom||1)*100);
+  const apply=()=>{
+    let p=parseInt(inp.value,10); if(isNaN(p)) return;       // ignore les saisies vides en cours
+    p=Math.max(FONT_PCT_MIN,Math.min(FONT_PCT_MAX,p));
+    S.zoom=p/100; applyZoom(); save();
+  };
+  inp.addEventListener('input',apply);
+  // À la sortie du champ, normalise l'affichage (reclampe + réécrit la valeur).
+  inp.addEventListener('change',()=>{ apply(); inp.value=Math.round((S.zoom||1)*100); });
 }
 
 // ── TOOLTIP DESCRIPTION SORTS (Ctrl + survol) ────────────────────
@@ -1819,10 +1908,15 @@ function setupHelp(){
     <div class="hpr">🖱 <b>Clic</b> sur un événement du log → restaure l'état à cet instant</div>
     <div class="hpr">⌨ <b>Ctrl + survol</b> d'un sort → affiche sa description</div>
     <div class="hpr">📂 <b>Glisse</b> ton fichier log dans la fenêtre pour le connecter</div>
+    <div class="hph" style="margin-top:8px">Disposition (docking)</div>
+    <div class="hpr">🪟 <b>Glisse un onglet</b> vers une autre zone (gauche / centre / droite) pour le déplacer</div>
+    <div class="hpr">↔ <b>Glisse les séparateurs</b> pour redimensionner les zones</div>
+    <button class="btn sml full" id="dockreset" style="margin-top:6px">↺ Réinitialiser la disposition</button>
     <div class="hph" style="margin-top:8px">Raccourcis clavier</div>
     <div class="hpr"><b>1 / 2 / 3</b> → Face / Côté / Dos</div>
     <div class="hpr"><b>C</b> → bascule Coup Critique</div>`;
   document.body.appendChild(panel);
+  panel.querySelector('#dockreset')?.addEventListener('click',()=>{ DOCK.reset(); });
   const place=()=>{ const r=btn.getBoundingClientRect(); panel.style.top=(r.bottom+6)+'px'; panel.style.right=Math.max(8,window.innerWidth-r.right)+'px'; };
   btn.addEventListener('click',e=>{ e.stopPropagation(); if(panel.classList.toggle('on')) place(); });
   document.addEventListener('click',e=>{ if(!panel.contains(e.target)&&e.target!==btn) panel.classList.remove('on'); });
@@ -1853,6 +1947,7 @@ function populateLogPath(){
 
 // ── INIT ─────────────────────────────────────────────────────────
 loadData(); load();
+DOCK.init(); // place les panneaux dans les zones (après load() : restaure la disposition)
 applyZoom(); setupFontSlider();
 setupShortcuts(); setupHelp(); populateLogPath();
 syncCls(); renderAll(); initCSQ();

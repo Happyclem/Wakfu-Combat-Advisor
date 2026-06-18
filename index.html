@@ -10,10 +10,10 @@
 
 <div id="hd">
   <h1>⚔ WAKFU COMBAT ADVISOR</h1>
-  <div id="fsctl" title="Taille du texte global">
-    <span style="font-size:10px;color:var(--muted)">A</span>
-    <input type="range" id="fontslider" min="0.8" max="1.5" step="0.05" value="1.1"/>
-    <span style="font-size:14px;color:var(--muted)">A</span>
+  <div id="fsctl" title="Taille du texte global (%)">
+    <span style="font-size:11px;color:var(--muted)">A</span>
+    <input type="number" id="fontsize" min="80" max="150" step="5" value="110"/>
+    <span style="font-size:11px;color:var(--muted)">%</span>
   </div>
   <div id="cw"><div class="led" id="led"></div><span id="clbl">Aucun log</span></div>
   <div id="hd-center">
@@ -27,18 +27,23 @@
   </div>
 </div>
 
-<div id="rl"></div>
+<!-- ZONES DE DOCKING — les barres d'onglets et le placement des panneaux sont gérés par le moteur de docking (wca.js).
+     Les panneaux (.lp/.cp/.rp, tagués data-dock) vivent dans #dockpool et sont déplacés dans les zones au démarrage. -->
+<div id="dockroot">
+  <div class="dz" data-zone="left"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+  <div class="dz-resizer" data-res="left"></div>
+  <div class="dz" data-zone="center"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+  <div class="dz-resizer" data-res="right"></div>
+  <div class="dz" data-zone="right"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+</div>
 
-<div id="lf">
-  <div id="ltabs">
-    <button class="lt on" data-lp="log">📡 LOG</button>
-    <button class="lt" data-lp="build">📥 BUILD</button>
-    <button class="lt" data-lp="target">👹 CIBLE</button>
-  </div>
+<!-- Réservoir caché : contient les panneaux tels quels (IDs/contenu inchangés) jusqu'à leur placement dans les zones. -->
+<div id="dockpool" style="display:none">
+
   <div id="lb">
 
     <!-- LOG -->
-    <div class="lp on" id="lp-log">
+    <div class="lp on" id="lp-log" data-dock="log" data-title="📡 Log" data-zone="left">
       <div class="sec">
         <input type="file" id="lfi" style="display:none"/>
         <div id="dz" onclick="document.getElementById('lfi').click()">
@@ -57,7 +62,7 @@
     </div>
 
     <!-- BUILD -->
-    <div class="lp" id="lp-build">
+    <div class="lp" id="lp-build" data-dock="build" data-title="📥 Build" data-zone="left">
       <div class="sec">
         <div class="sh">Classe &amp; Niveau</div>
         <div class="fr"><label>Classe</label>
@@ -99,7 +104,7 @@
     </div>
 
     <!-- TARGET -->
-    <div class="lp" id="lp-target">
+    <div class="lp" id="lp-target" data-dock="cible" data-title="👹 Cible" data-zone="left">
       <div class="sec" id="monsec" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <div class="sh" style="margin:0">Cibles (<span id="tgtcount">0</span>/8)</div>
@@ -124,17 +129,9 @@
         <button class="btn pri full" id="cmadd">➕ Ajouter la cible</button>
       </div>
     </div>
+  </div><!-- /#lb -->
 
-  </div>
-</div>
-
-<div id="ct">
-  <div id="ctabs">
-    <button class="ctt on" data-cp="advisor">⚔ Conseiller</button>
-    <button class="ctt" data-cp="perso">👤 Personnage</button>
-  </div>
-  <div id="cb">
-    <div class="cp on" id="cp-advisor">
+    <div class="cp on" id="cp-advisor" data-dock="advisor" data-title="⚔ Conseiller" data-zone="center">
       <div id="idle"><div style="font-size:32px">⚔</div><div>Configure un build et une cible<br>pour voir les conseils</div></div>
       <div id="advcontent" style="display:none;flex-direction:column;gap:10px">
         <!-- HP mini -->
@@ -222,7 +219,7 @@
         </div>
       </div>
     </div>
-    <div class="cp" id="cp-perso">
+    <div class="cp" id="cp-perso" data-dock="perso" data-title="👤 Personnage" data-zone="center">
       <div class="card">
         <div class="sh">Bonus actifs</div>
         <div class="brow on" id="brow-guilde" data-bk="guilde">
@@ -239,22 +236,15 @@
         <div id="perstats"></div>
       </div>
     </div>
-  </div>
-</div>
 
-<div id="rr"></div>
-
-<div id="rt">
-  <div id="rtabs">
-    <button class="rtt on" data-rp="events">📡 Événements</button>
-    <button class="rtt" data-rp="spells">✨ Sorts &amp; Passifs</button>
-    <button class="btn sml" id="clrfeed" title="Vider les événements" style="margin-left:auto;align-self:center;margin-right:6px">✕</button>
-  </div>
-  <div id="rb">
-    <div class="rp on" id="rp-events">
+    <div class="rp on" id="rp-events" data-dock="events" data-title="📡 Événements" data-zone="right">
+      <div id="feedhd" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="sh" style="margin:0">Événements</span>
+        <button class="btn sml" id="clrfeed" title="Vider les événements">✕</button>
+      </div>
       <div id="feed"></div>
     </div>
-    <div class="rp" id="rp-spells">
+    <div class="rp" id="rp-spells" data-dock="spells" data-title="✨ Sorts &amp; Passifs" data-zone="right">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <div class="sh" style="margin:0">Deck actif (<span id="deckcount">0</span>)</div>
@@ -275,9 +265,9 @@
         <div class="sh">Effets passifs</div>
         <div id="passefflist"></div>
       </div>
-    </div>
-  </div>
-</div>
+    </div><!-- /#rp-spells -->
+
+</div><!-- /#dockpool -->
 
 <div id="dov">📂 Dépose le fichier ici</div>
 <div id="toast"></div>
