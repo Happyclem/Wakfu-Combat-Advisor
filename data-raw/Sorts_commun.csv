@@ -1,4 +1,4 @@
-Nom;Niveau de déblocage;CoutPA;CoutPM;CoutPW;Portée;Effets
+Nom;Niveau de déblocage;CoutPA;CoutPM;CoutPW;Portée;Effets;Usages
 Maîtrise d'Armes;30;2;0;0;0;100 % Dommages et Soins réalisés avec une arme. Après l'utilisation d'une arme : À la fin du tour : Maîtrise d'Armes est désappliquée
 Os à Moelle;56;3;0;0;1-4;Invoque un Os à Moelle. En fin de tour du lanceur : L'Os à Moelle perd 1 % PV max. Soin: 33 autour de l'Os à Moelle
 Charme de Masse;130;2;0;0;1-4;+150 Tacle. Attire de 2 cases

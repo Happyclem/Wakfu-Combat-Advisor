@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Filouterie;;2;0;0;eau;monocible;2-5;oui;Inflige des dommages Eau et vole 1 PM à la cible ou 2 PM si elle en possède plus que l'Enutrof.;Dommage : 55 Vole 1 PM Si la cible a plus de PM que l'Enutrof : - Vole 2 PM à la place;2;2;55;69
 Purge;;3;0;0;eau;zone;3-6;oui;Inflige des dommages eau à longue distance et vole de la portée à la cible. Si l'Enutrof cible un Gisement, la zone d'effet du sort est augmentée.;Dommage : 83 Vole 1 Portée (1 tour) Si un est sur la cellule visée : - Les effets passent en zone;3;3;83;104
 Coupures;;3;0;0;eau;monocible;2-4;oui;Inflige des dommages Eau à une cible, quadruplés s'il s'agit d'une invocation. Si l'Enutrof tue sa cible avec ce sort, il gagne l'état Trésors.;Dommage : 105 - Dommages quadruplés sur les invocations Si l'Enutrof tue un combattant avec ce sort : - Trésors (+1 Niv.);3;3;105;132

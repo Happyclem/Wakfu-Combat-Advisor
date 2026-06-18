@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Flèche chercheuse;;2;0;0;air;monocible;4-9;oui;Ce sort possède une très grande portée. De plus, il peut traverser les obstacles si le Crâ est sous Tir précis. Ce sort génère 20 d'Affûtage et de Précision.;Dommage : 55 Tir précis : Le sort passe sans ligne de vue - Consomme 30 de Précision;2;2;55;69
 Flèche de recul;;3;0;0;air;monocible;1-4;oui;Repousse la cible de plusieurs cases. Ce sort génère 40 d'Affûtage et de Précision.;Dommage : 121 Pousse de 3 cases Tir précis : Pousse de 6 cases - Consomme 60 de Précision;4;5;121;152
 Flèche tempête;;3;0;0;air;zone;3-6;oui;Inflige des dommages air en zone cône. Ce sort génère 30 d'Affûtage et de Précision.;Dommage : 91 Tir précis : Dommage : 121 - Consomme 45 de Précision La zone est plus grande en diagonale;3;3;91;114

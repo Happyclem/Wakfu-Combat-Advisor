@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Fouet;;4;0;0;air;monocible;1-5;oui;Inflige des dommages doublés sur les invocations.;Dommage : 136 Si la cible est une invocation : - Dommage : 272 à la place;4;5;136;170
 Déplumage;;3;0;0;air;monocible;2-5;oui;Tourne le regard de la cible, de manière à donner son dos.;Tourne la cible de dos Dommage : 91;3;3;91;114
 Transfert;;3;0;0;air;monocible;1-3;oui;La cible échange de position avec l'invocation. En dragon, l'Osamodas et son invocation échangent de position, puis l'Osamodas inflige des dommages.;Lancé sur un combattant, celui-ci échange de position avec Invocation (7 cases maximum) Dommage : 121 Forme draconique : - échange de position avec son Invocation (7 cases maximum) - Dommage : 121;4;5;121;152

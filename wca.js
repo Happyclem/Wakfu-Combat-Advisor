@@ -13,6 +13,7 @@ function loadData(){
 // Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,gen,tp,tpCost,lvl,rng,type,los,desc
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
+  uses:s.u||3, // usages par tour (défaut 3)
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
@@ -590,10 +591,22 @@ function rankSpells(crit){
 // rapporte nettement plus, pour éviter de recommander un combo plus fragile/situationnel
 // quand le gain est marginal.
 const FINISHER_SEQ_MARGIN=1.03;
+// Budget de PW du joueur pour une séquence (un seul tour). Défaut 6 si non renseigné.
+function wpBudget(){ const st=getEffStats(); return st.wp!=null?st.wp:6; }
+// Peut-on ajouter `sp` à la séquence `seq` sans dépasser ses usages/tour ni le PW dispo ?
+// (contraintes réalistes : la plupart des sorts sont limités à `uses`/tour ; le PW est rare.)
+function canAdd(seq,sp,wpMax){
+  const maxU=sp.uses||3;
+  let used=0, wp=(sp.wpCost||0);
+  for(const s of seq){ if(s===sp||s.name===sp.name) used++; wp+=(s.wpCost||0); }
+  if(used>=maxU) return false;             // limite d'usages/tour atteinte
+  if(wp>wpMax) return false;               // dépasserait le budget PW
+  return true;
+}
 function computeSeq(){
   const spells=getSpells(); if(!spells.length||!S.monster) return null;
   const st=getEffStats(), ap=S.remainingAP??st.ap??6; if(ap<=0) return null;
-  const maxAP=Math.min(ap,18), mech=getMech();
+  const maxAP=Math.min(ap,18), mech=getMech(), wpMax=wpBudget();
   // La jauge n'est suivie dans le knapsack que si elle influence les dégâts
   // (Sram : finisseurs scalants ; Iop : palier 100). Sinon on l'ignore (perf).
   const trackRes=tracksRes();
@@ -608,7 +621,8 @@ function computeSeq(){
   const dp=Array.from({length:maxAP+1},()=>({dmg:0,pf:initPF,seq:[]}));
   for(let j=1;j<=maxAP;j++) for(const sp of spells){
     const c=effApCost(sp); if(c>j) continue;
-    const prev=dp[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
+    const prev=dp[j-c]; if(!canAdd(prev.seq,sp,wpMax)) continue;
+    const pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
     if(d>dp[j].dmg) dp[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
   }
   let chosen=dp[maxAP].seq, strat='';
@@ -619,13 +633,18 @@ function computeSeq(){
       let bestAlt=0, bestSeq=[];
       for(const fin of fins){
         const aL=maxAP-effApCost(fin); if(aL<0) continue;
+        // On réserve le PW du finisseur : les builders ne doivent pas l'épuiser.
+        const wpForBlds=wpMax-(fin.wpCost||0);
         const dpF=Array.from({length:aL+1},()=>({pf:initPF,dmg:0,seq:[]}));
         for(let j=1;j<=aL;j++) for(const sp of blds){
           const c=effApCost(sp); if(c>j) continue;
-          const prev=dpF[j-c], pf2=nextPF(prev.pf,sp,false);
+          const prev=dpF[j-c]; if(!canAdd(prev.seq,sp,wpForBlds)) continue;
+          const pf2=nextPF(prev.pf,sp,false);
           if(pf2>dpF[j].pf||(pf2===dpF[j].pf&&prev.dmg+dmgAt(sp,prev.pf)>dpF[j].dmg))
             dpF[j]={pf:pf2,dmg:prev.dmg+dmgAt(sp,prev.pf),seq:[...prev.seq,sp]};
         }
+        // Le finisseur lui-même doit respecter sa limite d'usages (PW déjà réservé).
+        if(!canAdd(dpF[aL].seq,fin,wpMax)) continue;
         const tot=dpF[aL].dmg+dmgAt(fin,dpF[aL].pf);
         if(tot>bestAlt){bestAlt=tot;bestSeq=[...dpF[aL].seq,fin];}
       }
@@ -654,14 +673,20 @@ function computeSeq(){
   let refund=null;
   if(ok.ap||ok.mp||ok.wp){
     if(lethal && ok.ap>0){
-      const rb=ok.ap, dpR=Array.from({length:rb+1},()=>({dmg:0,pf:pfSim,seq:[]}));
+      // La relance sur PA regagnés CONTINUE le même tour : on repart de la séquence déjà
+      // jouée pour respecter les usages restants et le PW déjà dépensé.
+      const castSeq=chosen.slice();
+      const rb=ok.ap, dpR=Array.from({length:rb+1},()=>({dmg:0,pf:pfSim,seq:castSeq.slice()}));
       for(let j=1;j<=rb;j++) for(const sp of spells){
         const c=effApCost(sp); if(c>j) continue;
-        const prev=dpR[j-c], pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
+        const prev=dpR[j-c]; if(!canAdd(prev.seq,sp,wpMax)) continue;
+        const pf=trackRes?prev.pf:0, d=prev.dmg+dmgAt(sp,pf);
         if(d>dpR[j].dmg) dpR[j]={dmg:d,pf:trackRes?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
       }
       let pf2=pfSim;
-      const rwd=dpR[rb].seq.map(sp=>{const d=dmgAt(sp,pf2);pf2=nextPF(pf2,sp,false);return{spell:sp,damage:d};});
+      // On ne garde que les sorts AJOUTÉS par la relance (au-delà de la séquence déjà jouée).
+      const added=dpR[rb].seq.slice(castSeq.length);
+      const rwd=added.map(sp=>{const d=dmgAt(sp,pf2);pf2=nextPF(pf2,sp,false);return{spell:sp,damage:d};});
       refund={res:ok, lethal:true, seq:rwd, total:rwd.reduce((s,r)=>s+r.damage,0)};
     } else refund={res:ok, lethal:false, seq:[], total:0};
   }
@@ -672,21 +697,24 @@ function computeSeq(){
 // Objectif : maximiser le nombre de cibles tuées avec les PA disponibles,
 // en respectant l'ordre de priorité, et en réinjectant les PA regagnés sur kill
 // (passif Assassin / sort Attaque létale via getOnKillRes()).
-function minKill(target,budget,pf){
+// `prefix` = sorts déjà lancés ce tour (pour respecter usages/PW à travers plusieurs kills).
+function minKill(target,budget,pf,prefix){
   // DP "coût minimal" : pour chaque total de PA ≤ budget, dégâts max atteignables.
   const spells=getSpells(); if(!spells.length) return null;
   const need=curHP(target); if(need<=0) return {seq:[],ap:0,dmg:0,pf};
-  const tr=tracksRes();
-  const dp=Array.from({length:budget+1},()=>({dmg:0,pf,seq:[]}));
+  const tr=tracksRes(), wpMax=wpBudget(), base=prefix||[];
+  // Chaque cellule porte la séquence COMPLÈTE du tour (préfixe inclus) pour les contraintes,
+  // mais on n'extrait que la partie utile au kill courant à la fin.
+  const dp=Array.from({length:budget+1},()=>({dmg:0,pf,seq:base.slice()}));
   for(let j=1;j<=budget;j++) for(const sp of spells){
     const c=effApCost(sp); if(c>j) continue;
-    const prev=dp[j-c];
+    const prev=dp[j-c]; if(!canAdd(prev.seq,sp,wpMax)) continue;
     const castPf=tr?prev.pf:0;
     const d=prev.dmg+dmgVs(sp,target,castPf,S.critMode);
     if(d>dp[j].dmg) dp[j]={dmg:d,pf:tr?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
   }
   // Plus petit coût en PA qui tue la cible.
-  for(let j=1;j<=budget;j++) if(dp[j].dmg>=need) return {seq:dp[j].seq,ap:j,dmg:dp[j].dmg,pf:dp[j].pf};
+  for(let j=1;j<=budget;j++) if(dp[j].dmg>=need) return {seq:dp[j].seq.slice(base.length),ap:j,dmg:dp[j].dmg,pf:dp[j].pf};
   return null; // pas tuable dans ce budget
 }
 function computeKills(){
@@ -698,11 +726,13 @@ function computeKills(){
   const tr=tracksRes();
   let pf=tr?resVal():0;
   const kills=[]; let totalDmg=0; let totalAP=0;
+  const castThisTurn=[]; // sorts déjà lancés ce tour (contraintes usages/PW cumulées)
   // Ordre de priorité = ordre du tableau (index 0 = priorité 1).
   for(const t of alive){
     if(budget<=0) break;
-    const plan=minKill(t,budget,pf);
+    const plan=minKill(t,budget,pf,castThisTurn);
     if(!plan || !plan.seq.length){ continue; } // pas tuable maintenant ; on tente la suivante
+    castThisTurn.push(...plan.seq);
     // Dégâts réels + jauge reportée à la cible suivante (le dernier sort est le coup létal).
     let p=pf, dmg=0;
     plan.seq.forEach((sp,k)=>{
@@ -721,14 +751,17 @@ function computeKills(){
   const killedUids=new Set(kills.map(k=>k.target.uid));
   const survivor=alive.find(t=>!killedUids.has(t.uid));
   if(survivor && budget>0){
-    const mAP=Math.min(budget,18);
-    const dp=Array.from({length:mAP+1},()=>({dmg:0,pf,seq:[]}));
+    const mAP=Math.min(budget,18), wpMax=wpBudget();
+    // Le dump CONTINUE le tour : on repart des sorts déjà lancés pour les contraintes.
+    const dp=Array.from({length:mAP+1},()=>({dmg:0,pf,seq:castThisTurn.slice()}));
     for(let j=1;j<=mAP;j++) for(const sp of spells){
       const c=effApCost(sp); if(c>j) continue;
-      const prev=dp[j-c], d=prev.dmg+dmgVs(sp,survivor,tr?prev.pf:0,S.critMode);
+      const prev=dp[j-c]; if(!canAdd(prev.seq,sp,wpMax)) continue;
+      const d=prev.dmg+dmgVs(sp,survivor,tr?prev.pf:0,S.critMode);
       if(d>dp[j].dmg) dp[j]={dmg:d,pf:tr?nextPF(prev.pf,sp,false):0,seq:[...prev.seq,sp]};
     }
-    if(dp[mAP].seq.length) dump={target:survivor,seq:dp[mAP].seq,dmg:dp[mAP].dmg,ap:dp[mAP].seq.reduce((s,sp)=>s+effApCost(sp),0)};
+    const dseq=dp[mAP].seq.slice(castThisTurn.length);
+    if(dseq.length) dump={target:survivor,seq:dseq,dmg:dp[mAP].dmg,ap:dseq.reduce((s,sp)=>s+effApCost(sp),0)};
   }
   return { kills, dump, killCount:kills.length, totalAP, totalDmg,
     aliveCount:alive.length, refundAP:ok.ap||0, budgetStart:S.remainingAP??st.ap??6 };

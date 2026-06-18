@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Emeute;;3;0;0;eau;monocible;1-3;oui;L'Ouginak vole un PM à sa cible. Le vol est plus élevé si l'Ouginak possède beaucoup de PV.;Vole 1 PM Dommage : 98 Si le possède plus de 80 % de ses PV : - Vole 2 PM à la place;3;3;98;123
 Fléau;;4;0;0;eau;zone;1-3;oui;L’Ouginak crée un geyser sous ses cibles. Il récupère une partie de la vie qu’il leur retire.;Dommage : 152 - 40 % vie volée;5;6;152;190
 Rupture;;2;0;0;eau;monocible;1-2;oui;Les dommages de ce sort s’accompagnent d’un vol de vie. Le sort est plus puissant sur les invocations.;Dommage : 70 - 50 % vie volée Si la cible est une invocation : - Dommage : 141 - 50 % vie volée;2;2;70;88

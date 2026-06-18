@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Sang pour sang;;3;0;0;feu;monocible;1-1;oui;Inflige des dommages élevés, mais blesse aussi le lanceur.;Dommage : 120 Retour de flamme : Dommage : 40;3;3;120;150
 Furie sanguinaire;;2;0;0;feu;monocible;1-3;oui;Vole la vie d'une cible.;Dommage : 70 - 100 % vie volée;2;2;70;88
 Sang brûlant;;4;0;0;feu;zone;;oui;Brûle une partie de la vie du lanceur pour infliger de lourds dommages aux cibles autour de lui.;Dommage : 164 Retour de flamme : Dommage : 10 % des PV max du lanceur;5;6;164;205

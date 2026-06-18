@@ -35,6 +35,18 @@ function clean(s) {
 }
 function num(s) { const n = parseInt(clean(s), 10); return Number.isFinite(n) ? n : 0; }
 
+// Usages par tour d'un sort. Priorité : colonne CSV « Usages » (si renseignée) →
+// valeur « N utilisation(s) par tour » trouvée dans les effets/description →
+// défaut 3 (cap commun à la plupart des sorts Wakfu ; à affiner au cas par cas).
+const DEFAULT_USES = 3;
+function parseUses(rawCol, text) {
+  const col = parseInt(clean(rawCol), 10);
+  if (Number.isFinite(col) && col > 0) return col;
+  const m = (text || '').match(/(\d+)\s*utilisation(?:s)?\s*par\s*tour/i);
+  if (m) { const v = parseInt(m[1], 10); if (v > 0) return v; }
+  return DEFAULT_USES;
+}
+
 // Parseur CSV minimal (séparateur ';', pas de guillemets dans nos données).
 function parseCSV(text) {
   const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim() !== '');
@@ -300,6 +312,7 @@ function buildSpells(classDisplay) {
       ap,
       mp: num(r['CoutPm'] || r['CoutPM']),
       wp: num(r['CoutPW']),
+      u: parseUses(r['Usages'], eff + ' ' + descRaw),  // usages par tour (défaut 3)
       dm: num(r['Dommage lvl245']),
       dc: num(r['Dommage lvl245 critique']),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,

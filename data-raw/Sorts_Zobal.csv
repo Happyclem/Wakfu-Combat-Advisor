@@ -1,4 +1,4 @@
-Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique
+Nom;NiveauDebloque;CoutPA;CoutPm;CoutPW;Element;Type;Portée;Ligne de vue;Description;Effets;Dommage lvl1;Dommage lvl1 critique;Dommage lvl245;Dommage lvl245 critique;Usages
 Signe;;2;0;0;eau;monocible;1-4;oui;Ce sort flexible peut soigner un allié ou infliger des dommages à un ennemi.;Dommage : 70 Soin : 35;2;2;70;88
 Armature;;4;0;0;eau;monocible;1-5;oui;Ce sort donne une bonne quantité d'Armure et de Tacle à un allié, afin de l'aider à apprécier les combats en mêlée.;245 Tacle (1 tour) 2 038 Armure;;;;
 Rescousse;;3;0;0;eau;zone;1-5;oui;Rescousse permet de faire des dégâts en zone, ou de soigner et de donner de l'Esquive en zone, selon le combattant ciblé.;Lancé sur : - Dommage : 76 Sinon : - Soin : 42 - 88 Esquive;3;3;76;95
