@@ -22,11 +22,18 @@
 
 (function (global) {
 
-  // ── SRAM — Point Faible ────────────────────────────────────────────────────
-  // Le Point Faible se génère (pf) et se consomme (finisseurs) ; les finisseurs
-  // et Arnaque voient leurs dégâts ×(1 + pf/100). Calibré en jeu (voir wca.js).
+  // ── SRAM — Point Faible (refonte 1.92) ─────────────────────────────────────
+  // Le Point Faible se génère (pf) et se consomme (finisseurs/ultimes). Depuis 1.92 :
+  //  • Le maximum passe de 100 à 200.
+  //  • Le ratio dégâts/PF est halvé : +0,5 % de dégâts par PF consommé (l'exemple du
+  //    patch : 100 PF consommés = +50 % dégâts) → bonus ×1 → ×2.0 à 200 PF.
+  //  • Les paliers de récompense (PA/PM/PW + Hémo) passent tous les 50 PF (au lieu de
+  //    25) et les ultimes consomment le PF par tranche de 50.
+  // ⚠ Recalibrage suivant l'exemple du patch ; à reconfirmer en jeu.
+  const SRAM_PF_MAX = 200;
+  const SRAM_PF_PER = 0.005; // +0,5 % de dégâts par PF (100 PF → +50 %, 200 → +100 %)
   const sram = {
-    res: { id: 'pf', label: 'Point Faible', max: 100, color: '#e05c5c' },
+    res: { id: 'pf', label: 'Point Faible', max: SRAM_PF_MAX, color: '#e05c5c' },
     initial: 0, // ⚠ supposé 0 en début de combat (à confirmer in-game)
     gen(sp) { return sp.pfGen || 0; },
     consumes(sp) {
@@ -40,19 +47,19 @@
       // Assassin : le coup qui tue ne génère pas de Point Faible.
       if (ctx && ctx.lethal && ctx.assassin) return val;
       const g = ctx && ctx.suppressGen ? 0 : this.gen(sp);
-      return Math.min(100, val + g);
+      return Math.min(SRAM_PF_MAX, val + g);
     },
-    bonus(m) { return 1 + (m.pf || 0) * 0.002; }, // ×1 → ×1.20 (PF 0→100)
+    bonus(m) { return 1 + (m.pf || 0) * SRAM_PF_PER; }, // ×1 → ×2.0 (PF 0→200)
     // Les multiplicateurs par sort restent dans wca.js (spellDmgMult) qui connaît
     // Assaut Brutal, Attaque mortelle <50 % PV, Châtiment/Effroi, l'Hémorragie…
     advice(m) {
-      const pf = m.pf || 0, mult = (1 + pf * 0.002).toFixed(2);
-      if (pf >= 100) return [{ p: 'H', msg: `🔴 Point Faible MAX → Finisseur ! (×1.20)` }];
-      if (pf >= 70)  return [{ p: 'M', msg: `🟡 Point Faible ${pf}/100 (×${mult})` }];
-      if (pf > 0)    return [{ p: 'L', msg: `⚪ Point Faible ${pf}/100 (×${mult})` }];
+      const pf = m.pf || 0, mult = (1 + pf * SRAM_PF_PER).toFixed(2);
+      if (pf >= SRAM_PF_MAX) return [{ p: 'H', msg: `🔴 Point Faible MAX (${SRAM_PF_MAX}) → Finisseur/ultime ! (×2.00)` }];
+      if (pf >= 100) return [{ p: 'M', msg: `🟡 Point Faible ${pf}/${SRAM_PF_MAX} (×${mult}) — palier ultime atteint (consomme par 50)` }];
+      if (pf > 0)    return [{ p: 'L', msg: `⚪ Point Faible ${pf}/${SRAM_PF_MAX} (×${mult})` }];
       return [];
     },
-    onState(a, n, lvl, m) { if (/point\s*faible/i.test(n)) m.pf = Math.min(100, lvl); },
+    onState(a, n, lvl, m) { if (/point\s*faible/i.test(n)) m.pf = Math.min(SRAM_PF_MAX, lvl); },
   };
 
   // ── IOP — Concentration ────────────────────────────────────────────────────
@@ -222,8 +229,10 @@
       const out = [];
       const v = m.veine || 0;
       out.push({ p: 'L', msg: `🎲 Veine ${v}/100 (chance : soins, résistances, cartes — pas de bonus de dégâts direct)` });
-      out.push({ p: 'L', msg: `🃏 Mise sur le Coup critique (active le mode ★) : c'est ton vrai levier de dégâts` });
-      out.push({ p: 'L', msg: `🎯 Dé six : relance-le dans le tour, son coût baisse d'1 PA à chaque fois (combo signature)` });
+      out.push({ p: 'L', msg: `🃏 Ton vrai levier de dégâts reste le Coup critique : empile le % Crit (Bataille en donne 20 % sur 2 tours)` });
+      out.push({ p: 'L', msg: `🎯 Dé six : relance-le dans le tour, son coût baisse d'1 PA à chaque fois (min 1 PA) — combo signature` });
+      out.push({ p: 'L', msg: `💥 Dé du chateux (1.92) : 2 PA rendus instantanément si tu achèves un ennemi avec → enchaîne sur une cible basse` });
+      out.push({ p: 'L', msg: `♣️ Trèfle pose désormais l'état « Guigne » (1 usage/tour) ; un seul Trèfle/Guigne à la fois` });
       return out;
     },
     onState(a, n, lvl, m) { if (/veine/i.test(n)) m.veine = Math.min(100, lvl); },
@@ -262,6 +271,7 @@
         { p: 'L', msg: `🌀 Serein / Exalté : change de mode selon le sort (active « Exalté » pour voir ses dégâts)` },
         { p: 'L', msg: `🌀 Portails : lance tes sorts à travers/sur un portail pour majorer les dégâts` },
         { p: 'L', msg: `✨ Don céleste : +40 % Dommages infligés sur le prochain sort (active le toggle)` },
+        { p: 'L', msg: `🚪 Exode (1.92) : utilisable à travers les portails, 2 usages/tour (placement non simulé ici)` },
       ];
     },
   };
@@ -311,6 +321,9 @@
   //  • Phorzerker (forme) : change surtout les EFFETS (traverse Armure, échange de
   //    position…). Le bonus de Dommages infligés de « Bestialité » n'est pas chiffré
   //    dans les données → mode informatif (toggle `phorzerker`, sans effet calcul).
+  // Dette/Fauché (1.92) : une cible « Fauchée » (état Dette consommé) subit
+  // +20 % Dommages infligés de la part de l'Enutrof. Mode toggle `fauche`.
+  const ENUTROF_FAUCHE_DI = 0.20;
   const enutrof = {
     res: null,
     // Dégât conditionnel activé par un toggle (Epuration : Trésors).
@@ -318,15 +331,19 @@
       if (sp.altDmg && sp.altCond && modes && modes[sp.altCond]) return sp.altDmg;
       return sp.damageMax || sp.damageMin || 0;
     },
+    // Fauché : +20 % Dommages infligés sur la cible endettée (toggle).
+    bonus(m) { return m && m.fauche ? 1 + ENUTROF_FAUCHE_DI : 1; },
     modes: [
       { id: 'tresors',    label: 'Trésors',    desc: 'L\'Enutrof a l\'état Trésors : Epuration consomme l\'état pour des dégâts majorés' },
       { id: 'phorzerker', label: 'Phorzerker', desc: 'Forme Phorzerker : change les effets des sorts (bonus de dégâts « Bestialité » non chiffré ici)' },
+      { id: 'fauche',     label: 'Cible Fauchée', desc: '+20 % Dommages infligés sur une cible Fauchée (état Dette consommé) — 1.92' },
     ],
     advice() {
       return [
         { p: 'L', msg: `💰 Trésors : garde-le pour Epuration (dégâts majorés), ou consomme-le sur Taxe/Pelle mêlée pour le contrôle` },
         { p: 'L', msg: `⛏ Phorzerker : forme offensive (traverse l'Armure, vol de vie) — bonus de dégâts non chiffré dans l'outil` },
-        { p: 'L', msg: `🪨 Gisements : Coup de grisou & Coulée de lave tournent autour de tes Gisements posés` },
+        { p: 'L', msg: `💸 Dette/Fauché (1.92) : une cible Fauchée subit +20 % Dommages infligés (active le toggle) ; l'état Dette se retire à ton prochain tour` },
+        { p: 'L', msg: `🪨 Gisements : apparaissent à 3 Portée max (1.92) ; Coup de grisou & Coulée de lave tournent autour d'eux (placement non simulé)` },
       ];
     },
   };
@@ -354,8 +371,11 @@
   // Classe des Runes élémentaires. Levier de dégâts CHIFFRÉ : la jauge de BQ
   // (Brise Quadramentale, 0→100) fait scaler Rayon crépusculaire : +`bqScale` %
   // de dégâts par % de BQ restante (0.5 → +50 % à 100 BQ). On suit la BQ comme une
-  // jauge réglable. Les bonus de Runes (Disque luminescent +10 % de dos à 3 runes,
-  // Universalité +15 % DI en fin de tour…) sont trop conditionnels → en conseil.
+  // jauge réglable. Les bonus de Runes (1.92 : Disque luminescent +20 % Dommages
+  // subis sur la cible à 3 runes, Vestige/Incan'Rune +20 % DI allié, Lueur de
+  // l'aube +20 % Dommages subis…) restent trop conditionnels (suivi des runes/états
+  // non simulé) → en conseil. La régen BQ de fin de tour (≥200 hors Cœur de Lumière,
+  // 1.92) ne change pas l'aperçu : on part de la BQ pleine (initial:100).
   const huppermage = {
     res: { id: 'bq', label: 'BQ', max: 100, color: '#9b6dff' },
     initial: 100, // la BQ démarre pleine et se consomme ; on part au max pour l'aperçu
@@ -373,8 +393,9 @@
       const bq = m.bq != null ? m.bq : 100;
       return [
         { p: 'L', msg: `🔮 BQ ${bq}/100 : Rayon crépusculaire gagne +0,5 % de dégâts par % de BQ (×${(1 + 0.5 * bq / 100).toFixed(2)})` },
-        { p: 'L', msg: `🌈 Runes : combine les 4 éléments ; à 3 runes Disque luminescent ajoute +10 % de dos, à 4 runes ta BQ se régénère plus vite` },
-        { p: 'L', msg: `✨ Feu-Follet : relais pour propager tes sorts et sauvegarder des runes` },
+        { p: 'L', msg: `🌈 Runes (1.92) : à 3 runes Disque luminescent applique +20 % Dommages subis sur la cible (2 tours) ; Vestige/Incan'Rune donne +20 % DI aux alliés` },
+        { p: 'L', msg: `🌅 Lueur de l'aube (Incan'Rune) : +20 % Dommages subis dans l'élément de la dernière rune (2 tours) — combo avant ton burst` },
+        { p: 'L', msg: `✨ Feu-Follet : relais pour propager tes sorts et sauvegarder des runes (effets de runes non chiffrés ici)` },
       ];
     },
     onState(a, n, lvl, m) { if (/\bBQ\b|quadramental/i.test(n)) m.bq = Math.min(100, lvl); },
@@ -599,6 +620,7 @@
       } else {
         out.push({ p: 'L', msg: `⏳ Si tu joues « Taque, Tique » : active-le pour voir l'effet ±20 % DI selon la parité du tour` });
       }
+      out.push({ p: 'L', msg: `🪡 Aiguille (1.92) : lançable dès 1 PA pour les mêmes dégâts (111) → excellent reliquat de PA ; rembourse les PA utilisés si elle achève une cible` });
       out.push({ p: 'L', msg: `🕐 Cadran & heure courante : sers-t'en pour téléporter, retirer des PA et positionner (contrôle)` });
       return out;
     },
@@ -618,8 +640,9 @@
     ],
     advice() {
       return [
-        { p: 'L', msg: `🎭 Masques (Psychopathe / Classe / Bouffon) : change selon la situation (offensif, polyvalent, mobilité)` },
-        { p: 'L', msg: `💥 Collisions : pousse tes ennemis contre des obstacles pour des dégâts/effets bonus (Poussées violentes)` },
+        { p: 'L', msg: `🎭 Masques (1.92) : chaque masque donne une charge en début de tour → ton prochain sort élémentaire à 1 PW est gratuit, et te rend 1 PW selon la cible (ennemi/allié/collision)` },
+        { p: 'L', msg: `💥 Collisions (1.92, effet inné) : ne retirent plus de PA ; elles infligent des dégâts par PA du sort à jusqu'à 2 ennemis. Entrechoquement force la collision sur cible stabilisée` },
+        { p: 'L', msg: `👻 Esprit masqué est désormais inné (3e barre) et profite de tes gains de PW` },
         { p: 'L', msg: `⚔ Passifs offensifs (Brute +25 %, Au contact +15 %…) : pense à les activer, ils sont pris en compte` },
       ];
     },

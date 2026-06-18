@@ -451,10 +451,11 @@ function spellDmgMult(sp, pf, target){
   const n = (sp.name||'').toLowerCase();
 
   // Sorts PF-scalants (Arnaque, Mise à mort, Traumatisme) :
-  // cb=1 est passé à calcDmg, on applique ici ×(1 + pf/100).
+  // cb=1 est passé à calcDmg, on applique ici ×(1 + 0,5 %/PF) (refonte 1.92 :
+  // 100 PF consommés = +50 % dégâts ; max PF = 200 → ×2.0).
   const isPFScaler = consumesPF(sp) || /arnaque/i.test(n);
   if(isPFScaler){
-    m *= 1 + (pf||0) / 100;
+    m *= 1 + (pf||0) * 0.005;
   }
 
   // Attaque mortelle : +40 % si cible < 50 % PV courants

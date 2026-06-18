@@ -8,9 +8,9 @@ Fugue;;3;0;0;air;monocible;1-3;oui;Le Zobal inflige des dommages à une cible av
 Poursuite;;0;0;0;air;monocible;1-1;oui;Poursuite permet de faire reculer la cible, tout en la poursuivant pour qu'elle ne s’échappe pas.;Dommage : 30 Pousse de 2 case puis suit;1;1;30;38
 Culbute;;2;0;0;air;monocible;1-4;oui;Le Zobal tire la cible puis passe dans son dos.;Attire de 1 case puis passe de l'autre côté de la cible Dommage : 51;2;2;51;63
 Cavalcade;;2;0;0;air;monocible;1-1;oui;Cavalcade permet de lier le Zobal à une cible. Il pourra ensuite la tirer avec lui.;Dommage : 51 Cavalcade;2;2;51;63
-Dislocation;;4;0;0;air;monocible;1-5;oui;Le Zobal effectue un saut vers sa cible, et échange de position avec celle-ci.;Echange de position Dommage : 98;3;3;98;123
+Dislocation;;4;0;1;air;monocible;1-5;oui;Le Zobal effectue un saut vers sa cible, et échange de position avec celle-ci.;Echange de position Dommage : 98;3;3;98;123
 Coup de pied fouetté;;3;0;0;feu;monocible;1-3;oui;Ce sort inflige des dommages puis retourne la cible, de manière à donner son dos.;Dommage : 83 Tourne la cible de dos (Si la cible est déjà de dos, pousse de 1 case);3;3;83;104
 Félure;;3;0;0;feu;zone;1-1;oui;Un sort simple mais efficace, qui inflige des dégâts en zone et réduit les protections et soins reçus par les ennemis.;Dommage : 91 Incurable et Friable (Niv.3);3;3;91;114
-Détraquage;;4;0;0;feu;zone;;oui;Ce sort inflige des dommages aux ennemis en zone. Si des alliés sont dans la zone de dommages, ils gagnent un bonus de dommages.;Dommage : 131 Détraquage (+10 Niv.);4;5;131;164
+Détraquage;;3;0;0;feu;zone;;oui;Ce sort inflige des dommages aux ennemis en zone. Si des alliés sont dans la zone de dommages, ils gagnent un bonus de dommages.;Dommage : 131 Détraquage (+10 Niv.);4;5;131;164
 Névrose;;4;0;0;feu;zone;1-4;oui;Ce sort permet d'attirer les ennemis autour d'un allié, ou d'infliger des dommages importants à un ennemi en monocible, selon la cible.;Lancé sur : - Enflammé (Niv. 152) - Attire de 3 cases les alignés (max 4 cases) Lancé sur : - Dommage : 176 - Echaudé (Niv. 4);5;6;176;220
 Cabriole;;6;0;0;feu;monocible;3-5;oui;Le Zobal se téléporte à plusieurs cases de distance tout en faisant des dommages sur son passage. Si des alliés sont sur son chemin, ils gagnent de l'armure.;Sur le chemin : - Dommage : 153 (mêlée) - 2 398 Armure Se téléporte sur la case;6;7;153;191

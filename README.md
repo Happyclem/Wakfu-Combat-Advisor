@@ -94,6 +94,8 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
   - **Zobal** — passifs offensifs **chiffrés** (Brute +25 %, Érosion −25 %) + toggle « Au contact » (+15 % DI). Masques & collisions en conseil
 - **Les 18 classes sont modélisées en profondeur.** Là où une mécanique repose sur des éléments non simulés (invocations, bombes, tourelles, poupées) ou sur des bonus non chiffrés dans les données, l'outil le signale clairement en conseil plutôt que d'inventer une valeur.
 
+> 📋 Le détail des limites de chaque classe (et les 2 valeurs à calibrer in-game) est dans **[LIMITES-CLASSES.md](LIMITES-CLASSES.md)**.
+
 ---
 
 ## Pipeline de données
