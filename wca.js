@@ -929,17 +929,29 @@ document.getElementById('tgtlist')?.addEventListener('click',e=>{
   else if(el.dataset.rm!=null) removeTarget(el.dataset.rm);
 });
 const moninp=document.getElementById('moninp'), monres=document.getElementById('monres');
+// Normalise pour une recherche insensible à la casse ET aux accents ("meryde" → "Méryde").
+function normTxt(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 moninp.addEventListener('input',debounce(()=>{
-  const q=moninp.value.trim().toLowerCase();
-  if(q.length<2){monres.style.display='none';return;}
-  const hits=MONS.filter(m=>(m.n||m.name||'').toLowerCase().includes(q)).slice(0,12);
-  if(!hits.length){monres.style.display='none';return;}
+  const q=normTxt(moninp.value.trim());
+  if(q.length<2){ monres.style.display='none'; return; }
+  // Classe par pertinence : noms qui COMMENCENT par la requête d'abord, puis les autres.
+  const hits=MONS.filter(m=>normTxt(m.n||m.name).includes(q))
+    .sort((a,b)=>{
+      const na=normTxt(a.n||a.name), nb=normTxt(b.n||b.name);
+      const sa=na.startsWith(q)?0:1, sb=nb.startsWith(q)?0:1;
+      return sa-sb || na.localeCompare(nb);
+    })
+    .slice(0,30);
+  if(!hits.length){
+    monres.innerHTML='<div class="muted-sm" style="padding:6px 8px">Aucun monstre trouvé.</div>';
+    monres.style.display='block'; return;
+  }
   monres.innerHTML=hits.map(m=>`<div class="mr" data-id="${m.id}">
     <span style="color:var(--dim);font-size:10px;width:32px">niv.${m.lv||m.level||'?'}</span>
-    <span>${m.n||m.name}</span>
-    ${m.hp>0?`<span style="margin-left:auto;font-size:10px;color:var(--dim)">${(m.hp||0).toLocaleString('fr')} PV</span>`:''}
+    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.n||m.name}</span>
+    ${m.hp>0?`<span class="muted-sm" style="margin-left:auto;white-space:nowrap">${(m.hp||0).toLocaleString('fr')} PV</span>`:''}
   </div>`).join('');
-  monres.style.display='';
+  monres.style.display='block';
 },120));
 // Délégation : un seul listener sur le conteneur de résultats (réécrit à chaque frappe).
 monres.addEventListener('click',e=>{
