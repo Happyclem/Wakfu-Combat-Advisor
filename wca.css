@@ -7,7 +7,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;background:var(--bg);color:var(--text);overflow:hidden}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--hl);border-radius:2px}
-#app{display:grid;height:calc(100vh / var(--zoom,1));width:calc(100vw / var(--zoom,1));zoom:var(--zoom,1);
+/* zoom appliqué en inline-style via applyZoom() (JS) — plus fiable que zoom:var() ;
+   zoom redimensionne déjà le contenu, donc height/width restent en 100vh/100vw. */
+#app{display:grid;height:100vh;width:100vw;
   grid-template-columns:var(--cl,300px) 4px 1fr 4px var(--cr,300px);
   grid-template-rows:38px 1fr;
   grid-template-areas:"h h h h h""l rl c rr r"}
@@ -135,6 +137,11 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px
   border:1px solid var(--border);border-radius:var(--r);margin-bottom:3px;cursor:pointer;transition:all .15s}
 .pc:hover{border-color:var(--hl)}.pc.on{border-color:var(--gold);background:var(--gdim)}
 .pn{font-size:12px;font-weight:600;color:var(--text)}
+/* Badges / micro-libellés réutilisables (remplacent des styles inline répétés) */
+.badge{font-size:9px;flex-shrink:0}          /* petit badge inline (ex. +NPF, indicateurs de sort) */
+.badge-pf{color:var(--red);font-weight:600}  /* génération de Point Faible / ressource rouge */
+.meta{font-size:9px;color:var(--muted);font-family:var(--mono)} /* méta discrète (portée, niveau…) */
+.muted-sm{font-size:10px;color:var(--dim)}   /* libellé secondaire grisé */
 /* Stat rows */
 .strow{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px}
 .stk{color:var(--muted);flex:1;font-size:13px}.stv{font-family:var(--mono);color:var(--text);width:65px;text-align:right}

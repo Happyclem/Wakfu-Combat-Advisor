@@ -1,4 +1,7 @@
 'use strict';
+// ── UTILS ────────────────────────────────────────────────────────
+// Regroupe les appels rapprochés : n'exécute `fn` qu'après `ms` sans nouvel appel.
+function debounce(fn,ms){ let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
 // ── DATA ─────────────────────────────────────────────────────────
 let MONS=[], SPD={}, GPD=[], CSP=[];
 function loadData(){
@@ -56,7 +59,7 @@ function load(){
     if(!S.situationalBuffs) S.situationalBuffs={};
     if(S.pfConsumedThisTurn===undefined) S.pfConsumedThisTurn=false;
     if(S.previewMaxPF===undefined) S.previewMaxPF=false;
-    if(S.zoom===undefined) S.zoom=1;
+    if(S.zoom===undefined) S.zoom=1.1; // palier « confort » par défaut (l'app a beaucoup de texte 9-11px)
     const __p=S.combat?.mechanics?.['__p']; if(__p){ __p.hp=null; __p.gAP=0; __p.gMP=0; __p.gWP=0; }
     // Migration : ancien état mono-cible (monster) → S.targets[]
     if(legacyMon){
@@ -142,7 +145,7 @@ function sitActive(id){ return id==='pf_consumed'?S.pfConsumedThisTurn:!!S.situa
 function toggleSit(id){
   if(id==='pf_consumed'){ S.pfConsumedThisTurn=!S.pfConsumedThisTurn; }
   else { if(!S.situationalBuffs) S.situationalBuffs={}; S.situationalBuffs[id]=!S.situationalBuffs[id]; }
-  save(); renderAdvisor(); renderSpellsTab();
+  save(); renderAdvisor(); renderSitBuffs(); // recalcul + maj des seuls boutons situationnels
 }
 // Incrémente/décrémente un compteur de mécanique (Ecaflip : Dé six lancés).
 function bumpCounter(id,delta){
@@ -150,7 +153,7 @@ function bumpCounter(id,delta){
   if(!S.situationalBuffs) S.situationalBuffs={};
   const v=Math.max(0,Math.min(def.max||99,(counterVal(id))+delta));
   S.situationalBuffs[id]=v;
-  save(); renderAdvisor(); renderSpellsTab();
+  save(); renderAdvisor(); renderSitBuffs(); // recalcul + maj du seul stepper
 }
 
 const BDEFS = {
@@ -569,6 +572,11 @@ function rankSpells(crit){
 }
 
 // ── KNAPSACK ─────────────────────────────────────────────────────
+// Marge minimale (+3 %) pour préférer une séquence « monter la jauge → finisseur »
+// à la séquence en dégâts directs : on n'impose le détour par le finisseur que s'il
+// rapporte nettement plus, pour éviter de recommander un combo plus fragile/situationnel
+// quand le gain est marginal.
+const FINISHER_SEQ_MARGIN=1.03;
 function computeSeq(){
   const spells=getSpells(); if(!spells.length||!S.monster) return null;
   const st=getEffStats(), ap=S.remainingAP??st.ap??6; if(ap<=0) return null;
@@ -608,7 +616,7 @@ function computeSeq(){
         const tot=dpF[aL].dmg+dmgAt(fin,dpF[aL].pf);
         if(tot>bestAlt){bestAlt=tot;bestSeq=[...dpF[aL].seq,fin];}
       }
-      if(bestAlt>dp[maxAP].dmg*1.03){chosen=bestSeq;strat='⚡ PF max → Finisseur';}
+      if(bestAlt>dp[maxAP].dmg*FINISHER_SEQ_MARGIN){chosen=bestSeq;strat='⚡ PF max → Finisseur';}
       else strat='⚡ Dégâts directs';
     }
   }
@@ -837,17 +845,16 @@ function renderCSQ(){
   if(re) re.innerHTML=rbar(CSQ.remAP,maxAP,'var(--gold)','PA')+(maxMP>0?rbar(CSQ.remMP,maxMP,'var(--blue)','PM'):'')+(maxWP>0?rbar(CSQ.remWP,maxWP,'var(--purple)','PW'):'');
   const se=document.getElementById('csqsteps');
   if(se){
-    if(!CSQ.steps.length) se.innerHTML='<span style="font-size:10px;color:var(--dim)">Clic sur les sorts du ranking ci-dessus.</span>';
+    if(!CSQ.steps.length) se.innerHTML='<span class="muted-sm">Clic sur les sorts du ranking ci-dessus.</span>';
     else{
       se.innerHTML=CSQ.steps.map((s,i)=>{
         const el=s.sp.element||'Neutre';
         const co=[s.ap?`${s.ap}PA`:'',s.mp?`${s.mp}PM`:'',s.wp?`${s.wp}PW`:''].filter(Boolean).join(' ');
         return `<div class="ss"><span>${EL[el]}</span><span style="font-weight:600">${s.sp.name}</span>
           <span class="ssap">${co}</span>${s.dmg>0?`<span class="ssdmg">${s.dmg.toLocaleString('fr')}</span>`:''}
-          ${s.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${s.pfGen}PF</span>`:''}
+          ${s.pfGen>0?`<span class="badge badge-pf">+${s.pfGen}PF</span>`:''}
           <span data-d="${i}" style="color:var(--dim);cursor:pointer;margin-left:auto;padding:0 3px;font-size:11px">✕</span></div>`;
       }).join('');
-      se.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeFromCSQ(parseInt(b.dataset.d));}));
     }
   }
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
@@ -868,6 +875,16 @@ function renderCSQ(){
   }
 }
 document.getElementById('csqreset').addEventListener('click',initCSQ);
+// Délégation (conteneur #csqsteps stable) : retirer une étape de la séquence perso.
+document.getElementById('csqsteps')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-d]'); if(!b) return;
+  e.stopPropagation(); removeFromCSQ(parseInt(b.dataset.d));
+});
+// Délégation (conteneur #ranklist stable) : clic sur un sort du ranking → l'ajoute à la séquence.
+document.getElementById('ranklist')?.addEventListener('click',e=>{
+  const row=e.target.closest('.sr'); if(!row) return;
+  const sp=getSpells().find(s=>s.name===row.dataset.sn); if(sp) addToCSQ(sp);
+});
 
 // ── PANNEAU CIBLES ───────────────────────────────────────────────
 const EL = {Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
@@ -897,17 +914,22 @@ function renderMonPanel(){
         <div class="hpt" style="flex:1;height:6px"><div id="tgthp_${t.uid}" class="hpf" style="width:100%"></div></div>
         <span id="tgthpt_${t.uid}" style="font-family:var(--mono);font-size:9px"></span>
       </div>`:''}
-      <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:3px">${res}</div>
+      <div class="meta" style="margin-top:3px">${res}</div>
     </div>`;
   }).join('');
-  list.querySelectorAll('[data-foc]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();focusTarget(b.dataset.foc);}));
-  list.querySelectorAll('[data-up]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();moveTarget(b.dataset.up,-1);}));
-  list.querySelectorAll('[data-dn]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();moveTarget(b.dataset.dn,1);}));
-  list.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeTarget(b.dataset.rm);}));
   renderHPBars();
 }
+// Délégation : un seul listener sur le conteneur stable (pas de rebind à chaque rendu).
+document.getElementById('tgtlist')?.addEventListener('click',e=>{
+  const el=e.target.closest('[data-foc],[data-up],[data-dn],[data-rm]'); if(!el) return;
+  e.stopPropagation();
+  if(el.dataset.foc!=null) focusTarget(el.dataset.foc);
+  else if(el.dataset.up!=null) moveTarget(el.dataset.up,-1);
+  else if(el.dataset.dn!=null) moveTarget(el.dataset.dn,1);
+  else if(el.dataset.rm!=null) removeTarget(el.dataset.rm);
+});
 const moninp=document.getElementById('moninp'), monres=document.getElementById('monres');
-moninp.addEventListener('input',()=>{
+moninp.addEventListener('input',debounce(()=>{
   const q=moninp.value.trim().toLowerCase();
   if(q.length<2){monres.style.display='none';return;}
   const hits=MONS.filter(m=>(m.n||m.name||'').toLowerCase().includes(q)).slice(0,12);
@@ -918,12 +940,14 @@ moninp.addEventListener('input',()=>{
     ${m.hp>0?`<span style="margin-left:auto;font-size:10px;color:var(--dim)">${(m.hp||0).toLocaleString('fr')} PV</span>`:''}
   </div>`).join('');
   monres.style.display='';
-  monres.querySelectorAll('.mr').forEach(row=>row.addEventListener('click',()=>{
-    const m=MONS.find(m=>m.id===parseInt(row.dataset.id));
-    if(m){ addTarget({id:m.id, name:m.n||m.name, level:m.lv||m.level||0,
-      hp:m.hp||0, rf:m.rf||0, re:m.re||0, rt:m.rt||0, ra:m.ra||0});
-      moninp.value=''; monres.style.display='none'; }
-  }));
+},120));
+// Délégation : un seul listener sur le conteneur de résultats (réécrit à chaque frappe).
+monres.addEventListener('click',e=>{
+  const row=e.target.closest('.mr'); if(!row) return;
+  const m=MONS.find(m=>m.id===parseInt(row.dataset.id));
+  if(m){ addTarget({id:m.id, name:m.n||m.name, level:m.lv||m.level||0,
+    hp:m.hp||0, rf:m.rf||0, re:m.re||0, rt:m.rt||0, ra:m.ra||0});
+    moninp.value=''; monres.style.display='none'; }
 });
 document.getElementById('monclear').addEventListener('click',clearTargets);
 document.getElementById('cmadd').addEventListener('click',()=>{
@@ -1025,7 +1049,7 @@ function renderAdvisor(){
         // Coût PA effectif (Ecaflip Dé six réduit) — affiché barré si différent du coût de base.
         const apc=r.apEff??r.spell.apCost, apTxt=apc!==r.spell.apCost?`<s style="color:var(--dim)">${r.spell.apCost}</s>${apc}PA`:(r.spell.apCost?`${r.spell.apCost}PA`:'');
         const co=[apTxt,r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
-        const pf=r.spell.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${r.spell.pfGen}PF</span>`:'';
+        const pf=r.spell.pfGen>0?`<span class="badge badge-pf">+${r.spell.pfGen}PF</span>`:'';
         const scLbl=getMech()?.res?.label||'jauge';
         const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon ${scLbl}">⤢${scLbl}</span>`:'';
         const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
@@ -1047,9 +1071,10 @@ function renderAdvisor(){
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')
     ).join('');
+    // Tooltip au survol : reste par ligne (hover). Le clic est délégué (cf. plus bas).
     rl.querySelectorAll('.sr').forEach(row=>{
       const r=ranked.find(r=>r.spell.name===row.dataset.sn);
-      if(r){ bindSpTip(row,r.spell.desc||''); row.addEventListener('click',()=>addToCSQ(r.spell)); }
+      if(r) bindSpTip(row,r.spell.desc||'');
     });
   }
   // Mode de calcul
@@ -1176,51 +1201,56 @@ function renderKillsPlan(){
       </div>
       <div style="font-size:10px;color:var(--muted)">${seqTxt}</div></div>`;
   }
-  if(!plan.kills.length && !plan.dump) html='<div style="font-size:10px;color:var(--dim)">Aucune cible tuable avec les PA disponibles.</div>';
+  if(!plan.kills.length && !plan.dump) html='<div class="muted-sm">Aucune cible tuable avec les PA disponibles.</div>';
   steps.innerHTML=html;
 }
 function setCalcMode(mode){ S.calcMode=mode; save(); renderAdvisor(); }
 document.getElementById('modedmg')?.addEventListener('click',()=>setCalcMode('dmg'));
 document.getElementById('modekills')?.addEventListener('click',()=>setCalcMode('kills'));
+// Délégation des toggles/compteurs situationnels (conteneur #sitbuffs stable).
+document.getElementById('sitbuffs')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-sit],[data-cnt]'); if(!b) return;
+  if(b.dataset.sit!=null) toggleSit(b.dataset.sit);
+  else if(b.dataset.cnt!=null) bumpCounter(b.dataset.cnt,parseInt(b.dataset.d));
+});
+// Rendu isolé des toggles/compteurs situationnels (header #sitbuffs). Séparé de
+// renderSpellsTab pour pouvoir le rafraîchir seul quand seul le calcul change.
+function renderSitBuffs(){
+  const sitEl=document.getElementById('sitbuffs'); if(!sitEl) return;
+  const deckNames=new Set(getDeck().map(s=>(s.name||'').toLowerCase()));
+  const toggles=[];
+  if(S.build?.class==='sram'){
+    Object.entries(SITUATIONAL).filter(([,v])=>v.cls==='sram'&&(!v.spell||deckNames.has(v.spell.toLowerCase())))
+      .forEach(([id,v])=>toggles.push({id,label:v.label,on:sitActive(id)}));
+  }
+  // Modes de la mécanique de classe (Crâ : Tir précis…)
+  mechModes().forEach(md=>toggles.push({id:md.id,label:md.label,desc:md.desc,on:isModeOn(md.id)}));
+  // Compteurs (Ecaflip : Dé six lancés) — affichés en stepper −/valeur/+
+  const counters=mechCounters();
+  sitEl.style.display=(toggles.length||counters.length)?'':'none';
+  sitEl.innerHTML=toggles.map(t=>
+    `<button class="btn sml${t.on?' on':''}" data-sit="${t.id}"${t.desc?` title="${t.desc.replace(/"/g,'&quot;')}"`:''}
+      style="color:${t.on?'var(--gold)':'var(--dim)'};border-color:${t.on?'var(--gold)':'var(--border)'};white-space:nowrap">
+      ${t.on?'✓':'○'} ${t.label}</button>`).join('')
+    + counters.map(c=>{
+      const v=counterVal(c.id);
+      return `<span class="cntr" title="${(c.desc||'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ${v?'var(--gold)':'var(--border)'};border-radius:5px;padding:1px 4px;white-space:nowrap">
+        <span style="font-size:10px;color:${v?'var(--gold)':'var(--dim)'}">${c.label}</span>
+        <button class="btn sml" data-cnt="${c.id}" data-d="-1" style="padding:0 5px">−</button>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--gold);min-width:10px;text-align:center">${v}</span>
+        <button class="btn sml" data-cnt="${c.id}" data-d="1" style="padding:0 5px">+</button>
+      </span>`;
+    }).join('');
+}
 function renderSpellsTab(){
   // Migration : les anciens decks pouvaient dépasser la limite de 12 sorts actifs
   if(S.build?.spells?.length>MAX_DECK){ S.build.spells=S.build.spells.slice(0,MAX_DECK); save(); }
   const deck=getDeck(), all=getClassSpells(), lvl=S.build?.level||200;
   document.getElementById('deckcount').textContent=`${deck.length}/${MAX_DECK}`;
-  // Toggles situationnels : Sram (Assassinat/Surineur/PF) + modes de mécanique
-  // (Crâ : Tir précis). Système unifié, stocké dans S.situationalBuffs.
-  const sitEl=document.getElementById('sitbuffs');
-  if(sitEl){
-    const deckNames=new Set(getDeck().map(s=>(s.name||'').toLowerCase()));
-    const toggles=[];
-    if(S.build?.class==='sram'){
-      Object.entries(SITUATIONAL).filter(([,v])=>v.cls==='sram'&&(!v.spell||deckNames.has(v.spell.toLowerCase())))
-        .forEach(([id,v])=>toggles.push({id,label:v.label,on:sitActive(id)}));
-    }
-    // Modes de la mécanique de classe (Crâ : Tir précis…)
-    mechModes().forEach(md=>toggles.push({id:md.id,label:md.label,desc:md.desc,on:isModeOn(md.id)}));
-    // Compteurs (Ecaflip : Dé six lancés) — affichés en stepper −/valeur/+
-    const counters=mechCounters();
-    sitEl.style.display=(toggles.length||counters.length)?'':'none';
-    sitEl.innerHTML=toggles.map(t=>
-      `<button class="btn sml${t.on?' on':''}" data-sit="${t.id}"${t.desc?` title="${t.desc.replace(/"/g,'&quot;')}"`:''}
-        style="color:${t.on?'var(--gold)':'var(--dim)'};border-color:${t.on?'var(--gold)':'var(--border)'};white-space:nowrap">
-        ${t.on?'✓':'○'} ${t.label}</button>`).join('')
-      + counters.map(c=>{
-        const v=counterVal(c.id);
-        return `<span class="cntr" title="${(c.desc||'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ${v?'var(--gold)':'var(--border)'};border-radius:5px;padding:1px 4px;white-space:nowrap">
-          <span style="font-size:10px;color:${v?'var(--gold)':'var(--dim)'}">${c.label}</span>
-          <button class="btn sml" data-cnt="${c.id}" data-d="-1" style="padding:0 5px">−</button>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--gold);min-width:10px;text-align:center">${v}</span>
-          <button class="btn sml" data-cnt="${c.id}" data-d="1" style="padding:0 5px">+</button>
-        </span>`;
-      }).join('');
-    sitEl.querySelectorAll('[data-sit]').forEach(b=>b.addEventListener('click',()=>toggleSit(b.dataset.sit)));
-    sitEl.querySelectorAll('[data-cnt]').forEach(b=>b.addEventListener('click',()=>bumpCounter(b.dataset.cnt,parseInt(b.dataset.d))));
-  }
+  renderSitBuffs(); // toggles situationnels (header) — extrait pour rafraîchissement isolé
   // Deck
   const de=document.getElementById('decklist');
-  if(!deck.length){ de.innerHTML='<div style="font-size:10px;color:var(--dim)">Aucun sort dans le deck.</div>'; }
+  if(!deck.length){ de.innerHTML='<div class="muted-sm">Aucun sort dans le deck.</div>'; }
   else{
     de.innerHTML=deck.map(sp=>{
       const spL=sp.spellLevel||lvl, dS=sp.damageMax>0?scale(sp.damageMin||0,sp.damageMax,spL):0;
@@ -1231,7 +1261,7 @@ function renderSpellsTab(){
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${dS>0?`<span class="scdmg">~${dS}</span>`:''}
-            ${sp.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${sp.pfGen}PF</span>`:''}
+            ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
             ${sp.isFinisher?`<span style="font-size:9px;color:var(--gold)">★fin</span>`:''}
           </div>
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
@@ -1245,18 +1275,10 @@ function renderSpellsTab(){
         <span data-rm="${sp.name}" style="color:var(--dim);font-size:13px;cursor:pointer;padding:0 2px;flex-shrink:0">✕</span>
       </div>`;
     }).join('');
-    de.querySelectorAll('.slvl').forEach(sl=>{
-      const vl=sl.nextElementSibling;
-      sl.addEventListener('input',()=>{ if(vl)vl.textContent=sl.value; const sp=getDeck().find(s=>s.name===sl.dataset.sn); if(sp){sp.spellLevel=parseInt(sl.value);save();} });
-      sl.addEventListener('change',renderAdvisor);
-    });
-    de.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',e=>{
-      e.stopPropagation(); const sp=getDeck().find(s=>s.name===b.dataset.rm); if(sp) toggleSpell(sp);
-    }));
   }
   // All spells
   const ae=document.getElementById('allspells');
-  if(!all.length){ ae.innerHTML=`<div style="font-size:10px;color:var(--dim)">${S.build?'Aucun sort disponible pour cette classe.':'Choisis ta classe dans l\'onglet Build.'}</div>`; return; }
+  if(!all.length){ ae.innerHTML=`<div class="muted-sm">${S.build?'Aucun sort disponible pour cette classe.':'Choisis ta classe dans l\'onglet Build.'}</div>`; return; }
   const byEl={};
   all.forEach(sp=>{ const k=sp.element||'Neutre'; if(!byEl[k]) byEl[k]=[]; byEl[k].push(sp); });
   const ord=['Feu','Eau','Terre','Air','Neutre'];
@@ -1273,20 +1295,32 @@ function renderSpellsTab(){
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${sp.damageMax>0?`<span class="scdmg">${sp.damageMin}-${sp.damageMax}</span>`:''}
             ${sp.damageCrit>0?`<span style="font-size:9px;color:#c0c060">CC:${sp.damageCrit}</span>`:''}
-            ${sp.pfGen>0?`<span style="font-size:9px;color:var(--red)">+${sp.pfGen}PF</span>`:''}
+            ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
             ${sp.isFinisher?`<span style="font-size:9px;color:var(--gold)">★</span>`:''}
           </div>
-          ${meta?`<div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px">${meta}</div>`:''}
+          ${meta?`<div class="meta" style="margin-top:1px">${meta}</div>`:''}
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
         </div>
         <span style="color:${inD?'var(--gold)':'var(--dim)'};font-size:13px;flex-shrink:0">${inD?'✓':'+'}</span>
       </div>`;
     }).join('')
   ).join('');
-  ae.querySelectorAll('.sc').forEach(el=>el.addEventListener('click',()=>{
-    const sp=all.find(s=>s.name===el.dataset.n); if(sp) toggleSpell(sp);
-  }));
 }
+// Délégation (conteneurs stables) — re-fetch des sorts dans le handler (pas de capture de locals).
+document.getElementById('decklist')?.addEventListener('input',e=>{
+  const sl=e.target.closest('.slvl'); if(!sl) return;
+  const vl=sl.nextElementSibling; if(vl) vl.textContent=sl.value;
+  const sp=getDeck().find(s=>s.name===sl.dataset.sn); if(sp){ sp.spellLevel=parseInt(sl.value); save(); }
+});
+document.getElementById('decklist')?.addEventListener('change',e=>{ if(e.target.closest('.slvl')) renderAdvisor(); });
+document.getElementById('decklist')?.addEventListener('click',e=>{
+  const b=e.target.closest('[data-rm]'); if(!b) return;
+  e.stopPropagation(); const sp=getDeck().find(s=>s.name===b.dataset.rm); if(sp) toggleSpell(sp);
+});
+document.getElementById('allspells')?.addEventListener('click',e=>{
+  const el=e.target.closest('.sc'); if(!el) return;
+  const sp=getClassSpells().find(s=>s.name===el.dataset.n); if(sp) toggleSpell(sp);
+});
 document.getElementById('imptclsbtn').addEventListener('click',()=>{
   const st=document.getElementById('imptclsstatus');
   if(!S.build){st.textContent="⚠ Choisis ta classe d'abord.";return;}
@@ -1315,7 +1349,7 @@ function renderPassivesTab(){
     if(kept.length!==S.build.activePassives.length){ S.build.activePassives=kept; save(); }
   }
   const active=getActivePassives(); if(ce) ce.textContent=active.length;
-  if(!all.length){le.innerHTML='<div style="font-size:10px;color:var(--dim)">Choisis ta classe dans Build.</div>';return;}
+  if(!all.length){le.innerHTML='<div class="muted-sm">Choisis ta classe dans Build.</div>';return;}
   const clsP=all.filter(p=>!p.isGeneral), genP=all.filter(p=>p.isGeneral);
   const card=p=>{
     const on=active.some(a=>a.id===p.id);
@@ -1329,7 +1363,6 @@ function renderPassivesTab(){
   };
   const divider=genP.length?'<div class="elhdr" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 0 3px;border-top:1px solid var(--border);margin-top:4px">Passifs généraux</div>':'';
   le.innerHTML=clsP.map(card).join('')+divider+genP.map(card).join('');
-  le.querySelectorAll('.pc[data-pid]').forEach(el=>el.addEventListener('click',()=>togglePassive(el.dataset.pid)));
   // Effects
   const es=document.getElementById('passeffsec'), ef=document.getElementById('passefflist');
   const sbAll={};
@@ -1348,6 +1381,11 @@ function renderPassivesTab(){
     ef.innerHTML=lines.map(l=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--border)">${l}</div>`).join('');
   }
 }
+// Délégation (conteneur #passlist stable) : toggle d'un passif au clic.
+document.getElementById('passlist')?.addEventListener('click',e=>{
+  const el=e.target.closest('.pc[data-pid]'); if(!el) return;
+  togglePassive(el.dataset.pid);
+});
 
 // ── PERSO TAB ────────────────────────────────────────────────────
 const STATDEFS=[
@@ -1709,7 +1747,17 @@ function setupShortcuts(){
 function renderAll(){ renderPerso();renderAdvisor();renderMonPanel();renderSpellsTab();renderPassivesTab();renderNameBanner(); }
 
 // ── TAILLE TEXTE GLOBALE (slider) ────────────────────────────────
-function applyZoom(){ document.documentElement.style.setProperty('--zoom', S.zoom||1); }
+function applyZoom(){
+  const z = S.zoom || 1;
+  const app = document.getElementById('app');
+  if(app){
+    app.style.zoom = z;                        // échelle fiable de toute l'UI (texte + layout)
+    // zoom rétrécit/agrandit la boîte : on compense pour rester en plein écran exact.
+    app.style.height = `calc(100vh / ${z})`;
+    app.style.width  = `calc(100vw / ${z})`;
+  }
+  document.documentElement.style.setProperty('--zoom', z); // conservé si du CSS le référence
+}
 function setupFontSlider(){
   const sl=document.getElementById('fontslider'); if(!sl) return;
   sl.value=S.zoom||1;
