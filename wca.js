@@ -37,7 +37,7 @@ function getClassSpells(){
 
 // ── STATE ────────────────────────────────────────────────────────
 const S = {
-  build:null, targets:[], focusIdx:0, calcMode:'dmg', position:'normal', critMode:false,
+  build:null, targets:[], focusIdx:0, calcMode:'dmg', position:'normal', critMode:false, range:'distance',
   remainingAP:null, playerName:null, detectedName:null,
   overrides:{}, bonuses:{guilde:true, monture:false},
   combat:{ mechanics:{} },
@@ -468,9 +468,12 @@ function spellDmgMult(sp, pf, target){
     if(maxHp > 0 && curHp < maxHp * 0.5) m *= 1.40;
   }
 
-  // Châtiment / Effroi : +25 % si PF consommé ce tour
-  if((n.includes('châtiment') || n.includes('chatiment') || n.includes('effroi')) && S.pfConsumedThisTurn){
-    m *= 1.25;
+  // Bonus si du Point Faible a été consommé ce tour :
+  //  • Effroi : +33 % (valeur explicite dans les effets du sort)
+  //  • Châtiment : +25 % (valeur estimée — sa description ne chiffre pas le bonus)
+  if(S.pfConsumedThisTurn){
+    if(n.includes('effroi')) m *= 1.33;
+    else if(n.includes('châtiment') || n.includes('chatiment')) m *= 1.25;
   }
 
   return m;
@@ -519,15 +522,25 @@ function spellRange(sp){
   if(!r||r.includes('mêlée')||r.includes('melee')||r==='0'||r==='0-0') return 'melee';
   return 'distance';
 }
+// Le sort PEUT-il être lancé au contact (portée min ≤ 1) ? Si la portée min est ≥ 2,
+// il ne profite jamais de la maîtrise mêlée, même en contexte mêlée.
+function meleeCapable(sp){
+  const r=(sp.range||sp.rng||'').trim();
+  if(!r) return true;                       // portée vide = mêlée
+  const m=r.match(/^(\d+)/);                 // 1er nombre = portée min
+  return m ? parseInt(m[1],10)<=1 : true;
+}
 function elMastery(el,st,sp){
   const M={'Feu':'maitriseFeu','Eau':'maitriseEau','Terre':'maitriseTerre','Air':'maitriseAir','Neutre':null};
   let base=(st.maitriseElem||0)+(M[el]?st[M[el]]||0:0);
   // Maîtrise dos (appliquée quand position === back, sauf si Localisation quantique actif)
   if(S.position==='back' && !hasPassive('localisation_quantique')) base+=(st.maitriseDos||0);
-  // Maîtrise mêlée / distance
-  const range=sp?spellRange(sp):'distance';
-  if(range==='melee') base+=(st.maitriseMelee||0);
-  else base+=(st.maitriseDistance||0);
+  // Maîtrise mêlée / distance : on ne connaît pas la distance réelle au lancer, donc
+  // l'utilisateur choisit le contexte via le toggle d'en-tête (S.range). Exception :
+  // un sort INTRINSÈQUEMENT mêlée (portée « mêlée »/0) compte toujours comme mêlée.
+  const intrinsicMelee = sp && spellRange(sp)==='melee';
+  const meleeCtx = intrinsicMelee || (S.range==='melee' && (!sp || meleeCapable(sp)));
+  base += meleeCtx ? (st.maitriseMelee||0) : (st.maitriseDistance||0);
   return base;
 }
 const MAX_DECK=12; // Limite Wakfu : 12 sorts actifs maximum
@@ -1803,11 +1816,17 @@ function setPosition(pos){
   document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===pos));
   S.position=pos; save(); renderAdvisor();
 }
+// Contexte mêlée/distance : décide quelle maîtrise (mêlée vs distance) s'applique.
+function setRange(rng){
+  document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dataset.rng===rng));
+  S.range=rng; save(); renderAdvisor();
+}
 function toggleCrit(){
   S.critMode=!S.critMode;
   document.getElementById('crit-btn').classList.toggle('on',S.critMode); renderAdvisor();
 }
 document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>setPosition(b.dataset.pos)));
+document.querySelectorAll('[data-rng]').forEach(b=>b.addEventListener('click',()=>setRange(b.dataset.rng)));
 document.getElementById('crit-btn').addEventListener('click',toggleCrit);
 // ── RACCOURCIS CLAVIER COMBAT (ignorés dans les champs de saisie) ──
 function setupShortcuts(){
@@ -1951,4 +1970,8 @@ DOCK.init(); // place les panneaux dans les zones (après load() : restaure la d
 applyZoom(); setupFontSlider();
 setupShortcuts(); setupHelp(); populateLogPath();
 syncCls(); renderAll(); initCSQ();
+// Synchronise l'état visuel des toggles de combat avec l'état restauré.
+document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===S.position));
+document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dataset.rng===S.range));
+document.getElementById('crit-btn')?.classList.toggle('on',!!S.critMode);
 if(S.playerName) document.getElementById('pninp').value=S.playerName;
