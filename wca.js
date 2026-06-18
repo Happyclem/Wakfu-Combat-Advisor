@@ -975,7 +975,7 @@ function renderIdle(){
   const el=document.getElementById('idle'); if(!el) return;
   const steps=[
     {n:1, ok:!!S.build?.class,            lbl:'Choisir ta classe & ton niveau', hint:'Build',  go:()=>openLeftTab('build')},
-    {n:2, ok:getDeck().length>0,          lbl:'Ajouter des sorts au deck',       hint:'Sorts',  go:()=>openCenterTab('spells')},
+    {n:2, ok:getDeck().length>0,          lbl:'Ajouter des sorts au deck',       hint:'Sorts',  go:()=>openRightTab('spells')},
     {n:3, ok:S.targets.length>0,          lbl:'Choisir une cible',               hint:'Cible',  go:()=>openLeftTab('target')},
     {n:4, ok:document.getElementById('led')?.classList.contains('on'), lbl:'Connecter le log', opt:true, hint:'Log', go:()=>openLeftTab('log')},
   ];
@@ -1712,6 +1712,14 @@ document.querySelectorAll('.ctt').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.ctt').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.cp').forEach(p=>p.classList.toggle('on',p.id==='cp-'+b.dataset.cp));
 }));
+// Onglets du panneau droit : Événements | Sorts & Passifs
+document.querySelectorAll('.rtt').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.rtt').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.rp').forEach(p=>p.classList.toggle('on',p.id==='rp-'+b.dataset.rp));
+  // Le bouton « vider les événements » n'a de sens que sur l'onglet Événements.
+  const clr=document.getElementById('clrfeed'); if(clr) clr.style.display=b.dataset.rp==='events'?'':'none';
+}));
+function openRightTab(rp){ const b=document.querySelector(`.rtt[data-rp="${rp}"]`); if(b) b.click(); }
 function setPosition(pos){
   document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===pos));
   S.position=pos; save(); renderAdvisor();

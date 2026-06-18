@@ -132,7 +132,6 @@
   <div id="ctabs">
     <button class="ctt on" data-cp="advisor">⚔ Conseiller</button>
     <button class="ctt" data-cp="perso">👤 Personnage</button>
-    <button class="ctt" data-cp="spells">✨ Sorts &amp; Passifs</button>
   </div>
   <div id="cb">
     <div class="cp on" id="cp-advisor">
@@ -240,7 +239,22 @@
         <div id="perstats"></div>
       </div>
     </div>
-    <div class="cp" id="cp-spells">
+  </div>
+</div>
+
+<div id="rr"></div>
+
+<div id="rt">
+  <div id="rtabs">
+    <button class="rtt on" data-rp="events">📡 Événements</button>
+    <button class="rtt" data-rp="spells">✨ Sorts &amp; Passifs</button>
+    <button class="btn sml" id="clrfeed" title="Vider les événements" style="margin-left:auto;align-self:center;margin-right:6px">✕</button>
+  </div>
+  <div id="rb">
+    <div class="rp on" id="rp-events">
+      <div id="feed"></div>
+    </div>
+    <div class="rp" id="rp-spells">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <div class="sh" style="margin:0">Deck actif (<span id="deckcount">0</span>)</div>
@@ -263,16 +277,6 @@
       </div>
     </div>
   </div>
-</div>
-
-<div id="rr"></div>
-
-<div id="rt">
-  <div id="rthd">
-    <span style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em">ÉVÉNEMENTS</span>
-    <button class="btn sml" id="clrfeed">✕</button>
-  </div>
-  <div id="feed"></div>
 </div>
 
 <div id="dov">📂 Dépose le fichier ici</div>
