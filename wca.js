@@ -2,6 +2,27 @@
 // ── UTILS ────────────────────────────────────────────────────────
 // Regroupe les appels rapprochés : n'exécute `fn` qu'après `ms` sans nouvel appel.
 function debounce(fn,ms){ let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
+// ── ICÔNES (WakfuAssets en remote, fallback emoji/texte si indispo/offline) ──
+// https://github.com/Tmktahu/WakfuAssets — fichiers nommés par ID (sorts) ou par nom (stats).
+const ICON_BASE='https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main';
+// Échappe le fallback (peut contenir des guillemets via attribut HTML).
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+// <img> qui se remplace par `fallback` (emoji/texte) si le chargement échoue.
+// `cls` = classe CSS de taille (icn / icn-sm). `fallback` est rendu tel quel (peut être un emoji).
+function iconImg(folder,name,fallback,cls,title){
+  if(name==null||name==='') return fallback||'';
+  const url=`${ICON_BASE}/${folder}/${name}.png`;
+  const fb=escAttr(fallback||'');
+  const t=title?` title="${escAttr(title)}"`:'';
+  return `<img class="${cls||'icn'}" src="${url}"${t} alt=""`+
+    ` onerror="this.outerHTML=this.dataset.fb" data-fb="${fb}">`;
+}
+// Élément → icône statistics (fire/water/earth/air_coin), fallback emoji.
+const ELEM_ICON={Feu:'fire_coin',Eau:'water_coin',Terre:'earth_coin',Air:'air_coin'};
+const ELEM_EMOJI={Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
+function elemIcon(el,cls){ const f=ELEM_ICON[el]; return f?iconImg('statistics',f,ELEM_EMOJI[el]||'⚪',cls||'icn-sm',el):(ELEM_EMOJI[el]||'⚪'); }
+function spellIcon(sp,cls){ return iconImg('spells',sp&&sp.icon,ELEM_EMOJI[sp&&sp.element]||'✨',cls||'icn',sp&&sp.name); }
+function statIcon(name,fallback,cls,title){ return iconImg('statistics',name,fallback,cls||'icn-sm',title); }
 // ── DATA ─────────────────────────────────────────────────────────
 let MONS=[], SPD={}, GPD=[], CSP=[];
 function loadData(){
@@ -14,6 +35,7 @@ function loadData(){
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   uses:s.u||3, // usages par tour (défaut 3)
+  icon:s.icon, id:s.id, // icône WakfuAssets (spells/<icon>.png) + Id Ankama
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
@@ -90,24 +112,23 @@ function curHP(t){ const mx=t._maxHp||t.hp||0; return mx>0?(t._currentHp??mx):0;
 // pour que tout le code de calcul de dégâts existant continue de fonctionner.
 Object.defineProperty(S,'monster',{ get:focusTgt, configurable:true });
 
+// Compteur monotone pour garantir des uid de cible uniques (plusieurs ajouts/ms).
+let uidSeq=0;
 // Normalise une cible : résistances canoniques rf/re/rt/ra (lues par elRes).
 function normTarget(m){
   const rf=m.rf??m.resFeu??0, re=m.re??m.resEau??0, rt=m.rt??m.resTerre??0, ra=m.ra??m.resAir??0;
   const hp=m.hp||0;
-  return { uid:m.uid||(Date.now()+Math.floor(Math.random()*1000)),
+  return { uid:m.uid||(++uidSeq, Date.now()*1000+uidSeq%1000),
     id:m.id||0, name:m.name||m.n||'Cible', level:m.level||m.lv||0,
     hp, _maxHp:hp, _currentHp:hp, dead:false, _hemo:0,
     rf,re,rt,ra };
 }
 function addTarget(m){
+  // En combat, un même monstre peut apparaître en plusieurs exemplaires : on ajoute
+  // toujours une nouvelle instance (uid unique), sans dédoublonner par nom+niveau.
+  if(S.targets.length>=MAX_TARGETS) return; // limite atteinte (silencieux)
   const t=normTarget(m);
-  // dédoublonnage : même nom + même niveau → on ne ré-ajoute pas, on (re)vise
-  const dup=S.targets.findIndex(x=>x.name===t.name && (x.level||0)===(t.level||0));
-  if(dup>=0){ S.focusIdx=dup; }
-  else {
-    if(S.targets.length>=MAX_TARGETS) return; // limite atteinte (silencieux)
-    S.targets.push(t); S.focusIdx=S.targets.length-1;
-  }
+  S.targets.push(t); S.focusIdx=S.targets.length-1;
   save(); renderMonPanel(); renderHPBars(); renderAdvisor(); setTimeout(refreshCSQTarget,0);
 }
 function removeTarget(uid){
@@ -897,12 +918,11 @@ function renderCSQ(){
     if(!CSQ.steps.length) se.innerHTML='<span class="muted-sm">Clic sur les sorts du ranking ci-dessus.</span>';
     else{
       se.innerHTML=CSQ.steps.map((s,i)=>{
-        const el=s.sp.element||'Neutre';
         const co=[s.ap?`${s.ap}PA`:'',s.mp?`${s.mp}PM`:'',s.wp?`${s.wp}PW`:''].filter(Boolean).join(' ');
-        return `<div class="ss"><span>${EL[el]}</span><span style="font-weight:600">${s.sp.name}</span>
+        return `<div class="ss" data-d="${i}" style="cursor:pointer" title="Clic pour retirer">${spellIcon(s.sp,'icn-sm')}<span style="font-weight:600">${s.sp.name}</span>
           <span class="ssap">${co}</span>${s.dmg>0?`<span class="ssdmg">${s.dmg.toLocaleString('fr')}</span>`:''}
           ${s.pfGen>0?`<span class="badge badge-pf">+${s.pfGen}PF</span>`:''}
-          <span data-d="${i}" style="color:var(--dim);cursor:pointer;margin-left:auto;padding:0 3px;font-size:11px">✕</span></div>`;
+          <span style="color:var(--dim);margin-left:auto;padding:0 3px;font-size:11px">✕</span></div>`;
       }).join('');
     }
   }
@@ -945,9 +965,9 @@ function renderMonPanel(){
   if(cnt) cnt.textContent=S.targets.length;
   list.innerHTML=S.targets.map((t,i)=>{
     const focused=i===S.focusIdx, dead=isDead(t);
-    const res=`🔴${t.rf||0} 🔵${t.re||0} 🟢${t.rt||0} 🟡${t.ra||0}`;
-    return `<div class="tgtrow ${focused?'foc':''} ${dead?'dead':''}" data-uid="${t.uid}"
-        style="border:1px solid ${focused?'var(--gold)':'var(--border)'};border-radius:6px;padding:6px 8px;margin-bottom:6px;opacity:${dead?0.5:1}">
+    const res=`${elemIcon('Feu')}${t.rf||0} ${elemIcon('Eau')}${t.re||0} ${elemIcon('Terre')}${t.rt||0} ${elemIcon('Air')}${t.ra||0}`;
+    return `<div class="tgtrow ${focused?'foc':''} ${dead?'dead':''}" data-uid="${t.uid}" data-card="${t.uid}"
+        style="border:1px solid ${focused?'var(--gold)':'var(--border)'};border-radius:6px;padding:6px 8px;margin-bottom:6px;opacity:${dead?0.5:1};cursor:pointer">
       <div style="display:flex;align-items:center;gap:6px">
         <span class="prio" style="font-family:var(--mono);font-size:10px;color:var(--gold);width:14px">${i+1}</span>
         <button class="tfoc btn sml" data-foc="${t.uid}" title="Viser"
@@ -970,12 +990,14 @@ function renderMonPanel(){
 }
 // Délégation : un seul listener sur le conteneur stable (pas de rebind à chaque rendu).
 document.getElementById('tgtlist')?.addEventListener('click',e=>{
-  const el=e.target.closest('[data-foc],[data-up],[data-dn],[data-rm]'); if(!el) return;
+  // Les contrôles (réordonner/supprimer) priment ; sinon un clic n'importe où sur la
+  // carte vise la cible.
+  const el=e.target.closest('[data-up],[data-dn],[data-rm],[data-card]'); if(!el) return;
   e.stopPropagation();
-  if(el.dataset.foc!=null) focusTarget(el.dataset.foc);
-  else if(el.dataset.up!=null) moveTarget(el.dataset.up,-1);
+  if(el.dataset.up!=null) moveTarget(el.dataset.up,-1);
   else if(el.dataset.dn!=null) moveTarget(el.dataset.dn,1);
   else if(el.dataset.rm!=null) removeTarget(el.dataset.rm);
+  else if(el.dataset.card!=null) focusTarget(el.dataset.card);
 });
 const moninp=document.getElementById('moninp'), monres=document.getElementById('monres');
 // Normalise pour une recherche insensible à la casse ET aux accents ("meryde" → "Méryde").
@@ -1131,7 +1153,7 @@ function renderAdvisor(){
         const exhausted=usedU>=maxU;
         const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="Usages par tour">${usedU}/${maxU}</span>`;
         return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" style="cursor:pointer">
-          <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
+          ${spellIcon(r.spell)}<span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
           <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}${useTxt}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
@@ -1197,7 +1219,7 @@ function renderDmgSeq(){
     };
     document.getElementById('seqsteps').innerHTML=seq.chosen.map((r,i)=>
       `<div class="ss" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
-        <span>${EL[r.spell.element||'Neutre']}</span><span>${r.spell.name}</span>
+        ${spellIcon(r.spell,'icn-sm')}<span>${r.spell.name}</span>
         <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
         <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
         ${!abApplies(r.spell)?resGenBadge(r.spell):''}
@@ -1248,7 +1270,7 @@ function renderKillsPlan(){
   const steps=document.getElementById('killsteps');
   let html='';
   plan.kills.forEach((k,n)=>{
-    const seqTxt=k.seq.map(sp=>`${EL[sp.element||'Neutre']} ${sp.name}`).join(' + ');
+    const seqTxt=k.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ');
     html+=`<div style="border:1px solid var(--border);border-left:3px solid var(--red);border-radius:5px;padding:5px 8px;margin-bottom:5px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
         <span style="font-family:var(--mono);font-size:10px;color:var(--red)">#${n+1} 💀</span>
@@ -1258,7 +1280,7 @@ function renderKillsPlan(){
       <div style="font-size:10px;color:var(--muted)">${seqTxt}</div></div>`;
   });
   if(plan.dump){
-    const seqTxt=plan.dump.seq.map(sp=>`${EL[sp.element||'Neutre']} ${sp.name}`).join(' + ');
+    const seqTxt=plan.dump.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ');
     html+=`<div style="border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:5px;padding:5px 8px;margin-bottom:5px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
         <span style="font-family:var(--mono);font-size:10px;color:var(--sky)">PA restants →</span>
@@ -1322,7 +1344,7 @@ function renderSpellsTab(){
       const spL=sp.spellLevel||lvl, dS=sp.damageMax>0?scale(sp.damageMin||0,sp.damageMax,spL):0;
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:'',sp.wpCost?`${sp.wpCost}PW`:''].filter(Boolean).join(' ');
       return `<div class="sc dk" data-n="${sp.name}">
-        <span>${EL[sp.element||'Neutre']||'⚪'}</span>
+        ${spellIcon(sp)}
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
@@ -1356,6 +1378,7 @@ function renderSpellsTab(){
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:''].filter(Boolean).join(' ');
       const meta=[sp.range?`◎${sp.range}`:'',sp.spellType==='zone'?'zone':'',sp.los===false?'sans LdV':''].filter(Boolean).join(' · ');
       return `<div class="sc ${inD?'dk':''}" data-n="${sp.name}">
+        ${spellIcon(sp)}
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
@@ -1456,10 +1479,22 @@ document.getElementById('passlist')?.addEventListener('click',e=>{
 // ── PERSO TAB ────────────────────────────────────────────────────
 const STATDEFS=[
   ['Combat',     [['ap','PA'],['mp','PM'],['wp','PW'],['hp','PV'],['initiative','Initiative'],['critChance','% CC'],['critMastery','Maît. Critique']]],
-  ['Maîtrises',  [['maitriseFeu','+ Feu'],['maitriseEau','+ Eau'],['maitriseTerre','+ Terre'],['maitriseAir','+ Air'],['maitriseDos','Maît. Dos'],['maitriseMelee','Maît. Mêlée'],['maitriseDistance','Maît. Distance'],['maitriseBerserk','Maît. Berserk'],['maitriseSoin','Maît. Soin']]],
-  ['Résistances',[['resElem','Rés. Élémentaire'],['resFeu','+ Feu'],['resEau','+ Eau'],['resTerre','+ Terre'],['resAir','+ Air'],['resCrit','Rés. Critique'],['resDos','Rés. Dos']]],
+  ['Maîtrises',  [['maitriseFeu','Feu'],['maitriseEau','Eau'],['maitriseTerre','Terre'],['maitriseAir','Air'],['maitriseDos','Maît. Dos'],['maitriseMelee','Maît. Mêlée'],['maitriseDistance','Maît. Distance'],['maitriseBerserk','Maît. Berserk'],['maitriseSoin','Maît. Soin']]],
+  ['Résistances',[['resElem','Rés. Élémentaire'],['resFeu','Feu'],['resEau','Eau'],['resTerre','Terre'],['resAir','Air'],['resCrit','Rés. Critique'],['resDos','Rés. Dos']]],
   ['Secondaires',[['degatsInfliges','% DI'],['dmgIndirect','% Dom. Indirects'],['soinsRealises','% Soins'],['tacle','Tacle'],['esquive','Esquive'],['portee','Portée'],['controle','Contrôle'],['sagesse','Sagesse'],['prospection','Prospection']]],
 ];
+// Clé de stat → fichier statistics WakfuAssets (pour l'icône devant le libellé).
+const STAT_ICON={
+  ap:'action_points', mp:'movement_points', wp:'wakfu_points', hp:'health_points',
+  initiative:'initiative', critChance:'critical_hit', critMastery:'critical_mastery',
+  maitriseFeu:'fire_coin', maitriseEau:'water_coin', maitriseTerre:'earth_coin', maitriseAir:'air_coin',
+  maitriseDos:'rear_mastery', maitriseMelee:'melee_mastery', maitriseDistance:'distance_mastery',
+  maitriseBerserk:'berserk_mastery', maitriseSoin:'healing_mastery',
+  resElem:'elemental_damage', resFeu:'fire_coin', resEau:'water_coin', resTerre:'earth_coin', resAir:'air_coin',
+  resCrit:'critical_resistance', resDos:'rear_resistance',
+  degatsInfliges:'damage_inflicted', dmgIndirect:'indirect_damage', soinsRealises:'heals_performed',
+  tacle:'lock', esquive:'dodge', portee:'range', controle:'control', sagesse:'wisdom', prospection:'prospecting',
+};
 function renderPerso(){
   // Bonus rows
   document.querySelectorAll('.brow').forEach(row=>{
@@ -1485,8 +1520,9 @@ function renderPerso(){
       const bv=base[key]??'';
       const ev=eff[key]||0;
       const showEff=(Number(bv||0)!==ev)&&ev!==0;
+      const ic=STAT_ICON[key]?statIcon(STAT_ICON[key],'',null,lbl):'';
       return `<div class="strow">
-        <span class="stk">${lbl}</span>
+        <span class="stk">${ic}${lbl}</span>
         <input class="stovr stbase" data-k="${key}" type="number" inputmode="numeric" placeholder="0" value="${bv}"/>
         <span class="stv" style="color:var(--dim);width:56px">${showEff?ev.toLocaleString('fr'):''}</span>
       </div>`;
