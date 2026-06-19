@@ -82,7 +82,9 @@ function load(){
     if(!S.situationalBuffs) S.situationalBuffs={};
     if(S.pfConsumedThisTurn===undefined) S.pfConsumedThisTurn=false;
     if(S.previewMaxPF===undefined) S.previewMaxPF=false;
-    if(S.zoom===undefined) S.zoom=1.1; // palier « confort » par défaut (l'app a beaucoup de texte 9-11px)
+    // Les tailles de base sont désormais confortables (+2px) → défaut 100 %.
+    // Migration : les anciens états à 1.1 (zoom de layout) sont ramenés à 1.0.
+    if(S.zoom===undefined || S.zoom===1.1) S.zoom=1;
     const __p=S.combat?.mechanics?.['__p']; if(__p){ __p.hp=null; __p.gAP=0; __p.gMP=0; __p.gWP=0; }
     // Migration : ancien état mono-cible (monster) → S.targets[]
     if(legacyMon){
@@ -818,7 +820,7 @@ function renderHPBars(){
     const pct=m&&m._hemo>0?Math.round(m._hemo*HEMO_PCT_PER_LVL*100):0;
     const hemo=m&&m._hemo>0?` · 🩸 Hémo ${m._hemo} (+${pct}% dégâts)`:'';
     an.innerHTML=(m?(m.name||m.n||''):'')+(S.targets.length>1?` (${S.focusIdx+1}/${S.targets.length})`:'')
-      +(hemo?`<span style="font-size:10px;color:var(--red);font-weight:600">${hemo}</span>`:'');
+      +(hemo?`<span style="font-size:var(--fs-10);color:var(--red);font-weight:600">${hemo}</span>`:'');
   }
   const at=document.getElementById('advhptxt'); if(at){at.textContent=txt;at.style.color=col;}
   const ab=document.getElementById('advhpbar'); if(ab){ab.style.width=pct+'%';ab.style.background=col;}
@@ -922,13 +924,13 @@ function renderCSQ(){
         return `<div class="ss" data-d="${i}" style="cursor:pointer" title="Clic pour retirer">${spellIcon(s.sp,'icn-sm')}<span style="font-weight:600">${s.sp.name}</span>
           <span class="ssap">${co}</span>${s.dmg>0?`<span class="ssdmg">${s.dmg.toLocaleString('fr')}</span>`:''}
           ${s.pfGen>0?`<span class="badge badge-pf">+${s.pfGen}PF</span>`:''}
-          <span style="color:var(--dim);margin-left:auto;padding:0 3px;font-size:11px">✕</span></div>`;
+          <span style="color:var(--dim);margin-left:auto;padding:0 3px;font-size:var(--fs-11)">✕</span></div>`;
       }).join('');
     }
   }
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
   const sm=document.getElementById('csqsum');
-  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
+  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
   const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
     // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
@@ -969,19 +971,19 @@ function renderMonPanel(){
     return `<div class="tgtrow ${focused?'foc':''} ${dead?'dead':''}" data-uid="${t.uid}" data-card="${t.uid}"
         style="border:1px solid ${focused?'var(--gold)':'var(--border)'};border-radius:6px;padding:6px 8px;margin-bottom:6px;opacity:${dead?0.5:1};cursor:pointer">
       <div style="display:flex;align-items:center;gap:6px">
-        <span class="prio" style="font-family:var(--mono);font-size:10px;color:var(--gold);width:14px">${i+1}</span>
+        <span class="prio" style="font-family:var(--mono);font-size:var(--fs-10);color:var(--gold);width:14px">${i+1}</span>
         <button class="tfoc btn sml" data-foc="${t.uid}" title="Viser"
           style="padding:1px 6px;color:${focused?'var(--gold)':'var(--dim)'}">${focused?'●':'○'}</button>
-        <span style="flex:1;min-width:0;font-weight:700;font-size:12px;color:${dead?'var(--dim)':'var(--gold)'}">${t.name}${t.level?` <span style="font-weight:400;color:var(--dim);font-size:10px">niv.${t.level}</span>`:''}${dead?' 💀':''}</span>
+        <span style="flex:1;min-width:0;font-weight:700;font-size:var(--fs-12);color:${dead?'var(--dim)':'var(--gold)'}">${t.name}${t.level?` <span style="font-weight:400;color:var(--dim);font-size:var(--fs-10)">niv.${t.level}</span>`:''}${dead?' 💀':''}</span>
         <span style="display:flex;flex-direction:column;gap:1px">
-          <span class="tup" data-up="${t.uid}" style="cursor:pointer;font-size:9px;line-height:1;color:var(--muted)">▲</span>
-          <span class="tdn" data-dn="${t.uid}" style="cursor:pointer;font-size:9px;line-height:1;color:var(--muted)">▼</span>
+          <span class="tup" data-up="${t.uid}" style="cursor:pointer;font-size:var(--fs-9);line-height:1;color:var(--muted)">▲</span>
+          <span class="tdn" data-dn="${t.uid}" style="cursor:pointer;font-size:var(--fs-9);line-height:1;color:var(--muted)">▼</span>
         </span>
-        <span class="trm" data-rm="${t.uid}" style="cursor:pointer;color:var(--dim);font-size:12px;padding:0 2px">✕</span>
+        <span class="trm" data-rm="${t.uid}" style="cursor:pointer;color:var(--dim);font-size:var(--fs-12);padding:0 2px">✕</span>
       </div>
       ${(t._maxHp||t.hp)?`<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
         <div class="hpt" style="flex:1;height:6px"><div id="tgthp_${t.uid}" class="hpf" style="width:100%"></div></div>
-        <span id="tgthpt_${t.uid}" style="font-family:var(--mono);font-size:9px"></span>
+        <span id="tgthpt_${t.uid}" style="font-family:var(--mono);font-size:var(--fs-9)"></span>
       </div>`:''}
       <div class="meta" style="margin-top:3px">${res}</div>
     </div>`;
@@ -1018,7 +1020,7 @@ moninp.addEventListener('input',debounce(()=>{
     monres.style.display='block'; return;
   }
   monres.innerHTML=hits.map(m=>`<div class="mr" data-id="${m.id}">
-    <span style="color:var(--dim);font-size:10px;width:32px">niv.${m.lv||m.level||'?'}</span>
+    <span style="color:var(--dim);font-size:var(--fs-10);width:32px">niv.${m.lv||m.level||'?'}</span>
     <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.n||m.name}</span>
     ${m.hp>0?`<span class="muted-sm" style="margin-left:auto;white-space:nowrap">${(m.hp||0).toLocaleString('fr')} PV</span>`:''}
   </div>`).join('');
@@ -1050,8 +1052,8 @@ function renderIdle(){
     {n:3, ok:S.targets.length>0,          lbl:'Choisir une cible',               hint:'Cible',  go:()=>openLeftTab('target')},
     {n:4, ok:document.getElementById('led')?.classList.contains('on'), lbl:'Connecter le log', opt:true, hint:'Log', go:()=>openLeftTab('log')},
   ];
-  el.innerHTML=`<div style="font-size:30px">⚔</div>
-    <div style="font-size:13px;color:var(--muted)">Bienvenue — quelques étapes pour démarrer</div>
+  el.innerHTML=`<div style="font-size:var(--fs-30)">⚔</div>
+    <div style="font-size:var(--fs-13);color:var(--muted)">Bienvenue — quelques étapes pour démarrer</div>
     <div class="ckl">${steps.map(s=>`
       <div class="cki ${s.ok?'ok':''}" data-n="${s.n}">
         <span class="ckn">${s.ok?'✓':s.n}</span>
@@ -1126,7 +1128,7 @@ function renderAdvisor(){
     const ord=['Feu','Eau','Terre','Air','Neutre'];
     const sortedEls=[...ord.filter(e=>byEl[e]),...Object.keys(byEl).filter(e=>!ord.includes(e))];
     rl.innerHTML=sortedEls.map(el=>
-      `<div class="elhdr" style="font-size:10px;color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
+      `<div class="elhdr" style="font-size:var(--fs-10);color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
       byEl[el].map(r=>{
         const isBest=r.spell.name===bestName;
         // Coût PA effectif (Ecaflip Dé six réduit) — affiché barré si différent du coût de base.
@@ -1134,19 +1136,19 @@ function renderAdvisor(){
         const co=[apTxt,r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
         const pf=r.spell.pfGen>0?`<span class="badge badge-pf">+${r.spell.pfGen}PF</span>`:'';
         const scLbl=getMech()?.res?.label||'jauge';
-        const sc=r.pfScaler?`<span style="font-size:9px;color:var(--purple)" title="Dégâts variables selon ${scLbl}">⤢${scLbl}</span>`:'';
-        const hm=buildsHemo(r.spell)?`<span style="font-size:9px;color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
+        const sc=r.pfScaler?`<span style="font-size:var(--fs-9);color:var(--purple)" title="Dégâts variables selon ${scLbl}">⤢${scLbl}</span>`:'';
+        const hm=buildsHemo(r.spell)?`<span style="font-size:var(--fs-9);color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
         // Crâ : indicateur Tir précis (dégât amélioré dispo / coût Précision quand actif)
         const tpOn=isModeOn('tir_precis');
-        const tp=r.spell.tp>0?`<span style="font-size:9px;color:${tpOn?'var(--gold)':'var(--dim)'}" title="${tpOn?'Tir précis actif — consomme '+r.spell.tpCost+' Précision':'Dégât amélioré en Tir précis'}">🎯${tpOn&&r.spell.tpCost?`-${r.spell.tpCost}`:''}</span>`:'';
+        const tp=r.spell.tp>0?`<span style="font-size:var(--fs-9);color:${tpOn?'var(--gold)':'var(--dim)'}" title="${tpOn?'Tir précis actif — consomme '+r.spell.tpCost+' Précision':'Dégât amélioré en Tir précis'}">🎯${tpOn&&r.spell.tpCost?`-${r.spell.tpCost}`:''}</span>`:'';
         // Dégât conditionnel « à la place » (Sacrieur : Aversion stabilisé, Fracasse vs Armure)
         const altOn=r.spell.altCond&&isModeOn(r.spell.altCond);
-        const alt=r.spell.altDmg>0?`<span style="font-size:9px;color:${altOn?'var(--gold)':'var(--dim)'}" title="${altOn?'Condition active — dégâts majorés':'Dégât majoré si condition remplie'}">⚔${altOn?'✓':''}</span>`:'';
+        const alt=r.spell.altDmg>0?`<span style="font-size:var(--fs-9);color:${altOn?'var(--gold)':'var(--dim)'}" title="${altOn?'Condition active — dégâts majorés':'Dégât majoré si condition remplie'}">⚔${altOn?'✓':''}</span>`:'';
         // Eliotrope : indicateurs Exalté / Portail (dégât modifié selon le mode)
-        const elioEx=r.spell.exaltedDmg>0?`<span style="font-size:9px;color:${isModeOn('exalte')?'var(--gold)':'var(--dim)'}" title="Dégât différent en mode Exalté (${r.spell.exaltedDmg})">⟳</span>`:'';
-        const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:9px;color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
+        const elioEx=r.spell.exaltedDmg>0?`<span style="font-size:var(--fs-9);color:${isModeOn('exalte')?'var(--gold)':'var(--dim)'}" title="Dégât différent en mode Exalté (${r.spell.exaltedDmg})">⟳</span>`:'';
+        const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:var(--fs-9);color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
         // Eniripsa : dégât conditionnel sur les PV (auto selon l'état réel)
-        const eniHp=(r.spell.lowTgtDmg>0||r.spell.selfHpBonus>0)?`<span style="font-size:9px;color:var(--dim)" title="${r.spell.lowTgtDmg>0?'Dégât plein si la cible a ≥ 80 % PV':'Bonus si l’Eniripsa a ≥ 80 % PV'}">❤</span>`:'';
+        const eniHp=(r.spell.lowTgtDmg>0||r.spell.selfHpBonus>0)?`<span style="font-size:var(--fs-9);color:var(--dim)" title="${r.spell.lowTgtDmg>0?'Dégât plein si la cible a ≥ 80 % PV':'Bonus si l’Eniripsa a ≥ 80 % PV'}">❤</span>`:'';
         // Compteur d'usages/tour : combien de fois ce sort est déjà dans la séquence perso vs sa limite.
         const maxU=r.spell.uses||3;
         const usedU=CSQ.steps.reduce((n,s)=>n+(s.sp.name===r.spell.name?1:0),0);
@@ -1215,7 +1217,7 @@ function renderDmgSeq(){
     const resGenBadge=(sp)=>{
       // Génération de jauge à afficher : Sram via pfGen, autres classes via resGen.
       const g=showRes?((sp.pfGen||0)?effPfGen(sp):resGenOf(sp)):0;
-      return g>0?`<span style="font-size:9px;color:${mech.res.color}">+${g}</span>`:'';
+      return g>0?`<span style="font-size:var(--fs-9);color:${mech.res.color}">+${g}</span>`:'';
     };
     document.getElementById('seqsteps').innerHTML=seq.chosen.map((r,i)=>
       `<div class="ss" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
@@ -1223,15 +1225,15 @@ function renderDmgSeq(){
         <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
         <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
         ${!abApplies(r.spell)?resGenBadge(r.spell):''}
-        ${abApplies(r.spell)?`<span style="font-size:9px;color:var(--sky)">🗡</span>`:''}
-        ${consumesPF(r.spell)?`<span style="font-size:9px;color:var(--gold)">✦PF</span>`:''}
+        ${abApplies(r.spell)?`<span style="font-size:var(--fs-9);color:var(--sky)">🗡</span>`:''}
+        ${consumesPF(r.spell)?`<span style="font-size:var(--fs-9);color:var(--gold)">✦PF</span>`:''}
       </div>`
     ).join('');
     document.getElementById('seqsum').innerHTML=
       `<span class="stot">${seq.total.toLocaleString('fr')}</span>
-       <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${seq.apUsed}/${seq.maxAP} PA</span>
-       <span style="font-size:10px;color:var(--gold)">CC: ${seq.totalCC.toLocaleString('fr')}</span>
-       ${seq.killRefund?`<span style="font-size:10px;color:var(--blue)">+${seq.killRefund.ap}PA ${seq.killRefund.mp}PM ${seq.killRefund.wp}PW sur kill${seq.lethal?' ✓ létal':''}${seq.refund&&seq.refund.seq.length?` → ${seq.refund.seq.map(r=>r.spell.name).join(' + ')} (+${seq.refund.total.toLocaleString('fr')})`:''}</span>`:''}`;
+       <span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${seq.apUsed}/${seq.maxAP} PA</span>
+       <span style="font-size:var(--fs-10);color:var(--gold)">CC: ${seq.totalCC.toLocaleString('fr')}</span>
+       ${seq.killRefund?`<span style="font-size:var(--fs-10);color:var(--blue)">+${seq.killRefund.ap}PA ${seq.killRefund.mp}PM ${seq.killRefund.wp}PW sur kill${seq.lethal?' ✓ létal':''}${seq.refund&&seq.refund.seq.length?` → ${seq.refund.seq.map(r=>r.spell.name).join(' + ')} (+${seq.refund.total.toLocaleString('fr')})`:''}</span>`:''}`;
     document.getElementById('seqsteps').querySelectorAll('.ss').forEach(el=>{
       bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'');
       el.addEventListener('click',()=>{
@@ -1273,21 +1275,21 @@ function renderKillsPlan(){
     const seqTxt=k.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ');
     html+=`<div style="border:1px solid var(--border);border-left:3px solid var(--red);border-radius:5px;padding:5px 8px;margin-bottom:5px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--red)">#${n+1} 💀</span>
-        <span style="font-weight:700;font-size:12px;color:var(--gold)">${k.target.name}</span>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">${k.ap} PA · ${k.dmg.toLocaleString('fr')} dmg</span>
+        <span style="font-family:var(--mono);font-size:var(--fs-10);color:var(--red)">#${n+1} 💀</span>
+        <span style="font-weight:700;font-size:var(--fs-12);color:var(--gold)">${k.target.name}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${k.ap} PA · ${k.dmg.toLocaleString('fr')} dmg</span>
       </div>
-      <div style="font-size:10px;color:var(--muted)">${seqTxt}</div></div>`;
+      <div style="font-size:var(--fs-10);color:var(--muted)">${seqTxt}</div></div>`;
   });
   if(plan.dump){
     const seqTxt=plan.dump.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ');
     html+=`<div style="border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:5px;padding:5px 8px;margin-bottom:5px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--sky)">PA restants →</span>
-        <span style="font-weight:700;font-size:12px;color:var(--gold)">${plan.dump.target.name}</span>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">${plan.dump.ap} PA · ${plan.dump.dmg.toLocaleString('fr')} dmg</span>
+        <span style="font-family:var(--mono);font-size:var(--fs-10);color:var(--sky)">PA restants →</span>
+        <span style="font-weight:700;font-size:var(--fs-12);color:var(--gold)">${plan.dump.target.name}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${plan.dump.ap} PA · ${plan.dump.dmg.toLocaleString('fr')} dmg</span>
       </div>
-      <div style="font-size:10px;color:var(--muted)">${seqTxt}</div></div>`;
+      <div style="font-size:var(--fs-10);color:var(--muted)">${seqTxt}</div></div>`;
   }
   if(!plan.kills.length && !plan.dump) html='<div class="muted-sm">Aucune cible tuable avec les PA disponibles.</div>';
   steps.innerHTML=html;
@@ -1323,9 +1325,9 @@ function renderSitBuffs(){
     + counters.map(c=>{
       const v=counterVal(c.id);
       return `<span class="cntr" title="${(c.desc||'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ${v?'var(--gold)':'var(--border)'};border-radius:5px;padding:1px 4px;white-space:nowrap">
-        <span style="font-size:10px;color:${v?'var(--gold)':'var(--dim)'}">${c.label}</span>
+        <span style="font-size:var(--fs-10);color:${v?'var(--gold)':'var(--dim)'}">${c.label}</span>
         <button class="btn sml" data-cnt="${c.id}" data-d="-1" style="padding:0 5px">−</button>
-        <span style="font-family:var(--mono);font-size:11px;color:var(--gold);min-width:10px;text-align:center">${v}</span>
+        <span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--gold);min-width:10px;text-align:center">${v}</span>
         <button class="btn sml" data-cnt="${c.id}" data-d="1" style="padding:0 5px">+</button>
       </span>`;
     }).join('');
@@ -1350,17 +1352,17 @@ function renderSpellsTab(){
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${dS>0?`<span class="scdmg">~${dS}</span>`:''}
             ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
-            ${sp.isFinisher?`<span style="font-size:9px;color:var(--gold)">★fin</span>`:''}
+            ${sp.isFinisher?`<span style="font-size:var(--fs-9);color:var(--gold)">★fin</span>`:''}
           </div>
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
           ${dS>0?`<div style="display:flex;align-items:center;gap:4px;margin-top:3px">
-            <span style="font-size:9px;color:var(--muted)">Niv.</span>
+            <span style="font-size:var(--fs-9);color:var(--muted)">Niv.</span>
             <input type="range" min="1" max="230" value="${spL}" data-sn="${sp.name}" class="slvl"
               style="flex:1;height:3px;accent-color:var(--gold)"/>
-            <span class="slvlv" style="font-size:9px;font-family:var(--mono);color:var(--gold);width:24px">${spL}</span>
+            <span class="slvlv" style="font-size:var(--fs-9);font-family:var(--mono);color:var(--gold);width:24px">${spL}</span>
           </div>`:''}
         </div>
-        <span data-rm="${sp.name}" style="color:var(--dim);font-size:13px;cursor:pointer;padding:0 2px;flex-shrink:0">✕</span>
+        <span data-rm="${sp.name}" style="color:var(--dim);font-size:var(--fs-13);cursor:pointer;padding:0 2px;flex-shrink:0">✕</span>
       </div>`;
     }).join('');
   }
@@ -1372,7 +1374,7 @@ function renderSpellsTab(){
   const ord=['Feu','Eau','Terre','Air','Neutre'];
   const sorted=[...ord.filter(e=>byEl[e]),...Object.keys(byEl).filter(e=>!ord.includes(e))];
   ae.innerHTML=sorted.map(el=>
-    `<div class="elhdr" style="font-size:10px;color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
+    `<div class="elhdr" style="font-size:var(--fs-10);color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
     byEl[el].map(sp=>{
       const inD=isInDeck(sp.name);
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:''].filter(Boolean).join(' ');
@@ -1383,14 +1385,14 @@ function renderSpellsTab(){
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${sp.damageMax>0?`<span class="scdmg">${sp.damageMin}-${sp.damageMax}</span>`:''}
-            ${sp.damageCrit>0?`<span style="font-size:9px;color:#c0c060">CC:${sp.damageCrit}</span>`:''}
+            ${sp.damageCrit>0?`<span style="font-size:var(--fs-9);color:#c0c060">CC:${sp.damageCrit}</span>`:''}
             ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
-            ${sp.isFinisher?`<span style="font-size:9px;color:var(--gold)">★</span>`:''}
+            ${sp.isFinisher?`<span style="font-size:var(--fs-9);color:var(--gold)">★</span>`:''}
           </div>
           ${meta?`<div class="meta" style="margin-top:1px">${meta}</div>`:''}
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
         </div>
-        <span style="color:${inD?'var(--gold)':'var(--dim)'};font-size:13px;flex-shrink:0">${inD?'✓':'+'}</span>
+        <span style="color:${inD?'var(--gold)':'var(--dim)'};font-size:var(--fs-13);flex-shrink:0">${inD?'✓':'+'}</span>
       </div>`;
     }).join('')
   ).join('');
@@ -1445,12 +1447,12 @@ function renderPassivesTab(){
     return `<div class="pc ${on?'on':''}" data-pid="${p.id}">
       <div style="flex:1;min-width:0">
         <div class="pn">${p.name}</div>
-        ${p.desc?`<div style="font-size:11px;color:#9099bb;line-height:1.4;margin-top:2px">${p.desc}</div>`:''}
+        ${p.desc?`<div style="font-size:var(--fs-11);color:#9099bb;line-height:1.4;margin-top:2px">${p.desc}</div>`:''}
       </div>
-      <span style="color:${on?'var(--gold)':'var(--dim)'};font-size:14px;flex-shrink:0">${on?'✓':'+'}</span>
+      <span style="color:${on?'var(--gold)':'var(--dim)'};font-size:var(--fs-14);flex-shrink:0">${on?'✓':'+'}</span>
     </div>`;
   };
-  const divider=genP.length?'<div class="elhdr" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 0 3px;border-top:1px solid var(--border);margin-top:4px">Passifs généraux</div>':'';
+  const divider=genP.length?'<div class="elhdr" style="font-size:var(--fs-9);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 0 3px;border-top:1px solid var(--border);margin-top:4px">Passifs généraux</div>':'';
   le.innerHTML=clsP.map(card).join('')+divider+genP.map(card).join('');
   // Effects
   const es=document.getElementById('passeffsec'), ef=document.getElementById('passefflist');
@@ -1467,7 +1469,7 @@ function renderPassivesTab(){
     const LBL={ap:'PA',degatsInfliges:'% DI',soinsRealises:'% Soins',maitriseFeu:'Maît. Feu',maitriseEau:'Maît. Eau',maitriseTerre:'Maît. Terre',maitriseAir:'Maît. Air',esquive:'Esquive',tacle:'Tacle',initiative:'Initiative',volonte:'Volonté',hpPct:'% PV'};
     const lines=Object.entries(sbAll).map(([k,v])=>`<span style="color:${v>0?'var(--green)':'var(--red)'}">${v>0?'+':''}${v}</span> ${LBL[k]||k}`);
     if(ok.ap||ok.mp||ok.wp) lines.push(`<span style="color:var(--gold)">+${ok.ap}PA +${ok.mp}PM +${ok.wp}PW${ok.hp?` +${ok.hp}% PV`:''}</span> sur kill`);
-    ef.innerHTML=lines.map(l=>`<div style="font-size:11px;padding:2px 0;border-bottom:1px solid var(--border)">${l}</div>`).join('');
+    ef.innerHTML=lines.map(l=>`<div style="font-size:var(--fs-11);padding:2px 0;border-bottom:1px solid var(--border)">${l}</div>`).join('');
   }
 }
 // Délégation (conteneur #passlist stable) : toggle d'un passif au clic.
@@ -1495,6 +1497,14 @@ const STAT_ICON={
   degatsInfliges:'damage_inflicted', dmgIndirect:'indirect_damage', soinsRealises:'heals_performed',
   tacle:'lock', esquive:'dodge', portee:'range', controle:'control', sagesse:'wisdom', prospection:'prospecting',
 };
+// Valeur « effectif » à AFFICHER pour une stat : maitriseElem (monture, passifs « +X maîtrise
+// élémentaire ») s'ajoute à CHACUN des 4 éléments — comme dans le calcul de dégâts (cf. elMastery).
+const ELEM_MAST_KEYS=new Set(['maitriseFeu','maitriseEau','maitriseTerre','maitriseAir']);
+function effDisplay(key,eff){
+  let v=eff[key]||0;
+  if(ELEM_MAST_KEYS.has(key)) v+=(eff.maitriseElem||0);
+  return v;
+}
 function renderPerso(){
   // Bonus rows
   document.querySelectorAll('.brow').forEach(row=>{
@@ -1509,7 +1519,7 @@ function renderPerso(){
   const con=document.getElementById('perstats');
   if(!con) return;
   if(!S.build){
-    con.innerHTML='<div style="font-size:13px;color:var(--dim)">Choisis ta classe dans l’onglet <b>Build</b>, puis saisis tes stats ici — ou importe un build Wakfuli/Zénith.</div>';
+    con.innerHTML='<div style="font-size:var(--fs-13);color:var(--dim)">Choisis ta classe dans l’onglet <b>Build</b>, puis saisis tes stats ici — ou importe un build Wakfuli/Zénith.</div>';
     return;
   }
   if(!S.build.stats) S.build.stats={};
@@ -1518,7 +1528,7 @@ function renderPerso(){
   for(const [grp,defs] of STATDEFS){
     const rows=defs.map(([key,lbl])=>{
       const bv=base[key]??'';
-      const ev=eff[key]||0;
+      const ev=effDisplay(key,eff);
       const showEff=(Number(bv||0)!==ev)&&ev!==0;
       const ic=STAT_ICON[key]?statIcon(STAT_ICON[key],'',null,lbl):'';
       return `<div class="strow">
@@ -1527,9 +1537,9 @@ function renderPerso(){
         <span class="stv" style="color:var(--dim);width:56px">${showEff?ev.toLocaleString('fr'):''}</span>
       </div>`;
     }).join('');
-    groups.push(`<div style="margin-bottom:10px"><div class="sh" style="font-size:11px">${grp}</div>${rows}</div>`);
+    groups.push(`<div style="margin-bottom:10px"><div class="sh" style="font-size:var(--fs-11)">${grp}</div>${rows}</div>`);
   }
-  let html='<div id="perstats-cols"><div style="font-size:11px;color:var(--muted);margin-bottom:8px;grid-column:1/-1">Saisie manuelle — valeurs de base. <span style="color:var(--dim)">Gris = effectif (avec bonus/passifs).</span></div>'+groups.join('')+'</div>';
+  let html='<div id="perstats-cols"><div style="font-size:var(--fs-11);color:var(--muted);margin-bottom:8px;grid-column:1/-1">Saisie manuelle — valeurs de base. <span style="color:var(--dim)">Gris = effectif (avec bonus/passifs).</span></div>'+groups.join('')+'</div>';
   con.innerHTML=html;
   con.querySelectorAll('.stbase').forEach(inp=>{
     // 'input' (live) → save + refresh effective column only, no full re-render (préserve le focus Tab)
@@ -1540,7 +1550,7 @@ function renderPerso(){
       // mise à jour des spans « effectif » sans toucher au DOM des inputs
       const eff=getEffStats();
       con.querySelectorAll('.stbase').forEach(i2=>{
-        const k2=i2.dataset.k, bv2=S.build.stats[k2]??'', ev2=eff[k2]||0;
+        const k2=i2.dataset.k, bv2=S.build.stats[k2]??'', ev2=effDisplay(k2,eff);
         const sp=i2.nextElementSibling;
         if(sp) sp.textContent=(Number(bv2||0)!==ev2&&ev2!==0)?ev2.toLocaleString('fr'):'';
       });
@@ -1943,16 +1953,14 @@ function setupShortcuts(){
 function renderAll(){ renderPerso();renderAdvisor();renderMonPanel();renderSpellsTab();renderPassivesTab();renderNameBanner(); }
 
 // ── TAILLE TEXTE GLOBALE (slider) ────────────────────────────────
+// Le curseur agit sur --ui-scale → html{font-size} ; comme toutes les tailles de texte
+// sont en rem, seul le TEXTE grossit. Les espacements/bordures (en px) restent fixes.
 function applyZoom(){
   const z = S.zoom || 1;
+  document.documentElement.style.setProperty('--ui-scale', z);
+  // Nettoie l'ancien zoom de layout au cas où un état sauvegardé l'aurait laissé.
   const app = document.getElementById('app');
-  if(app){
-    app.style.zoom = z;                        // échelle fiable de toute l'UI (texte + layout)
-    // zoom rétrécit/agrandit la boîte : on compense pour rester en plein écran exact.
-    app.style.height = `calc(100vh / ${z})`;
-    app.style.width  = `calc(100vw / ${z})`;
-  }
-  document.documentElement.style.setProperty('--zoom', z); // conservé si du CSS le référence
+  if(app){ app.style.zoom=''; app.style.height=''; app.style.width=''; }
 }
 // Taille du texte : saisie en POURCENTAGE (80–150 %), convertie vers le facteur de zoom.
 const FONT_PCT_MIN=80, FONT_PCT_MAX=150;
