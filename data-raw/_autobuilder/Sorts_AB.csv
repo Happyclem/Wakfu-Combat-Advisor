@@ -1,0 +1,711 @@
+Id;Classe;Nom;Element;CoutPA;PortMin;PortMax;Area;BaseDmg;CritDmg;LigneDeVue;iconId;EstPassif;DescEN
+4769;CRA;Flèche ardente;feu;2;2;5;monocible;60;76;oui;600;non;Steals 1 MP from the target. This spell generates 20 Sharpening and Precision.
+4774;CRA;Roulade;;2;1;3;;0;0;oui;617;non;Rolls to the targeted cell. The Cra can use this spell to escape from an enemy that was locking them, or move to a more favorable position to inflict damage.
+4805;CRA;Retraite balisée;;2;3;6;;0;0;oui;4805;non;Teleports to the targeted cell, if the targeted cell is adjacent to one of the Cra's Beacons.
+4806;CRA;Eclaireur;;2;;;;0;0;oui;4806;non;The caster gains damage and converts all their Precision into Sharpening.
+4808;CRA;Frappe incisive;;2;4;6;;0;0;oui;4808;non;Stabilizes the target, which therefore cannot be pushed, attracted, teleported or carried for 1 turn. In addition, healing received by the target will decrease for 1 turn.
+4809;CRA;Flèche tempête;air;3;3;6;zone;91;114;oui;899;non;Inflicts Air damage in a cone-shaped area of effect. This spell generates 30 Sharpening and Precision.
+4810;CRA;Flèche de recul;air;3;1;1;monocible;121;152;oui;612;non;Repels the target by several cells. This spell generates 40 Sharpening and Precision.
+4811;CRA;Flèche harcelante;air;4;2;6;monocible;111;139;non;608;non;This spell does not require line of sight. It can pass through obstacles to inflict damage on hidden targets. This spell generates 40 Sharpening and Precision.
+4812;CRA;Flèche statique;air;5;1;1;monocible;182;228;oui;890;non;If the caster has not moved using MP during their turn, this spell inflicts increased damage. This spell generates 60 Sharpening and Precision.
+4813;CRA;Flèche chercheuse;air;2;4;9;monocible;55;69;oui;594;non;This spell has a very long range. It can also pass through obstacles if the Cra is in Precision Shot. This spell generates 20 Sharpening and Precision.
+4814;CRA;Flèche destructrice;terre;6;1;1;monocible;295;369;oui;598;non;Inflicts heavy Earth damage. This spell generates 70 Sharpening and Precision.
+4815;CRA;Flèche perçante;terre;5;2;4;monocible;139;174;oui;599;non;The damage from this spell is inflicted as rebounds. If the spell targets an enemy A, the spell rebounds to an enemy B within 3 cells or less from enemy A. It then rebounds again to an enemy C within 3 cells or less from fighter B. Beacons can be triggered using this spell. This spell generates 50 Sharpening and Precision.
+4816;CRA;Flèche cinglante;terre;3;2;4;monocible;76;95;oui;593;non;Reduces the target's MP. This spell generates 30 Sharpening and Precision.
+4817;CRA;Pluie de flèches;terre;4;4;6;monocible;141;176;oui;597;non;Inflicts Earth damage. At the start of the Cra's next turn, the spell is replicated on the targeted cell. This will inflict additional damage if the target has not moved, for example. This spell generates 40 Sharpening and Precision.
+4818;CRA;Flèche criblante;terre;3;1;1;monocible;105;132;oui;607;non;In addition to the damage inflicted by this spell, the Cra marks their target and inflicts damage on it each time they consume Precision. This spell generates 40 Sharpening and Precision.
+4819;CRA;Flèche explosive;feu;5;1;1;monocible;139;174;oui;606;non;Inflicts heavy Fire damage in a 2-cell circle. This spell generates 60 Sharpening and Precision.
+4820;CRA;Flèche fulminante;feu;3;2;5;monocible;98;123;oui;601;non;Inflicts considerable Fire damage on the target. This spell generates 30 Sharpening and Precision.
+4821;CRA;Flèche enflammée;feu;4;2;5;zone;121;152;oui;4821;non;Inflicts damage in an area of effect, hitting 5 cells in a vertical line from the cell where the spell is cast. In addition, enemies hit by this spell take greater indirect damage (poisons, traps, etc.) for one turn. This spell generates 40 Sharpening and Precision.
+4822;CRA;Flèche d'immolation;feu;2;2;5;zone;60;76;oui;604;non;Inflicts Fire damage in a cross-shaped area of effect. The spell inflicts double damage on targeted summons. This spell generates 20 Sharpening and Precision.
+6842;CRA;Rafale;;1;1;1;;0;0;oui;654;non;The Cra unlocks 3 luminous arrows to use whenever needed. Light damage draws on the element of the caster's best mastery.
+6945;CRA;Archer futé;;;;;;0;0;oui;4801;oui;Each Sharpened Arrowhead that the Cra gains gives them a Luminous Arrow. In exchange, the Luminous Arrow spell will now have non-modifiable range.
+6946;CRA;éclaireur spécialisé;;;;;;0;0;oui;1420;oui;The Evasive state heals the Cra's missing HP. However, the area required to be Evasive becomes larger.
+6947;CRA;Balises discrètes;;;;;;0;0;non;615;oui;Cra Beacons no longer block line of sight. When Beagon is cast, targets aligned with the beacon are pushed back.
+6948;CRA;Parti pris;;;;;;0;0;oui;5072;oui;When the Cra obtains their Sharpened Arrowhead, they convert MP into AP if they are in Precision Shot. If they have not cast Precision Shot, they convert AP to MP instead.
+6949;CRA;Distance focale;;;;;;0;0;oui;7330;oui;The Cra can naturally cast their elemental spells 2 cells farther. In return, the minimum range of their elemental spells also increases by 2.
+6950;CRA;Précision vorace;;;;;;0;0;oui;5122;oui;When the Cra is affected by Precision Shot, their spells that consume Precision steal 25% of the damage inflicted. However, Precision Shot can only be cast once per turn.
+6951;CRA;La voie de l'arc;;;;;;0;0;oui;5077;oui;When the Cra removes MP from a target, they generate Precision and Sharpening. They no longer gain any at end of turn when Evasive.
+6952;CRA;Débalisage massif;;;;;;0;0;oui;615;oui;The Beagon spell immediately destroys all the Cra's beacons to generate Sharpening and Precision.
+6953;CRA;étude balistique;;;;;;0;0;oui;620;oui;Beacons' redirected damage is no longer applied to allies in addition, allies hit by a Beacon gain 1 Range. However, the Cra can now only summon one beacon in each element.
+6955;CRA;Paradoxe du Crâ;;;;;;0;0;oui;2076;oui;To be able to acquire the Evasive bonus, the Cra must have at least one enemy within 3 cells or less.
+6956;CRA;éclaireur intouchable;;;;;;0;0;oui;588;oui;The Cra gains Force of Will. In return, their Dodge is reduced to 0 at the start of the fight.
+6957;CRA;Instinct du chasseur;feu;;;;;0;0;oui;6930;oui;The Cra's single-target spells have different effects on their Beacons. In exchange, their Beacons must be spaced farther apart when placed.
+6958;CRA;Balisage rapproché;;;;;;0;0;oui;610;oui;The Cra can remove their Beacons for free. However, the summoning range of the Beacons can no longer be modified.
+6959;CRA;Tireur solitaire;;;;;;0;0;oui;5073;oui;The Cra can gain bonuses when Evasive reaches level 40 or higher. However, the state also requires that there be no allies around the Cra.
+6960;CRA;Esprit affûté;;;;;;0;0;oui;852;oui;The Cra gains Sharpening when they cast their Precision Shot. However, they can no longer increase their Precision level above 200.
+6961;CRA;L'art des Balises;;;;;;0;0;non;3362;oui;Beacons can be cast without line of sight but cost 1 WP more.
+6962;CRA;Tir divergent;;;;;;0;0;oui;586;oui;When the Sharpened Arrowhead is consumed, the caster and the target of the spell suffer an MP removal.
+6963;CRA;Perforation Crâ;;;;;;0;0;oui;619;oui;When the Cra has the Sharpened Arrowhead, their next single-target spell runs through the target and inflicts damage in a straight line. In return, their Sharpened Arrowhead no longer gives them damage inflicted.
+7753;CRA;œil de taupe;;2;1;1;;0;0;oui;7753;non;Removes 4 Range from enemies in an area of effect. Their spells can hit less distant targets. However, if the spell is cast on the Cra, they and their adjacent allies gain 4 Range.
+7795;CRA;Pointe protectrice;;;;;;0;0;oui;6997;oui;If the Cra ends their turn with Sharpening, that state is consumed to give the Cra elemental resistance for the following turn.
+2041;ECAFLIP;Pile ou face;terre;3;1;3;monocible;91;114;oui;2041;non;Cast on an enemy, this spell deals damage and heals the Ecaflip for an amount equal to the HP lost by the target. Cast on an ally, the spell heals the ally and the Ecaflip.
+2042;ECAFLIP;Dé six;feu;6;1;1;monocible;247;308;oui;2050;non;The next time this spell is cast, its cost is lower.
+2043;ECAFLIP;Tout ou rien;terre;2;1;2;monocible;98;123;oui;2043;non;This spell inflicts heavy damage. However, the Ecaflip has a 50% chance of getting hurt themself.
+2044;ECAFLIP;Trois cartes;terre;5;1;3;zone;139;174;oui;2044;non;The Ecaflip tosses three cards in a line. Based on the number of targets hit, the Ecaflip gains resistance.
+2045;ECAFLIP;Craps;feu;2;3;7;monocible;60;76;oui;2045;non;Inflicts Fire damage on a target and applies Preparation to the Ecaflip. Preparation increases the damage of the next spell.
+2046;ECAFLIP;Feulement;feu;6;1;1;zone;197;246;oui;2046;non;With this AoE spell, the Ecaflip can regain health and armor based on the number of opponents in the area of effect.
+2047;ECAFLIP;All in;terre;1;1;4;monocible;19;24;oui;2047;non;This spell uses the Ecaflip's remaining AP (up to 10). The more AP used, the more damage it deals. The Ecaflip then has a 50% chance to recover all AP used by this spell.
+2048;ECAFLIP;Roulette à dés;feu;5;;;zone;139;174;oui;2048;non;This area-of-effect spell is cast around the Ecaflip. It inflicts damage on enemies and heals allies.
+2049;ECAFLIP;Bataille;terre;4;1;1;monocible;164;205;oui;2049;non;The Ecaflip plays War with their target. If the Ecaflip wins, they gain AP and Critical Hit. If they lose, the opposite happens: They lose their current AP!
+2050;ECAFLIP;Dé du chateux;feu;3;1;3;monocible;51;63;oui;2042;non;This spell's damage is variable. If the Ecaflip kills an enemy with it, they gain 2 AP on the next turn.
+2059;ECAFLIP;Tarot veinard;;;;;;0;0;oui;5456;oui;Tarot cards increase the Ecaflip's Lucky Day and give them a boost to critical hit rate based on the cards' numerical value.
+2060;ECAFLIP;Quitte ou double;;2;;;;0;0;oui;859;non;This spell draws three tarot cards from the draw pile and immediately plays them on the Ecaflip.
+2061;ECAFLIP;Félintuition;;3;1;4;monocible;74;93;oui;2061;non;Places a glyph that stays on the field for 1 turn. The glyph activates when an allied or enemy fighter starts their turn on it.
+2062;ECAFLIP;Pucif;;;;;;0;0;oui;7931;oui;This passive reduces elemental healing done by the Ecaflip. In exchange, each elemental heal is replicated at the end of the target's turn before being transferred to the nearest ally.
+2065;ECAFLIP;Langue rapeuse;eau;3;1;5;monocible;98;123;oui;2065;non;Draws the target toward the caster. Heals allies and inflicts damage on enemies.
+2066;ECAFLIP;Lacérations;eau;4;2;4;monocible;98;123;oui;2066;non;The Ecaflip teleports several cells away, dealing damage along the way. If any allies are in their path, those allies are healed.
+2067;ECAFLIP;Capucine;eau;4;0;4;monocible;111;139;oui;2067;non;The damage from this spell is inflicted as rebounds. If the spell targets an enemy A, the spell rebounds to an enemy B within 3 cells or less from enemy A. It then rebounds again to an enemy C within 3 cells or less from fighter B. It works the same way if the spell is cast on an ally, but then the spell will do a chain heal.
+2068;ECAFLIP;La Mésaventure;;;;;;0;0;oui;2068;oui;Unlocks an extra tarot card (added to the draw pile). This card reduces the target's mobility and damage but increases their resistance for one turn.
+2072;ECAFLIP;Bas les pattes;eau;2;1;1;monocible;65;82;oui;2072;non;This spell pushes the target one cell per water spell previously cast in the turn.
+2073;ECAFLIP;Pupuce;eau;4;0;2;monocible;141;176;oui;2073;non;This super-powerful spell has a different effect depending on the target it is cast on: on an ally, it provides healing and increases MP and WP. On an enemy, however, the spell reduces their WP and health.
+2075;ECAFLIP;Topkaj;;3;1;4;;0;0;oui;2075;non;If cast on a KO'd ally, this spell revives the ally (an ally can only be revived once per fight) and gives them MP. If cast on the Ecaflip, it gives a bonus to critical hit rate and boosts MP for 2 turns, applied to the Ecaflip and their nearby allies.
+2076;ECAFLIP;En veine;;;;;;0;0;oui;5246;oui;Each Critical Hit point given by the Ecaflip (to themself or someone else) increases their Lucky Day by 1. However, when Critical Hit is given, it only lasts one turn.
+2078;ECAFLIP;Jeton de vie;;2;1;1;;0;0;oui;2078;non;This spell's target gains a life token. The target can survive a lethal attack once per turn. The token lasts for one turn: if not consumed, on the Ecaflip's next turn, the Ecaflip recovers it and sets their HP to be the same as the spell target's HP.
+2079;ECAFLIP;Coup du sort;;1;1;1;;0;0;oui;850;non;This spell uses the cards in hand.
+2080;ECAFLIP;L'Infortune;;;;;;0;0;oui;2080;oui;Unlocks an extra tarot card (added to the draw pile). This tarot card converts the target's Critical Hit into Block, at a rate of one to one, for one turn.
+5246;ECAFLIP;Tarot divinatoire;;;;;;0;0;oui;4959;oui;The Ecaflip earns bonuses by playing cards in pairs of the same color. However, Roll Again costs more.
+5249;ECAFLIP;Impact félin;;;;;;0;0;oui;5249;oui;This passive changes how the number of uses of Feline Leap is generated. Ending a turn adjacent to an enemy gives the spell two extra uses.
+5250;ECAFLIP;Le Destin d'Ecaflip;;;;;;0;0;oui;5250;oui;Unlocks an extra tarot card (added to the draw pile). This tarot card inflicts serious damage on the target. However, if the target is still alive the next turn, the Ecaflip takes the same damage.
+5251;ECAFLIP;Triche;;;;;;0;0;oui;852;oui;This passive allows the Ecaflip to play the first card of their turn for free. However, unless they use Roll Again, the Ecaflip can only draw a single card.
+7225;ECAFLIP;Trèfle;;3;0;3;;0;0;oui;861;non;This spell can help an ally by granting various bonuses or weaken an enemy by making them more vulnerable.
+7954;ECAFLIP;Veine soigneuse;;;;;;0;0;oui;5463;oui;With this passive, Lucky Day increases healing done by the Ecaflip. However, Lucky Day only lasts one turn, no matter how it's generated.
+7955;ECAFLIP;Tarot félin;;;;;;0;0;oui;7928;oui;When the Ecaflip uses a tarot card on a fighter, they switch places with them. However, the Ecaflip will be stabilized until their turn ends.
+7956;ECAFLIP;La fortune sourit aux audacieux;;;;;;0;0;oui;5466;oui;With this passive activated, the Ecaflip will regenerate Wakfu points when badly injured.
+7957;ECAFLIP;Pile, je gagne;;;;;;0;0;oui;5251;oui;This passive boosts the Ecaflip's natural resistance and survival abilities. They regenerate and gain resistance bonuses when they play a card with 100 Lucky Day. In exchange, the Ecaflip loses all their dodge.
+7958;ECAFLIP;Dés généreux;;;;;;0;0;oui;7935;oui;This passive transforms Lucky Star, applied when the Ecaflip goes over 100 Critical Hit. Instead of boosting damage, Lucky Star now boosts healing.
+7959;ECAFLIP;Félin suprême;;;;;;0;0;non;2059;oui;This passive changes the Feline Leap spell. It can be cast without line of sight, but it costs more.
+7960;ECAFLIP;Black Jack;;;;;;0;0;oui;5101;oui;Cards in the Ecaflip's hand are added up at the start of the turn. If their total value is equal to or less than 20, the Ecaflip gains Armor. If their value is over 20, the Ecaflip gets a penalty to final Armor received for 1 turn.
+7961;ECAFLIP;Atouts périodiques;;;;;;0;0;oui;5461;oui;This passive allows for some control over cards. On odd turns, the Ecaflip can only draw and play odd-numbered tarot cards, and on even turns, they can only draw and play even-numbered tarot cards.
+7999;ECAFLIP;Sept fétiche;;;;;;0;0;oui;866;oui;Every six tarot cards played with their normal effect (not doubled by Lucky Day), the Ecaflip maximizes their Lucky Day and empties their draw pile.
+8000;ECAFLIP;L'Univers;;;;;;0;0;oui;8000;oui;Cuts Lucky Day gains in half. Unlocks the Universe card when the Ecaflip reaches exactly 42 Lucky Day (the card is not in the draw pile).
+8001;ECAFLIP;Veine des cartes;;;;;;0;0;oui;2062;oui;This passive grants control over Lucky Day based on the cards still in the Ecaflip's hand at the end of their turn.
+4668;ELIOTROPE;Egide ardente;terre;3;1;1;monocible;111;139;oui;4668;non;This spells repositions a portal on a target or through another portal. If the Eliotrope has Celestial Gift when they cast the spell, the WP cost is refunded.
+4669;ELIOTROPE;Targe fracassante;terre;3;1;3;monocible;91;114;oui;4669;non;This spell inflicts Earth damage and debuffs the target based on the Eliotrope's active mode. If the Eliotrope consumes the Celestial Gift on the spell, removal effects are doubled.
+4670;ELIOTROPE;Séisme;terre;4;1;4;zone;111;139;oui;4670;non;If the Eliotrope targets themself, they inflict damage around them. If they target an enemy, they mark the enemy the next time they cast Exaltation, the marked enemy will take indirect damage.
+4671;ELIOTROPE;Raclée;terre;3;1;4;monocible;98;123;oui;4671;non;Inflicts Earth damage. If the target is on a portal, the Eliotrope is healed for the amount of damage they deal if in calm mode their damage is increased if in exalted mode.
+4680;ELIOTROPE;Tourbillon;eau;2;1;4;zone;60;76;oui;4680;non;This spell can only be cast on an allied portal. Besides dealing damage and healing in an area of effect, it pushes targets in an area of effect around the portal (in calm mode) and attracts targets around the portal (in exalted mode).
+4683;ELIOTROPE;Brèche temporaire;;2;1;1;;0;0;oui;4683;non;The Eliotrope can teleport to the targeted cell if they are in Calm mode. In Exalted mode, the target is teleported to the closest portal.
+4684;ELIOTROPE;Exode;;1;1;1;;0;0;oui;7199;non;When cast on an empty cell, this spell moves a nearby portal to the targeted cell. Cast on a target, the target switches places with the nearest free portal.
+4685;ELIOTROPE;Incandescence;;1;1;4;monocible;91;114;oui;4685;non;Stabilizes the target. If the target is an opponent, they suffer damage based on the number of portals near the target.
+4686;ELIOTROPE;Rage;;;;;;0;0;oui;4686;oui;The Eliotrope gains Celestial Gift instantly after casting the Celestial Portal spell. However, the AP bonus from Celestial Gift maxes out at 1 time per turn.
+4687;ELIOTROPE;Traquenard;;;;;;0;0;oui;4687;oui;Celestial Gift provides a very high damage bonus, but only if the target has its back to the Eliotrope.
+4688;ELIOTROPE;Effervescence;;;;;;0;0;oui;7185;oui;This passive allows the Eliotrope to deal much greater damage with their next spell after changing modes. In exchange, the damage bonus from Calm lasts only one turn.
+4689;ELIOTROPE;Intermédiaire;;;;;;0;0;oui;4689;oui;Celestial Portal no longer costs AP to cast, but Celestial Gift gives an MP bonus instead of an AP bonus.
+4690;ELIOTROPE;Résilience;;;;;;0;0;oui;4690;oui;The Eliotrope no longer recovers WP upon gaining Celestial Gift. Instead, they gain Armor to absorb incoming attacks.
+4691;ELIOTROPE;Wakméha;eau;4;1;5;monocible;131;164;oui;4691;non;In calm mode, this spell deals heavy damage if cast through a portal. In exalted mode, it deals damage both on and under a target's armor at the same time.
+4692;ELIOTROPE;Pulsation;eau;2;1;4;monocible;91;114;oui;4692;non;This spell inflicts single-target damage or heals an ally through portals in a flexible way. If no portals are within 3 cells or less of the target, the damage and healing are increased.
+4693;ELIOTROPE;Déluge;eau;3;1;5;monocible;105;132;oui;4693;non;In calm mode, the Eliotrope switches places with their target. In exalted mode, the Eliotrope teleports symmetrically to their target. If this spell is cast through a portal, only the damage or healing is applied.
+4694;ELIOTROPE;Cataclysme;eau;5;1;4;zone;195;244;oui;4694;non;In Calm mode, the Eliotrope deploys a Cataclysm area of effect on the field. The next time Exaltation is cast, they teleport to the area and then deal huge damage around them. In Exalted mode, the Eliotrope inflicts heavy damage on the target.
+4695;ELIOTROPE;Heurt;terre;4;1;4;zone;121;152;oui;4695;non;Inflicts damage in a cross-shaped area of effect. In exalted mode, the area of effect is a diagonal cross. If the Eliotrope consumes Celestial Gift on this spell, they regain 1 AP for each target killed.
+4697;ELIOTROPE;Flux torrentiel;air;4;1;3;zone;102;127;oui;4697;non;Inflicts damage in a line. Enemies starting or ending their turn in the area where the spell was cast take extra damage. When cast through a portal, the Eliotrope inflicts major damage on the target, but the destination portal is destroyed.
+4698;ELIOTROPE;Siphon;air;2;1;4;monocible;75;94;oui;4698;non;This spell inflicts Air damage on enemies and heals allies, in addition to pushing or attracting (based on what mode the Eliotrope is in).
+4699;ELIOTROPE;Salve éthérée;air;3;1;4;monocible;105;132;oui;4699;non;Inflicts Air damage and gives the target a healing received penalty (in calm mode) or an armor received penalty (in exalted mode).
+4700;ELIOTROPE;Tempête;air;5;1;4;zone;164;205;oui;4700;non;Inflicts damage in an area of effect. If this spell is cast on a portal, the area-of-effect damage is dealt around each portal currently on the field, and the portals are destroyed.
+4701;ELIOTROPE;Lame déchaînée;air;5;1;2;monocible;176;220;oui;4701;non;This spell inflicts heavy damage on the target, but can only be cast on an adjacent target. The target will take greater damage if it is on a portal.
+5056;ELIOTROPE;Disciple du portail;;;;;;0;0;oui;5348;oui;This passive allows the Eliotrope to create a temporary portal under them when they cast the Exaltation spell. The portal can exceed the limit of 4, but it cannot be moved and will disappear at the end of the turn. In exchange, the Eliotrope can no longer use the Portal spell until the end of their turn.
+5131;ELIOTROPE;Transitoire;;;;;;0;0;oui;5352;oui;If the Eliotrope or an ally goes through a Portal, they gain MP for the current turn. In exchange, they can no longer use portals to move until the following turn. This passive applies to all of the team's portals.
+5132;ELIOTROPE;Réminiscence;;;;;;0;0;oui;5132;oui;The Eliotrope automatically changes modes at end of turn. Also, they can cast Exaltation on another ally from a distance.
+5143;ELIOTROPE;Portail céleste;;;;;;0;0;oui;5143;oui;The Eliotrope teleports to the closest portal at the start of the turn.
+7198;ELIOTROPE;Empreinte de Wakfu;;2;1;4;;0;0;oui;4843;non;On an ally, applies Armor that absorbs the next attacks received. On an enemy, removes Armor. The effects are doubled if the spell goes through a portal.
+7199;ELIOTROPE;Coalition;;2;1;4;;0;0;oui;4684;non;Enables the Eliotrope to destroy all allied portals on the field and instantly place a new one on the targeted cell, in order to more efficiently change how their portals are set up.
+7200;ELIOTROPE;Barrière;;2;1;1;;0;0;oui;7200;non;When cast on a portal, this spell places a barrier that shields any allies standing on it and debuffs any enemies that pass through it.
+7202;ELIOTROPE;Interstellaire;;;;;;0;0;oui;5101;oui;Allies that use one of the Eliotrope's portals more than 6 cells away are no longer affected by Long Teleportation, but the starting portal is destroyed. This passive applies to all of the team's portals.
+7203;ELIOTROPE;Dimension blanche;;;;;;0;0;oui;5104;oui;Fighters around portals gain Critical Hits at the start of the Eliotrope's turn if the Eliotrope is in Calm mode, and lose Critical Hits if the Eliotrope is Exalted.
+7204;ELIOTROPE;Quiétude;;;;;;0;0;oui;880;oui;The Eliotrope regains AP (instead of gaining a damage inflicted bonus) when the Exaltation spell is cast.
+7205;ELIOTROPE;Espace-temps;;;;;;0;0;oui;4688;oui;Instead of lasting indefinitely, portals last for 2 turns. This passive applies to all of the team's portals.
+7206;ELIOTROPE;Porta(i)l;;;;;;0;0;oui;7206;oui;The Eliotrope now has just two portals, but they can move them around more easily and at a greater distance. Also, their damage and heals performed through portals are increased.
+7207;ELIOTROPE;Bouclier de la fin;;;;;;0;0;oui;7207;oui;The Eliotrope must place their portals adjacent to a fighter. In return, allies who use their portals are healed and gain AP. This passive applies to all of the team's portals.
+7208;ELIOTROPE;épée du début;;;;;;0;0;oui;7208;oui;The Eliotrope can get Celestial Gift by casting spells on adjacent targets. In exchange, the maximum range of all of their spells is reduced.
+7209;ELIOTROPE;Cicatrisation;;;;;;0;0;oui;5454;oui;The Eliotrope is healed for part of their missing HP when ending their turn in Calm mode, in exchange for one WP. If they are on a portal, the healing is greater.
+7210;ELIOTROPE;Concentration;;;;;;0;0;oui;7343;oui;Celestial Portal is more useful and can be cast multiple times per turn. In exchange, it is harder to cast.
+7720;ELIOTROPE;Méditation;;;;;;0;0;oui;5131;oui;The Eliotrope no longer gains damage by starting their turn in Calm mode, but gains MP and elemental resistance instead. Celestial Gift is also consumed if heals are performed, which then boosts healing.
+7814;ELIOTROPE;Souffle de la déesse;;;;;;0;0;oui;6925;oui;If the Eliotrope casts the Portal spell on an ally while standing on a portal, they switch places, but the caster does not place a new portal.
+623;ENIRIPSA;Colli-mateur;air;2;1;4;monocible;60;76;oui;623;non;Inflicts Air damage on the target and makes the target vulnerable to collisions. To cause a collision, you must push one obstacle against another one.
+625;ENIRIPSA;Reconstitution;eau;5;1;1;monocible;182;228;oui;625;non;This spell can reach targets through obstacles. It heals the targeted ally and increases healing done by the Eniripsa for the rest of their turn.
+627;ENIRIPSA;Déphasage;;1;2;2;;0;0;oui;627;non;The target loses all AP but becomes immune to damage for one turn.
+628;ENIRIPSA;Médecin sans barrière;;;;;;0;0;oui;628;oui;Changes how Propagator works: Performing heals no longer increases it, but inflicting damage does. Propagator is consumed on a single-target heal, and improves the healing performed.
+630;ENIRIPSA;Anatomie;air;3;1;4;monocible;152;190;oui;630;non;Inflicts Air damage that penetrates Armor. This damage is greater if the target has high HP.
+636;ENIRIPSA;Corro-soin;feu;5;1;1;zone;164;205;oui;636;non;The target becomes marked: boosts the next three direct, single-target damage spells suffered by the target. Also, a portion of damage inflicted on the target is redistributed in the form of healing around the target.
+638;ENIRIPSA;Feu gardien;feu;4;1;2;;0;0;oui;638;non;Heals an ally and applies a mark to the ally: If the ally loses HP and falls below 50% of their max HP, they are healed by the Eniripsa a second time.
+644;ENIRIPSA;Marquage précis;;;;;;0;0;oui;567;oui;Only one mark of a given type can be active at a time. When this mark is consumed or triggered, the Eniripsa gains 10% of their level in Propagator points.
+645;ENIRIPSA;Explo-soin;feu;3;1;5;zone;83;104;oui;645;non;Inflicts Fire damage on enemies in an area of effect. Places a Sadist Mark: The Eniripsa deals Fire damage around the target when the target is KO'd.
+779;ENIRIPSA;Mot soignant;eau;3;0;5;monocible;91;114;oui;779;non;Heals the targeted ally and gives them a Range bonus for one turn. Each Range point increases the max range of Range-modifiable spells.
+780;ENIRIPSA;Revitalisation;eau;3;1;2;zone;76;95;oui;780;non;Heals allies in an area of effect and gives them a bonus to damage inflicted.
+781;ENIRIPSA;Lien d'amitié;;2;1;1;;0;0;oui;781;non;Applies the Bond of Friendship state: The targeted ally gets a boost to damage inflicted and resistance if they suffer damage. The Eniripsa can only place one Regeneration per team.
+782;ENIRIPSA;Jouvence;;2;;;;0;0;oui;782;non;For two turns, the Eniripsa loses some of their max HP, but they become more mobile and have enhanced healing abilities.
+1415;ENIRIPSA;Soin unique;;;;;;0;0;oui;1415;oui;Each turn, the first single-target healing spell cast by the Eniripsa is more powerful. In exchange, after the improved healing spell, any additional healing spells cast by the Eniripsa during their turn have reduced effects.
+1532;ENIRIPSA;Infusion;eau;4;1;3;monocible;121;152;oui;1532;non;Cast on an ally, the targeted ally is healed several turns in a row.
+1533;ENIRIPSA;Vivification;eau;2;1;6;monocible;65;82;oui;649;non;Heals the targeted ally and gives a small Dodge gain. This spell has a long range.
+1534;ENIRIPSA;Flamme purificatrice;feu;3;1;3;monocible;91;114;oui;1534;non;This spell inflicts damage on enemies and heals allies. It also applies a mark, no matter what team the target is on: The target gains 1 MP and triggers the mark if the target ends their turn next to an ally of the Eniripsa. When triggered, the mark heals the Eniripsa's allies near the mark bearer.
+1535;ENIRIPSA;Rénisurrection;;2;1;1;;0;0;oui;624;non;The Eniripsa can revive a KO'ed ally. Be careful, a character can only be revived once per combat, and he will also die if his reanimator is KO'ed.
+1536;ENIRIPSA;Paroxysme vital;;;;;;0;0;oui;646;oui;This passive increases the Eniripsa's heals received, but changes the ability activation threshold to require a certain amount of HP.
+1537;ENIRIPSA;Serial marqueur;;;;;;0;0;oui;1537;oui;Each mark placed on a target heals the fighters around that target. In exchange, Fire spells become harder to cast.
+1538;ENIRIPSA;Interdiction;;2;1;3;;0;0;oui;1538;non;Applies a penalty to armor or healing received by the target for one turn. This spell also steals Armor from the target and gets it back as HP.
+1539;ENIRIPSA;Cure alternative;feu;2;1;3;;0;0;oui;1539;non;Heals an ally. The target will then get 20% of the heals done by the Eniripsa on fighters other than the target, until the target reaches 100% HP.
+1540;ENIRIPSA;Psychose;air;3;1;1;monocible;83;104;oui;1540;non;This area-of-effect spell weakens all fighters in an area for one turn, in addition to dealing damage.
+1541;ENIRIPSA;Torpeur;air;5;1;4;monocible;164;205;oui;1541;non;If the Eniripsa has very high HP, this spell deals more damage, but it also hurts the Eniripsa casting it.
+1542;ENIRIPSA;Fiole infectée;air;4;2;2;monocible;102;127;oui;1542;non;This spell steals health from the target: one time when it is cast, and a second time at the end of the target's turn.
+5451;ENIRIPSA;Délai;;;;;;0;0;oui;5451;oui;This passive delays half of the healing that the Eniripsa performs on their targets.
+5453;ENIRIPSA;Tous pour moi;;;;;;0;0;oui;5453;oui;The Eniripsa's HP increase significantly. In exchange, the Coney spell can only be cast on adjacent targets.
+5454;ENIRIPSA;Ponction;;;;;;0;0;oui;5454;oui;When the Eniripsa has 80% or more of their maximum HP, their heals performed are increased. However, they also take damage equivalent to 10% of the healing they perform.
+5455;ENIRIPSA;Nature morte;;;;;;0;0;oui;1420;oui;When the Coney dies, a glyph appears on its position. In exchange, the Coney is more expensive.
+5463;ENIRIPSA;Vampiripsa;;;;;;0;0;oui;5463;oui;This passive changes how Propagator works. Damage inflicted is lower, but the Eniripsa absorbs half of the damage inflicted via Propagator.
+7985;ENIRIPSA;Fontaine salvatrice;;2;1;3;;0;0;oui;7985;non;Places a large healing glyph that affects both allies and enemies.
+7987;ENIRIPSA;Radiance;;;;;;0;0;oui;7987;oui;When the Eniripsa ends their turn, they consume their Propagator to heal themself and their nearby allies.
+7990;ENIRIPSA;Présence;;;;;;0;0;oui;7330;oui;At end of turn, if the Eniripsa is isolated, they gain mobility for the next turn, but lose their Propagator. Conversely, if there are one or more fighters near the Eniripsa, the Eniripsa gains Propagator, but loses Range on the next turn.
+7991;ENIRIPSA;Super Lapino II;;;;;;0;0;oui;7344;oui;The Eniripsa now immediately summons the Super Coney, instead of waiting a turn. In exchange, the Coney spell now has a two-turn cooldown, and the Super Coney dies at the end of its turn.
+7992;ENIRIPSA;Transgression;;;;;;0;0;oui;5245;oui;This passive increases the Eniripsa's resistance potential when under the effects of Unnatural Remedies. In exchange, their range decreases while in this mode.
+7993;ENIRIPSA;Elixir de vent;;;;;;0;0;oui;959;oui;This passive increases the Eniripsa's Dodge when they accumulate Propagator. In addition, consuming Propagator on a target removes Lock from it. However, the Eniripsa's Lock drops to 0.
+7994;ENIRIPSA;Apprenti alchimiste;;;;;;0;0;oui;2040;oui;When Propagator is triggered, the Eniripsa steals 1 MP from the target. In exchange, the Eniripsa's generation of Propagator is cut in half.
+7995;ENIRIPSA;Secret de fabrication;;;;;;0;0;oui;877;oui;Propagator now applies its effects for a longer time: it lasts two turns.
+7996;ENIRIPSA;Marque anbareul;;;;;;0;0;oui;5101;oui;Repulsion immediately triggers marks, but does not push the marked targets.
+7997;ENIRIPSA;Paradoxe Contre-naturel;;;;;;0;0;oui;5055;oui;Heals performed in normal mode increase the Propagator level twice as much, but in exchange, heals performed with Unnatural Remedies no longer increase the Propagator level.
+7998;ENIRIPSA;Ambivalence;;;;;;0;0;oui;525;oui;Unnatural Remedies can now be cast on a target other than the Eniripsa, triggering different effects.
+2008;ENUTROF;Pelle du jugement;terre;2;1;3;monocible;65;82;oui;693;non;Inflicts Earth damage. If the Enutrof is in Drhellzerker form, the damage passes through Armor and ignores Block. Otherwise, the target loses Range.
+2009;ENUTROF;Géologie avancée;;;;;;0;0;oui;2028;oui;The Excavation spell's range is no longer modifiable. In exchange, when the Enutrof moves a Mine, they recover 1 AP if they are in normal form and heal themself if they are in Drhellzerker form.
+2010;ENUTROF;Pelle tueuse;terre;3;2;4;monocible;91;114;oui;2010;non;Pushes the target back in normal form and switches places in Drhellzerker form. Then, inflicts Earth damage.
+2011;ENUTROF;Roulage de pelle;terre;3;1;1;monocible;121;152;oui;2011;non;Inflicts Earth damage. In normal form, this spell removes MP from the target. In Drhellzerker form, the Enutrof moves into close-combat range of the target before inflicting damage.
+2012;ENUTROF;Pelle mêle;terre;4;1;4;monocible;121;152;oui;2012;non;Inflicts Earth damage. Removes AP from the target in normal form, and steals HP in Drhellzerker form. If the Enutrof has the Treasures state, they consume it to double the spell's secondary effects.
+2013;ENUTROF;Pelle sismique;terre;5;1;1;monocible;167;209;oui;2013;non;Inflicts damage in a straight line in front of the Enutrof. If their Drheller is at the edge of the area, it replicates the damage on its turn.
+2014;ENUTROF;Coupures;eau;3;1;1;monocible;105;132;oui;2014;non;Inflicts Water damage on a target, quadrupled if the target is a summons. If the Enutrof kills their target with this spell, the Enutrof gains the Treasures state.
+2015;ENUTROF;Filouterie;eau;2;2;5;monocible;55;69;oui;2015;non;Inflicts Water damage and steals 1 MP from the target, or 2 MP if target has more MP than the Enutrof.
+2016;ENUTROF;Taxe;eau;4;2;5;monocible;121;152;oui;2016;non;Inflicts Water damage. If the Enutrof has the Treasures state, the state is consumed and inflicts an MP loss on the target.
+2017;ENUTROF;Epuration;eau;5;2;2;monocible;212;266;oui;2017;non;Inflicts heavy Water damage. If the Enutrof has the Treasures state, the state is consumed to inflict more damage.
+2018;ENUTROF;Fusion;feu;3;1;1;monocible;111;139;oui;2018;non;If the Enutrof is on a Mine, the Mine immediately moves underneath the target and inflicts Fire damage on the target. If the Enutrof also has the Treasures state, they consume the state to immediately summon a new Mine at their position (only if the moved Mine was consumed). In this case, the consumed Mine does not give Treasures to the Enutrof.
+2019;ENUTROF;Météore;feu;2;1;1;zone;83;104;oui;2019;non;Inflicts Fire damage on enemies in an area of effect. The Enutrof moves the closest Mine to the targeted cell.
+2021;ENUTROF;Braise;feu;3;1;4;zone;83;104;oui;2021;non;Inflicts Fire damage in an area of effect.
+2022;ENUTROF;Coulée de lave;feu;5;1;1;zone;167;209;oui;2022;non;Inflicts major Fire damage in an area of effect. If the Enutrof is in Drhellzerker form and the targeted cell is free, the Enutrof teleports.
+2026;ENUTROF;Richesse sismique;;3;;;;0;0;oui;2026;non;The Enutrof consumes all of their Mines. Each Mine consumed grants a significant damage bonus to the Enutrof for a period of 2 turns.
+2028;ENUTROF;Art des marcheurs;;;;;;0;0;oui;7093;oui;The Enutrof uses their MP instead of their AP to move their Mines.
+2032;ENUTROF;Purge;eau;3;3;6;zone;83;104;oui;2032;non;Inflicts Water damage at long range and steals Range from the target. If the Enutrof targets a Mine, the spell's area of effect is increased.
+2037;ENUTROF;Coup de grisou;feu;4;1;63;monocible;111;139;oui;2037;non;The Enutrof inflicts major damage around one of their Mines. This spell can be cast anywhere on the battlefield, but it must target a Mine.
+2039;ENUTROF;Bénédiction Enutrof;;;;;;0;0;oui;2039;oui;The Enutrof gains 1 Treasures at start of turn, but can only accumulate up to a maximum of 2 instead of 3.
+2064;ENUTROF;Force de l'âge;;2;1;1;;0;0;oui;2064;non;Gives a significant MP and Dodge bonus to the Enutrof or an ally for the current turn. If the Enutrof has the Treasures state, they consume the state to grant additional AP.
+5059;ENUTROF;Placements boursiers;;;;;;0;0;oui;5059;oui;Purses apply their effects 1 turn after being picked up. They can stack up to 6 levels in this way.
+5071;ENUTROF;Cupidité;;;;;;0;0;oui;5071;oui;The Enutrof can no longer pick up Purses by walking on them, but collects them directly with the Excavation spell.
+5075;ENUTROF;Phorzertanker;;;;;;0;0;oui;5075;oui;The Enutrof exchanges the offensive bonuses of their Drhellzerker form for defensive bonuses.
+5076;ENUTROF;Côté en bourse;;;;;;0;0;oui;5076;oui;Purses summoned by the Enutrof instantly appear as Fat Pouches. However, they can be picked up by enemies.
+6324;ENUTROF;Accélération;;2;1;1;;0;0;oui;848;non;Gives 1 MP to the Enutrof or to an ally for two turns. If the Enutrof has the Treasures state, they consume the state to double the bonus.
+6326;ENUTROF;Intérêts créditeurs;;;;;;0;0;oui;6326;oui;With this passive, the Enutrof acquires Treasures from the targets they've left broke. In exchange, the Enutrof can't put them in debt as often.
+6337;ENUTROF;Maladresse;;1;1;4;;0;0;oui;696;non;Removes MP from the target and steals Lock and Dodge from it, reducing its mobility and increasing the Enutrof's.
+8240;ENUTROF;Avarice;;2;1;5;;0;0;oui;8240;non;The Enutrof consumes a Mine at range, allowing them to gain the Treasures state and gain part of the Mine's bonus for 1 turn. If the Enutrof has the Treasures state, they consume the state to gain the Mine's full bonus.
+8242;ENUTROF;Corruption;;3;1;1;;0;0;non;8242;non;The Enutrof turns a target transparent (no longer blocks line of sight) for 2 turns. If it is an ally, they are healed. If it is an enemy, they suffer a penalty on damage inflicted, heals performed, and armor given.
+8272;ENUTROF;échange asynchrone;;;;;;0;0;oui;4300;oui;The Enutrof copies their distance mastery to melee mastery by switching to Drhellzerker mode. Their elemental spells in Drhellzerker mode lose 2 max Range.
+8273;ENUTROF;Marchepied;;;;;;0;0;oui;7596;oui;In Drhellzerker mode, the first dodge of the turn is always 100% guaranteed. In exchange, the Enutrof's Dodge is reduced to 0 at the start of the fight.
+8274;ENUTROF;Marchand d'âge;;;;;;0;0;oui;5126;oui;In Drhellzerker mode, the Enutrof's neutral spells are also limited in Range, but they cost 1 MP less.
+8275;ENUTROF;La binocle;;;;;;0;0;oui;7330;oui;When the Enutrof is in Drhellzerker mode, Treasures no longer gives them WP at end of turn, but their elemental spells have a Range bonus.
+8276;ENUTROF;Assurance tous risques;;;;;;0;0;oui;845;oui;The Enutrof consumes their Treasures at end of turn to gain Armor.
+8277;ENUTROF;Protection minérale;;;;;;0;0;oui;2009;oui;If the Enutrof finishes their turn on a Mine, they destroy it to gain elemental resistances for 1 turn. The destroyed Mine cannot be dug up for 1 full turn.
+8278;ENUTROF;Optimisation focale;;;;;;0;0;oui;1420;oui;The Excavation spell has greater maximum range, but also greater minimum range, preventing the Enutrof from manipulating their Mines at very short range.
+8279;ENUTROF;Tunnelier;;;;;;0;0;oui;7184;oui;The Drheller has less MP, but when it digs up a Mine, it teleports onto it.
+8280;ENUTROF;Héritage;;;;;;0;0;oui;727;oui;The Drheller gains AP and MP based on the level of Treasures that the Enutrof has at end of turn. In exchange, the Drheller dies if it ends its turn in melee range of an enemy.
+6967;FECA;Fécalistofedes;feu;5;2;3;monocible;176;220;oui;2338;non;Inflicts Fire damage. This costly spell is difficult to wield but compensates for that with its power.
+6968;FECA;Météorite;feu;3;1;5;monocible;91;114;oui;2258;non;Inflicts Fire damage. When cast on an ally, applies a Fire shield that triggers a bonus at the end of the bearer's turn.
+6969;FECA;Attaque naturelle;feu;3;1;5;monocible;83;104;oui;2288;non;Inflicts Fire damage. If cast on an enemy, steals Dodge from them. The stolen Dodge can then be given to an ally by using the same spell.
+6970;FECA;Magma;feu;2;1;4;monocible;60;76;oui;2289;non;Inflicts Fire damage. When cast on an ally, applies a Fire shield that inflicts damage at the end of the bearer's turn.
+6971;FECA;Volcan;feu;4;1;4;monocible;121;152;oui;2290;non;Inflicts Fire damage. When cast on an ally, applies a Fire shield that triggers a bonus at the end of the bearer's turn.
+6972;FECA;Goutte;eau;2;1;3;monocible;55;69;oui;2282;non;Inflicts Water damage. When cast on an ally, applies a Water shield that reduces the next enemy hindering received.
+6973;FECA;Onde;;2;1;4;;0;0;oui;6973;non;Applies a small amount of armor on an ally.
+6974;FECA;Avalanche;eau;3;1;5;monocible;76;95;oui;2329;non;Inflicts Water damage. When cast on a target, it teleports them to the center of the nearest glyph. If the center cell is occupied by an obstacle, the two targets switch places.
+6975;FECA;Orage;eau;3;1;3;zone;105;132;oui;6975;non;When cast on an ally, this spell inflicts considerable damage all around the ally. When cast on an enemy, the enemy is moved toward the Feca.
+6976;FECA;Lame de fond;eau;2;1;3;monocible;60;76;oui;682;non;Inflicts Water damage. When cast on an ally, applies a Water shield that triggers a defensive bonus when receiving an enemy attack.
+6977;FECA;Frappe tellurique;terre;4;1;3;monocible;121;152;oui;661;non;Inflicts Earth damage. When cast on an ally, applies an Earth shield that triggers a position swap at the start of the bearer's turn.
+6978;FECA;Orbe défensif;terre;3;1;3;monocible;83;104;oui;2372;non;Inflicts Earth damage. When cast on an ally, applies an Earth shield on that ally that triggers a defensive bonus at the start of the Feca's next turn.
+6979;FECA;Bastion;terre;2;1;4;monocible;75;94;oui;6979;non;Inflicts Earth damage. When cast on an ally, the Feca suffers 25% of the ally's damage suffered instead of the ally.
+6980;FECA;Rempart;terre;3;1;3;monocible;91;114;oui;6980;non;Inflicts Earth damage. When cast on an ally, applies an Earth shield that triggers a defensive bonus at the start of the bearer's turn.
+6981;FECA;Bâton;terre;5;1;4;monocible;152;190;oui;2373;non;Inflicts Earth damage. When cast on an ally, applies an Earth shield that triggers an offensive bonus at the start of the bearer's turn.
+6982;FECA;Immunité;;2;1;6;;0;0;oui;5243;non;This spell makes an ally completely immune to damage received for one turn.
+6983;FECA;Trêve;;1;;;;0;0;oui;665;non;For one turn, all entities in the fight are more resistant, allies and enemies alike. This spell helps buy time when the going gets rough.
+6984;FECA;Pacification;;1;1;6;;0;0;oui;2274;non;This spell sets the target's damage inflicted to 30%. This can increase or decrease their offensive ability depending on the situation.
+6985;FECA;Provocation;;4;1;1;;0;0;oui;2273;non;The Feca taunts their target. Both of them become stabilized and lose mobility, causing the target to remain in place and attack.
+6986;FECA;égide;;2;1;1;;0;0;oui;634;non;This spell significantly increases the targeted ally's defenses. However, it becomes more and more costly based on the number of allies targeted by this spell within the same turn.
+6987;FECA;Magnétisme;;2;1;5;;0;0;oui;1824;non;The Feca uses their tools to create a powerful magnetic field that lets them control entities' positions.
+6988;FECA;Glyphe augmenté;;;;;;0;0;oui;5244;oui;Glyphs now have a "2-cell circle" size, but cost the Feca 1 additional WP to summon.
+6989;FECA;Ligne;;;;;;0;0;oui;6989;oui;Initially, the Range of Fire spells is not variable. This passive removes this constraint but adds a straight-line casting requirement.
+6990;FECA;Un pour tous;;;;;;0;0;oui;2269;oui;The Feca protects their allies at the expense of the Feca's own protection. Useful for team game configurations in which the Feca is rarely hit.
+6991;FECA;Maître des boucliers;;;;;;0;0;oui;6691;oui;The Feca can apply the effects of their shields instantly. However, they must wait to use them again.
+6992;FECA;Qui veut la paix prépare la guerre;;;;;;0;0;oui;2295;oui;Limits the Feca's ability to give their allies Armor, while improving the Feca's damage, thereby adopting a purely offensive role.
+6993;FECA;Marché pacifiste;;;;;;0;0;oui;866;oui;Improves the Feca's capability to give Armor while reducing the Feca's likelihood of performing Blocks.
+6994;FECA;Connaissance de la carte;;;;;;0;0;oui;5104;oui;This passive makes glyphs much less expensive to use, while restricting the damage they inflict.
+6995;FECA;La meilleure défense est l’attaque;;;;;;0;0;oui;5245;oui;This passive rewards the Feca if they attack their targets using classic damage.
+6996;FECA;Armure de combat;;;;;;0;0;oui;2374;oui;Transforms the Feca's damage into protection for allies. The Feca receives less Armor for themselves.
+6997;FECA;Peau rocheuse;;;;;;0;0;oui;6997;oui;The Feca limits their ability to provide support and decides to set off for the front to take hits.
+6998;FECA;Oeil pour oeil;;;;;;0;0;oui;2324;oui;The Feca increases their offensive and protective potential when the situation so requires and their allies are in danger.
+6999;FECA;Glyphes persistants;;;;;;0;0;oui;6999;oui;Glyphs now last two turns, but they can no longer be merged. This passive is useful in fixed locations, or when glyph damage is not a priority.
+7000;FECA;Berger;;;;;;0;0;oui;7000;oui;The Feca increases the effectiveness of a single shield by concentrating all their attention on it. A true guide needs little guidance to show the way.
+7001;FECA;Expérience du terrain;;;;;;0;0;oui;2272;oui;The Feca increases their resistance to attacks received at the expense of their ability to protect allies. Very useful for solo Fecas!
+7002;FECA;Boucliers élémentaires;;;;;;0;0;oui;7002;oui;Fire shields help allies inflict more damage. Earth shields increase their mobility. Water shields increase their range. Each bonus cannot be stacked with itself and lasts 1 turn from when the shield is applied.
+7003;FECA;Carapace d’épines;;;;;;0;0;oui;685;oui;On each turn, the Feca transforms their favorite form of protection into damage inflicted.
+7004;FECA;Compréhension du Wakfu;;;;;;0;0;oui;7004;oui;This passive improves the Armors that a Feca gives to their allies or themselves, but the Feca loses one WP each time they do this.
+7005;FECA;Protecteur du troupeau;;;;;;0;0;oui;7005;oui;This passive reinforces the Feca's tank aspect, and rewards them by regenerating HP for successfully filling that role.
+5561;HUPPERMAGE;Résonance;;4;1;3;monocible;121;152;oui;5561;non;It's one of Huppermages' unique spells. They extend their hand and a conical shockwave spreads out in front of them. There are additional effects depending on what runes the Huppermage has.
+5562;HUPPERMAGE;Flux d'énergie;feu;2;1;4;monocible;65;81;oui;5562;non;It's one of Huppermages' unique spells. It inflicts damage on enemies and can apply a Block penalty on them if the Huppermage has the right rune. Allies can gain Critical Hits.
+5563;HUPPERMAGE;Lueur de l'aube;feu;2;1;4;monocible;65;82;oui;5563;non;It's one of Huppermages' unique spells. It creates a minor fireball that is launched at the target, which suffers extra damage in the element of the last rune generated.
+5564;HUPPERMAGE;Averse;eau;2;1;5;monocible;55;69;oui;5564;non;It's the "Drip" spell, borrowed from the Feca class. The Huppermage creates a water bubble, raises it, and launches at the target it to heal it if it is an ally or inflict damage on it if it is an enemy.
+5565;HUPPERMAGE;Débâcle;eau;2;1;3;monocible;70;88;non;5565;non;It's the "Refinement" spell, borrowed from the Enutrof class. The Huppermage conjures a shovel that falls on the target and inflicts damage on enemies. If the Huppermage has the water rune, the target becomes transparent for 1 turn, no longer blocking line of sight.
+5566;HUPPERMAGE;Vestige;eau;2;2;4;zone;70;88;oui;5566;non;It's the "Clock" spell, borrowed from the Xelor class. Huppermages summon a clock over the target, which strikes them with lightning. Enemies in the area of effect lose damage inflicted, while allies gain some.
+5567;HUPPERMAGE;Éboulement;terre;2;1;3;monocible;65;82;oui;5567;non;It's the "Rocknoceros" spell, borrowed from the Iop class. In one quick movement, the Huppermage summons stones that fall on the target, inflicting damage on it. The target will also have reduced stats depending on what runes the Huppermage has.
+5568;HUPPERMAGE;Feuillure;terre;2;1;1;monocible;60;76;oui;5568;non;This is the "Shovel Shaker" spell, borrowed from the Enutrof class. The Huppermage inflicts damage on enemies in front of them and removes MP from them. They gain a Force of Will bonus for the duration of the spell, based on the number of runes they have.
+5569;HUPPERMAGE;Faille;terre;2;1;3;monocible;60;76;oui;6400;non;It's one of Huppermages' unique spells. The spell lets you generate armor for Huppermages while giving armor to an ally or inflicting damage on an enemy.
+5570;HUPPERMAGE;Papillons diurnes;air;2;1;4;monocible;65;82;oui;5570;non;It's the "Scaraleaf Wing" spell, borrowed from the Osamodas class. They spread their arms as if to beat their wings, then they bring their hands together and focus this force on their target to steal Air Mastery from it, inflict damage on it, and move it.
+5571;HUPPERMAGE;Disque luminescent;feu;2;1;5;monocible;60;76;oui;5571;non;It's one of Huppermages' unique spells. The Huppermage sends a disc flying at the target, inflicting damage on it. If the Huppermage has exactly 3 runes at that time, the target will suffer extra damage from behind for 1 turn.
+5572;HUPPERMAGE;Ombres dansantes;air;2;1;4;monocible;60;76;oui;5572;non;It's a technique borrowed from Srams. The Huppermage creates a whirlwind that surrounds the target and teleports it farther away.
+5575;HUPPERMAGE;Forteresse solaire;;3;1;2;;0;0;oui;5575;non;The Huppermage protects an ally with the Solar Stronghold. When the bearer of the Stronghold suffers damage, the Huppermage who initiated the Stronghold generates the rune linked to the damage element in exchange for a bit of QB.
+5576;HUPPERMAGE;Mur d'énergie;;1;;;;0;0;non;5576;non;To isolate themselves fully, Huppermages can conjure a wall of energy that blocks out spells that require line of sight. Characters can pass through the barrier but lose movement points.
+5577;HUPPERMAGE;Principio Valere;;2;0;6;;0;0;oui;5577;non;The movement effect of the Principio Valere spell varies depending on the last rune generated by the Huppermage.
+5579;HUPPERMAGE;Dynamo;;;;;;0;0;oui;5579;oui;The Huppermage's Runes are ephemeral and will disappear at end of turn, allowing them to manage their runes differently.
+5580;HUPPERMAGE;Initiative de l'âme;;;;;;0;0;oui;5132;oui;The Huppermage gains 2 AP for the current turn if the first spell they cast is Heart of Light.
+5581;HUPPERMAGE;Distension élémentaire;feu;;;;;0;0;oui;5347;oui;Elemental spells gain 2 Range when the Heart of the same element is active.
+5582;HUPPERMAGE;Liaison Lumineuse;;;;;;0;0;oui;7107;oui;The Huppermage switches places with their Will-o'-the-Wisp when they summon it.
+5583;HUPPERMAGE;Universalité;;;;;;0;0;oui;5583;oui;The Huppermage's knowledge allows them to convert their runes into bonuses at the end of the turn, in exchange for some of their Quadramental Breeze.
+5584;HUPPERMAGE;Sauvegarde Runique;;;;;;0;0;oui;4300;oui;The Huppermage can save 3 runes onto their Will-o'-the-Wisp, provided they have exactly 1 rune. In return, the Will-o'-the-Wisp spell can only be used once per turn.
+5585;HUPPERMAGE;Plénitude;;;;;;0;0;oui;5585;oui;With serene efficiency, you catalyze the power of the elements and release them in the form of energy to create spells with astonishing effects.
+5586;HUPPERMAGE;Profusion Runique;;;;;;0;0;oui;5586;oui;At the end of the turn, the Huppermage increases the abilities of their Light spells for the following turn based on the number of runes they have.
+5587;HUPPERMAGE;Absorption Quadramentale;;;;;;0;0;oui;7193;oui;The Huppermage gains Force of Will to obstruct their opponents. They generate QB for each reduction (AP, MP, or Range) performed.
+5588;HUPPERMAGE;Réfraction élémentaire;;;;;;0;0;oui;5588;oui;The Huppermage sacrifices some of the Heart of Light's power so they can cast it several times on the same turn.
+5590;HUPPERMAGE;Orbes luisants;;3;1;4;monocible;63;79;oui;5590;non;It's one of Huppermages' unique spells. They create a Shiny Orb in each hand and then successively launch them at the target, inflicting two lines of damage on enemies and healing allies. The impact zone is extended when the spell is cast on one's own Will-o'-the-Wisp.
+5591;HUPPERMAGE;Rayon crépusculaire;;4;1;5;monocible;131;164;oui;5591;non;It's one of Huppermages' unique spells. The Twilight Beam inflicts Light damage flexibly. If the Huppermage has a Fire rune, the damage will depend on their remaining QB gauge.
+5592;HUPPERMAGE;Halo Chatoyant;;2;1;4;zone;98;123;oui;5592;non;This is the "Sadist Mark" spell, borrowed from the Eniripsa class. The Huppermage places a mark on their target. If the Huppermage casts the spell again on a marked target, the mark explodes in an area of effect, causing other marks in the AoE to explode. If the Huppermage has an Air rune, the mark placed is immediately triggered. The mark can't be placed on a summons.
+5593;HUPPERMAGE;Larmes scintillantes;;3;1;4;monocible;98;123;oui;5593;non;It's the "Sadida's Tear" spell, borrowed from the Sadida class. An enormous tear of light falls onto the target, inflicting damage on it if it is an enemy, and healing it if it is an ally. If the Huppermage has a Water rune, they heal themself at the same time.
+5594;HUPPERMAGE;Flèche de lumière;;6;2;5;monocible;317;394;oui;5594;non;It's the "Destructive Arrow" spell, borrowed from the Cra class. The Huppermage brandishes a majestic light arrow, which they loose to strike their target with full force. The spell has additional effects depending on the last rune generated.
+5595;HUPPERMAGE;Épée de lumière;;2;1;1;zone;51;63;oui;5595;non;It's a technique borrowed from Iops. The Huppermage gracefully unsheathes their light sword and strikes a blow, inflicting damage in a cone shape in front of them. They steal some of the damage inflicted, depending on the number of runes carried.
+5596;HUPPERMAGE;Mirage;air;2;1;3;monocible;60;76;oui;5596;non;It's the "Assault" spell that's been borrowed from the Sacrier class. The Huppermage switches places with the target, inflicting damage on it if it is an enemy. If the Huppermage has an Air rune, this spell's range is modified.
+5597;HUPPERMAGE;Faisceau de lune;;4;1;1;monocible;131;164;oui;5597;non;It's one of Huppermages' unique spells. They bring their hands together to project a devastating beam of light. The beam spreads horizontally over Will-o'-the-Wisps.
+7754;HUPPERMAGE;Visio Imperum;;2;0;4;;0;0;oui;7754;non;Visio Imperum is a spell that applies different penalties based on the last rune the Huppermage generated.
+7755;HUPPERMAGE;Surcharge runique;;2;1;4;;0;0;oui;7755;non;The Huppermage focuses all the power of their elemental runes to heal an ally, in addition to granting the ally bonuses. The runes are consumed.
+7797;HUPPERMAGE;Extension des sens;;;;;;0;0;oui;5584;oui;The Huppermage can regenerate QB under the effects of Heart of Light by meeting certain conditions, but the Heart lasts longer.
+7798;HUPPERMAGE;Transcendance Runique;;;;;;0;0;oui;5587;oui;The Huppermage doubles their QB regeneration when they have all their runes. Otherwise, their regeneration is halved.
+7800;HUPPERMAGE;Combinaison élémentaire;;;;;;0;0;oui;5348;oui;The Huppermage increases the abilities of their Light spells by creating elemental combinations.
+7801;HUPPERMAGE;Pulsation;;;;;;0;0;oui;7191;oui;The Will-o'-the-Wisp attracts fighters when placed it repels them when consumed.
+7802;HUPPERMAGE;Antithèse;feu;;;;;0;0;oui;5581;oui;The Huppermage regenerates QB when generating Runes. However, elemental spells inflict less damage.
+7803;HUPPERMAGE;Essor de l'âme;;;;;;0;0;oui;5454;oui;The Huppermage uses the Heart of Light to gain resistance in other elements.
+7804;HUPPERMAGE;Altruisme de l'âme;;;;;;0;0;oui;5455;oui;The Huppermage sacrifices the damage granted by Heart of Light to gain heals performed. This passive also allows them to recover Quadramental Breeze each time they heal an ally.
+7805;HUPPERMAGE;Nouveau souffle;;;;;;0;0;oui;5582;oui;The Huppermage has better control of their Will-o'-the-Wisp. However, they can only place one at a time.
+7809;HUPPERMAGE;Runification;;1;;;;0;0;oui;7809;non;The Huppermage concentrates the power of their elemental runes to give themself or an ally a significant bonus to damage inflicted or heals performed.
+4775;IOP;Fulgur;feu;3;1;3;monocible;83;104;oui;514;non;Inflicts damage on the target and applies the Lost state to it. When the Iop reaches 100 Concentration, the Lost state inflicts extra damage.
+4776;IOP;Jugement;feu;1;1;2;monocible;30;38;oui;515;non;Inflicts damage on an enemy and makes them vulnerable to the next Fire damage suffered. If cast on an ally, increases the damage of the ally's next spell.
+4777;IOP;Super Iop Punch;feu;4;1;2;monocible;141;176;oui;516;non;This spell inflicts damage. When this spell kills a target, the Iop recovers action points (AP) and Concentration. Concentration is a state that allows the Iop to regenerate Wakfu points (WP) and inflict more damage.
+4778;IOP;Épée céleste;feu;2;1;4;monocible;65;82;oui;518;non;Inflicts area-of-effect damage damage is greater on targets at full health.
+4779;IOP;Colère de Iop;feu;6;1;1;zone;182;228;oui;519;non;Inflicts damage all around the Iop, applying the Lost state to affected enemies. When the Iop reaches 100 Concentration, the Lost state inflicts extra damage.
+4780;IOP;Ébranler;terre;2;1;3;monocible;70;88;oui;492;non;Inflicts damage on the target and applies the Shaken state to it. Armor losses are increased by 30% for 1 turn.
+4781;IOP;Roknocerok;terre;4;1;3;monocible;121;152;oui;495;non;Inflicts damage on the target. If the target has Armor, this spell inflicts an extra loss of Armor on it.
+4782;IOP;Fendoir;terre;3;1;4;zone;55;69;oui;505;non;This area-of-effect spell is versatile within a cross-shaped area of effect, enemies suffer damage, and allies gain Armor and Block. And for every ally or enemy target hit, the Iop gains Armor.
+4783;IOP;Charge;terre;1;1;4;monocible;30;38;oui;507;non;The Iop comes right up to their target before inflicting damage on it. Charge inflicts more damage if cast on the same target several turns in a row.
+4784;IOP;Ravage;terre;5;0;2;zone;164;205;oui;508;non;This spell inflicts damage in an area of effect around the Iop. If the spell is cast on a free cell, the Iop teleports onto it before inflicting damage. Based on the number of targets hit, the Iop gains more Concentration.
+4785;IOP;Jabs;air;3;1;1;monocible;98;123;oui;509;non;This spell boosts the Iop's Concentration even more. Concentration is a state that allows the Iop to regenerate Wakfu points (WP) and inflict more damage.
+4786;IOP;Rafale;air;1;1;3;monocible;32;41;oui;501;non;The spell's target is drawn to the Iop.
+4787;IOP;Torgnole;air;2;1;2;monocible;65;82;oui;500;non;This spell boosts the Iop's Concentration even more. Concentration is a state that allows the Iop to regenerate Wakfu points (WP) and inflict more damage.
+4788;IOP;Tannée;air;4;1;1;monocible;197;246;oui;513;non;Inflicts a great deal of Air damage. The target then gains an amount of Armor equal to half of the damage suffered. This Armor cannot be increased or decreased by the Armor Given or Armor Received characteristics.
+4789;IOP;Épée de Iop;air;3;1;4;zone;83;104;oui;4789;non;In an area of effect, this spell inflicts minor damage on enemies and increases allies' damage.
+4790;IOP;Focus;;2;1;3;;0;0;oui;1397;non;The Iop immobilizes the target and reduces the target's resistances, as well as healing and armor received, for 1 turn.
+4791;IOP;Vertu;;2;1;1;;0;0;oui;4791;non;The Iop heals themself and allies around them. The healing is also done around the Iop's standard.
+4792;IOP;Posture;feu;2;1;1;monocible;83;83;oui;520;non;Applies a stance to the Iop. The type of stance is based on the Iop's last spell used and is triggered when the Iop suffers direct damage.
+4793;IOP;Amplification;;2;2;2;;0;0;oui;1398;non;The Iop increases their damage and that of allies around them. This spell also increases the Iop's movement points (MP). The effects are applied around the standard.
+4794;IOP;Duel;;1;1;1;;0;0;oui;4794;non;The target turns to face the Iop, and both of them have a reduced chance of blocking.
+4795;IOP;Virilité;;;;;;0;0;non;525;oui;The Iop has more health points, but they can no longer use the Jump spell without line of sight (behind obstacles).
+4796;IOP;Compulsion;;;;;;0;0;oui;521;oui;The Iop gains a level of Wrath at the start of each turn. However, they lose Wrath at the end of each turn.
+4797;IOP;Autorité;;;;;;0;0;oui;523;oui;The Iop gains the ability to attract or repel targets by attacking them from the front or from behind.
+4798;IOP;Duelliste;;;;;;0;0;oui;522;oui;If the Iop ends their turn facing an enemy, both of them gain a large amount of resistance for 1 turn.
+4799;IOP;Roi de la Colline;;;;;;0;0;oui;1399;oui;The Iop gains a large amount of Lock and Flaming if they end their turn on their standard. However, they lose all their Lock if they don't end it on their standard.
+5100;IOP;Bravoure;;;;;;0;0;oui;5100;oui;The Iop gains Armor at end of turn based on their Power level. However, the Iop has to finish near their enemies at end of turn to gain Power.
+5101;IOP;Précipitation;;;;;;0;0;oui;5101;oui;The Iop gains 1 MP every time they use one of their spells to move, but they also lose resistances for 1 turn.
+5102;IOP;Ralliement;;;;;;0;0;oui;7186;oui;When the Iop summons their standard, nearby targets are drawn to the Iop. The Bravery Standard spell loses 1 Range.
+5103;IOP;Mini-Bond;;;;;;0;0;oui;5103;oui;The Jump spell can be used multiple times in a turn and costs less AP. However, its range is reduced, and it costs 1 WP.
+5104;IOP;Faille Sismique;;;;;;0;0;oui;5104;oui;Gutting Gust removes Dodge and gives Lock to the target and the Iop.
+5130;IOP;Heure de gloire;;3;;;;0;0;oui;5130;non;This passive lets you switch to Ranged mode for one turn. Elemental spells increase in Range to reach targets farther away.
+8413;IOP;Destin;;;;;;0;0;oui;6997;oui;The standard's aura no longer gives resistance it becomes a redirection aura: Allies within the aura will redirect some of the damage they suffer to the Iop.
+8414;IOP;Impétueux;;;;;;0;0;oui;7096;oui;When the Iop uses the Jump spell, its AP cost is refunded. However, the Iop will lose the same amount of AP at the start of their next turn.
+8415;IOP;Démonstration;;;;;;0;0;oui;5132;oui;The Iop recovers WP and Preparation at end of turn based on the level of the Wrath state. However, they no longer recover WP instantly with Concentration.
+8416;IOP;Frappe et court;;;;;;0;0;oui;5352;oui;The Iop instantly recovers MP after using their Wrath. However, the Wrath is only triggered at a minimum of level 2.
+8417;IOP;Dissipation;;;;;;0;0;oui;7105;oui;The Gutting Gust and Uppercut spells can be cast at longer range. However, the Iop no longer gains Concentration by performing combos.
+8418;IOP;Avant-poste;;;;;;0;0;non;7107;oui;The Iop can use the Bravery Standard spell without line of sight (through obstacles). However, the Standard is destroyed if the Iop uses it to jump on top of it.
+8419;IOP;Fortification;;;;;;0;0;oui;5454;oui;If the Iop is on their Standard, each successful Block restores some of their HP. Also, if they end on their Standard, half of their Critical Hit is converted to Block until the end of the next turn.
+8420;IOP;Le Iop de Wazemmes;;;;;;0;0;oui;7111;oui;Damage inflicted by the Iop up to a range of 3 cells is considered melee damage. However, they receive less Armor.
+8421;IOP;Conquête;;;;;;0;0;oui;5102;oui;When the Iop kills an enemy, they place a conquest glyph on this cell. If the cell is free at end of turn, they summon or move their Standard onto the conquest. If they kill an enemy while a conquest glyph is already present, the new glyph replaces the old one.
+8422;IOP;Porte-étendard;;;;;;0;0;oui;5131;oui;The Iop can use the Bravery Standard on themself to deploy the Bravery Aura around them at end of turn. In doing so, they become stabilized, and the aura's area of effect is larger. However, the Bravery Standard is more fragile.
+7307;OSAMODAS;Corbeau incendiaire;feu;3;3;6;monocible;83;104;non;7307;non;This spell can strike through obstacles. It inflicts high damage if the target isn't in the caster's line of sight.
+7308;OSAMODAS;Fouet enflammé;feu;2;2;4;monocible;65;82;oui;7308;non;Scalds the target. The target will suffer more indirect damage. "Indirect" damage is any damage caused by anything other than the effects of a spell or weapon. For example: glyphs, poisons, auras, etc.
+7309;OSAMODAS;Tornade de flammes;feu;4;1;1;monocible;111;139;oui;7309;non;Cast on an enemy, the enemy suffers more damage from the Osamodas's summons. If it is an ally, they receive more healing from the summons.
+7310;OSAMODAS;Attisement;feu;3;1;1;monocible;97;121;oui;7310;non;Heals the Osamodas's summons based on the damage it inflicts. Cast on an ally, the ally is healed at the start of the turn for several turns.
+7311;OSAMODAS;Souffle du dragon;feu;5;3;4;zone;164;205;oui;7311;non;Inflicts high damage in an area of effect. In dragon form, the spell's target is injured but the damage inflicted around the target are higher.
+7312;OSAMODAS;Tempête de sable;terre;4;1;1;monocible;152;190;oui;7312;non;The Osamodas's summons becomes more resistant if it is adjacent to the target.
+7313;OSAMODAS;Pesanteur;terre;2;1;2;monocible;58;72;oui;7313;non;Reduces the target's Lock and Dodge.
+7314;OSAMODAS;Empalement;terre;5;1;1;monocible;194;243;oui;7314;non;Inflicts high damage in close combat.
+7315;OSAMODAS;Gambade;terre;3;1;3;monocible;91;114;oui;7315;non;Inflicts damage and gives the caster a mobility bonus.
+7316;OSAMODAS;Frappe du craqueleur;terre;4;1;5;zone;121;152;oui;7316;non;Inflicts damage in an area of effect. In dragon form, attracts fighters in line with the target toward the target.
+7317;OSAMODAS;Fouet;air;4;1;5;monocible;136;170;oui;7317;non;Inflicts double damage on summons.
+7318;OSAMODAS;Déplumage;air;3;2;5;monocible;91;114;oui;7318;non;Changes where the target is looking in order to turn its back.
+7319;OSAMODAS;Transfert;air;3;1;1;monocible;121;152;oui;7319;non;The target switches places with the summons. In dragon form, the Osamodas and their summons switch places then the Osamodas inflicts damage.
+7320;OSAMODAS;Souffle répulsif;air;2;1;6;monocible;65;82;oui;7320;non;Pushes the target 1 cell.
+7321;OSAMODAS;Tornade de plumes;air;3;3;4;zone;83;104;oui;7321;non;Inflicts damage in an area of effect. Teleports the summons if the spell is cast on a nearby empty cell.
+7322;OSAMODAS;Dernier souffle;;3;1;5;;0;0;oui;7322;non;The Osamodas's summons gains large bonuses but dies at the end of its turn.
+7323;OSAMODAS;Piqure motivante;;3;1;2;;0;0;oui;7323;non;The target gains an AP bonus and damage inflicted. If the Osamodas targets their summons, they regain 2 AP.
+7324;OSAMODAS;Célérité;;2;1;1;;0;0;oui;7324;non;The Osamodas transfers all their remaining MP to the target. The ally will also inflict more damage in melee.
+7325;OSAMODAS;Cri affaiblissant;;3;1;4;;0;0;oui;7325;non;The target reduces the damage suffered by the Osamodas's summons, but in exchange loses resistance when the target inflicts damage on it.
+7326;OSAMODAS;Relais;;3;1;5;;0;0;oui;7326;non;At the start of the turn, the ally changes places with the Osamodas's summons. If the summons is not in play, the ally changes places with the Osamodas. Cast on their summons or the Gobgob, the Osamodas instantly changes places with them.
+7327;OSAMODAS;Lien animal;;4;1;5;;0;0;oui;7327;non;The Osamodas sacrifices health points to give them as armor to an ally. The Osamodas regains 2 WP.
+7328;OSAMODAS;Rage du Mulou;;;;;;0;0;oui;7328;oui;The summons is harder to keep alive but gains bonuses for turns passed on the field.
+7329;OSAMODAS;Don animal;;;;;;0;0;oui;7329;oui;The Osamodas regains 1 WP at the start of the turn if their summons is on the field. On the other hand, summoning the same entity again is more difficult.
+7330;OSAMODAS;Vision du Corbac;;;;;;0;0;non;7330;oui;Summons no longer hinder line of sight. The Osamodas gains range to better take advantage of this.
+7331;OSAMODAS;Guerrier invocateur;;;;;;0;0;oui;7331;oui;The Osamodas sacrifices some of their summons's power to become stronger.
+7332;OSAMODAS;Invocateur solitaire;;;;;;0;0;oui;7332;oui;At the end of the turn, the Osamodas gains AP for the next turn if their summons isn't on the field.
+7333;OSAMODAS;Transcendance draconique;;;;;;0;0;oui;7338;oui;In dragon form, the first elemental spell cast on the Osamodas or their summons has its area of effect increased.
+7334;OSAMODAS;Esprit du phénix;;;;;;0;0;oui;7334;oui;The Osamodas can more quickly re-summmon a creature that has come back in their Gobgob. However, their summons have less HP.
+7335;OSAMODAS;Force-Taure;;;;;;0;0;oui;7335;oui;The Osamodas and their summons inflict more single-target damage at the expense of their Dodge.
+7336;OSAMODAS;Synergie animale;;;;;;0;0;oui;7336;oui;The Osamodas sacrifices some of their power and transfers it to their summons. When a summons kills an enemy, the Osamodas regenerates WP.
+7337;OSAMODAS;Symbiose;;;;;;0;0;oui;7337;oui;The Osamodas gains a melee-combat damage bonus in exchange for some of their resistances when their summons returns to the Gobgob.
+7338;OSAMODAS;Puissance draconique;;;;;;0;0;oui;7333;oui;The Osamodas becomes more powerful in dragon form but has more difficulty regenerating WP.
+7339;OSAMODAS;étoile du Sud;;;;;;0;0;oui;7339;oui;The Gobgob's auras apply an effect on fighters while they are in the aura.
+7340;OSAMODAS;Sacrifice animal;;;;;;0;0;oui;7340;oui;The Osamodas gains max WP but loses flexibility in managing their summons.
+7341;OSAMODAS;étoile de l'Est;;;;;;0;0;oui;7341;oui;The Gobgob's auras can be applied on the Osamodas but last for less time.
+7342;OSAMODAS;Dévouement animal;feu;;;;;0;0;oui;7342;oui;The Osamodas gains support abilities in exchange for some of their damage.
+7343;OSAMODAS;Art du dressage;;;;;;0;0;oui;7343;oui;Two creatures from the Gobgob can be summoned on the field at the same time. In exchange, damage they suffer is transferred to the Osamodas. You cannot summon the same creature twice on the field, but two Osamodas can each summon a different creature.
+7344;OSAMODAS;Partage animal;;;;;;0;0;oui;7344;oui;The Osamodas sacrifices some of their resistances and gives them to their summons. When the Osamodas is attacked, their summons gain bonuses.
+6256;OUGINAK;Plombage;eau;3;1;1;zone;98;123;oui;6256;non;This spell inflicts powerful damage on opponents in a line. The damage is increased if the Ouginak has high HP.
+6257;OUGINAK;Fléau;eau;4;1;1;monocible;152;190;oui;6257;non;The Ouginak creates a geyser under their targets. They recover part of the HP removed from the targets.
+6258;OUGINAK;Rupture;eau;2;1;2;monocible;70;88;oui;6258;non;This spell's damage comes with a health steal. The spell is more powerful on summons.
+6259;OUGINAK;Balafre;eau;5;1;4;monocible;188;235;oui;6259;non;The Ouginak inflicts heavy damage on the target and applies a penalty on its healing and armor received. The penalty is larger if the Ouginak has high HP.
+6260;OUGINAK;Emeute;eau;3;1;3;monocible;98;123;oui;6260;non;The Ouginak steals an MP from their target. The theft is greater if the Ouginak has lots of HP.
+6261;OUGINAK;Croc-en-jambe;terre;2;1;1;monocible;65;82;oui;6261;non;A huge classic among Ouginaks. Their bite paralyzes their target, preventing it from fleeing.
+6262;OUGINAK;Hachure;terre;3;1;2;zone;83;104;oui;6262;non;Crosshatch does damage in an area of effect and marks the targets for one turn, they will suffer additional damage each time the Ouginak attacks them directly.
+6263;OUGINAK;Bastonnade;terre;3;1;1;monocible;83;104;oui;6263;non;Inflicts Earth damage on a target. On the following turn, damage is tripled on targets that have already been hit by the spell.
+6264;OUGINAK;Saccade;terre;4;1;2;monocible;65;82;oui;6264;non;The Ouginak inflicts additional damage on the target's Armor, as well as protecting themself in turn.
+6265;OUGINAK;Molosse;terre;4;1;2;zone;121;152;oui;6265;non;The Ouginak does damage in an area of effect and gains Armor depending on the number of enemies they hit.
+6266;OUGINAK;Balayage;air;4;1;3;monocible;131;164;oui;6266;non;The Ouginak attracts their target and inflicts air damage on it. The damage is greater if the target is adjacent to them.
+6267;OUGINAK;Contusion;air;3;2;3;zone;91;114;oui;6267;non;The Ouginak pushes back fighters around the target and inflicts damage on enemies.
+6268;OUGINAK;Cador;air;3;1;1;monocible;121;152;oui;6268;non;The Ouginak uses their grapple to injure their enemy! They use it to get behind them.
+6269;OUGINAK;Brise'Os;air;2;1;3;monocible;35;44;oui;6269;non;The Ouginak applies a poison on their target. The target will suffer damage on every movement during its turn.
+6270;OUGINAK;Baroud;air;6;1;1;monocible;152;190;oui;6270;non;The Ouginak applies their most powerful poison on their enemy... If the target ends its turn in close combat with the Ouginak, it suffers additional damage!
+6271;OUGINAK;Terrier;;1;;;;0;0;oui;6271;oui;At end of turn, the Ouginak switches places with their Bow Wow. The Bow Wow then switches places with the Ouginak at the end of its turn.
+6272;OUGINAK;Art Canin;;1;;;;0;0;oui;6275;oui;The Ouginak steals part of the indirect damage they inflict and converts it to armor. This is damage done outside of their turn, such as poisons. In exchange, their damage is reduced. The armor obtained with Canine Art is limited to 50% of the Ouginak's max HP per turn.
+6273;OUGINAK;Maître Chien;;1;;;;0;0;oui;6273;oui;The Bow Wow copies the Ouginak's actions. However, it can no longer cast spells.
+6274;OUGINAK;Compagnon;;1;;;;0;0;oui;6274;oui;The Bow Wow is more resistant and has more AP. In exchange, it can no longer dodge. When it dies, the Ouginak regains 2 WP.
+6275;OUGINAK;Ardeur;;1;;;;0;0;oui;7328;oui;The Ouginak's mobility is reduced, but they gain lots of damage-dealing power if they can finish their turn adjacent to their Prey.
+6276;OUGINAK;Epuisement;;1;;;;0;0;oui;6276;oui;The Ouginak loses range, but their indirect damage increases. This is damage done outside of their turn, such as poisons.
+6277;OUGINAK;Pillage;;1;;;;0;0;oui;6277;oui;The Ouginak sacrifices damage in order to improve their ability to take a hit. They gain HP and armor received. They also gain armor at the start of their turn if adjacent to prey.
+6278;OUGINAK;Crocs Futés;;1;;;;0;0;oui;6278;oui;The Ouginak gains Block to become more resistant. When it transforms into a Were-Ouginak, it converts its Block into Critical Hits to go on the attack.
+6279;OUGINAK;Flair;;1;;;monocible;2;0;oui;6279;oui;The Ouginak's Prey are poisoned and take damage every turn.
+6280;OUGINAK;Marchandage;;1;;;;0;0;oui;6280;oui;The Ouginak gains resistance based on its Fury when it transforms into a Were-Ouginak. In exchange, it loses Fury at start of turn.
+6281;OUGINAK;Pistage;;1;;;;0;0;oui;5103;oui;The Ouginak is more effective when attacking its targets from behind. To get there more easily, it gains mobility.
+6282;OUGINAK;Force sage;;1;;;monocible;0;0;oui;7185;oui;MP removals are replaced by application of indirect damage on the target.
+6284;OUGINAK;Chasseur;;2;2;4;;0;0;oui;6284;non;The Ouginak can use their Hunter abilities to either get closer to opponents or attract allies. If the target is their Prey, the cost of the spell is reimbursed.
+6285;OUGINAK;Poursuite;;3;1;1;;0;0;oui;6285;non;The Ouginak has mastered the art of tracking prey. It prepares to attack and pounces on its opponent.
+6287;OUGINAK;Canine;;3;2;4;monocible;76;0;oui;6287;non;The Ouginak places a glyph that inflicts damage on and immobilizes any targets that start their turn on it.
+6288;OUGINAK;Apaisement;;2;1;1;;0;0;oui;6288;non;The Ouginak concentrates to give their MP to their target. If they have enough Fury, they consume it to give their target Armor.
+7551;OUGINAK;Meute;;1;0;2;;0;0;oui;7088;non;The Ouginak and their allies are strengthened based on the number of allies present in the area of effect when the spell is cast.
+7552;OUGINAK;élan;;1;1;4;;0;0;oui;7552;non;The Ouginak jumps to the targeted cell. If they target their Bow Wow or their Prey, they switch places with it. The spell's cost depends on the number of cells the Ouginak has moved.
+7553;OUGINAK;Acharné;;1;;;;0;0;oui;7193;oui;The Ouginak gains force of will to bind targets more easily. The Ouginak gains Fury each time they remove MP. In exchange, they lose damage inflicted.
+7554;OUGINAK;Chasse ouverte;;1;;;;0;0;oui;7554;oui;The Ouginak gains Fury and damage upon attacking its Prey, but its maximum Fury decreases.
+7555;OUGINAK;Digestion;;1;;;;0;0;oui;6272;oui;The Ouginak gains Fury and heals themself when they do indirect damage this is damage done outside of their turn, such as poisons. In exchange, they sacrifice some of their damage.
+7556;OUGINAK;énergie Canine;;1;;;;0;0;oui;7343;oui;The Ouginak has more max WP, but their damage bonus in Were-Ouginak form is reduced.
+7557;OUGINAK;Fureur;;1;;;;0;0;oui;7557;oui;The Ouginak has greater maximum Fury. In exchange, their max WP decreases.
+7558;OUGINAK;Traqueur Canin;;1;;;;0;0;oui;7558;oui;The Ouginak converts damage into resistance when it ends its turn in contact with Prey.
+7596;OUGINAK;Canin'Os;;1;;;;0;0;oui;7596;oui;The Ouginak gains lock. When it transforms into a Were-Ouginak, its lock is converted to dodge.
+4702;PANDAWA;Souffle Enflammé;feu;2;1;3;monocible;60;76;oui;2194;non;The Pandawa blows on his opponents and deals them Fire damage! What's more, he removes their resistances if they are Dizzy!
+4703;PANDAWA;Tournée Générale;feu;3;1;4;monocible;98;123;oui;2199;non;Light My Fire allows the Pandawa to be really generous with his Fire damage, while becoming Flaming. Cast on a Barrel, the Barrel is destroyed but applies a large quantity of Dizzy around it.
+4704;PANDAWA;Coup Laiteux;feu;2;2;2;zone;65;82;oui;2196;non;The Pandawa scalds and inflicts damage on their enemies in an area of effect before teleporting to the targeted cell.
+4705;PANDAWA;Flasque Explosive;feu;4;2;4;monocible;111;139;oui;2200;non;The Pandawa chucks a flask of Bamboo Milk which explodes all over his enemies.
+4706;PANDAWA;Toilaitage;feu;5;3;4;monocible;133;167;oui;2256;non;A big fan of collateral damage, Milking It lets the Pandawa clear a large area. If his Barrel is in the area, he inflicts even more damage.
+4707;PANDAWA;Souffle Laiteux;eau;2;1;3;monocible;65;82;oui;944;non;The Pandawa blows on his target, inflicting a painful burst of Water-type damage. Moreover, the target will end up Dizzy! If the Pandawa throws an ally with this spell, the ally is healed.
+4708;PANDAWA;Nuage Laiteux;eau;4;1;5;monocible;131;164;oui;2203;non;The Pandawa creates a Splash of Milk which inflicts damage and makes targets Dizzy! Cast on the Barrel, this creates a Milk Cloud that heals all targets present on it at their start of turn.
+4709;PANDAWA;Tekilait;eau;3;0;4;;0;0;oui;2204;non;Bubble Trouble heals its target. If the Pandawa is in line with their target, it can also push the target two cells.
+4710;PANDAWA;Vague de Lait;eau;6;1;1;monocible;262;328;oui;2205;non;Creating a Milk Wave, the Pandawa consumes their ally's Dizziness to heal them. They can also use it to inflict damage on an opponent. Cast on the Barrel, the damage becomes area damage.
+4711;PANDAWA;Fontaine de Laiqueur;eau;5;1;1;monocible;139;174;oui;2207;non;The playful Pandawa uses Milk Fountain to inflict damage on his enemies. If the spell is cast on the Barrel, all the targets will find themselves irresistibly attracted to it!
+4712;PANDAWA;Triple Karma Leet;terre;2;1;1;monocible;65;82;oui;2190;non;The Pandawa inflicts damage while pushing his enemy backwards. If he is carrying his Barrel, it will land on his opponent instead of pushing him back!
+4713;PANDAWA;Six Roses;terre;4;1;1;monocible;131;164;oui;2193;non;Six Roses inflicts heavy Earth damage, makes the target Dizzy, and sets the Pandawa Flaming! If the Pandawa is carrying their Barrel, they increase their resistance based on how Dizzy the target is.
+4714;PANDAWA;Frappe Fût;terre;2;;;monocible;60;76;oui;2197;non;The Pandawa inflicts damage and makes the surrounding targets dizzy. If the Pandawa is carrying their Barrel, they increase their Lock and resistances.
+4715;PANDAWA;Lucha L'ambrée;terre;4;1;2;monocible;111;139;oui;2198;non;The furious Pandawa uses his Barrel to inflict long-distance damage, making targets Dizzy in the process! If the Pandawa is carrying a character, he throws him, inflicting damage and removing MP in the area.
+4716;PANDAWA;Blitzkriek;terre;6;1;1;zone;178;223;oui;2201;non;The Pandawa inflicts damage in an area of effect. The targeted enemies are scalded, and the spell caster teleports to the targeted position if they are carrying their Barrel.
+4717;PANDAWA;Coup de bambou;;2;1;1;;0;0;oui;943;non;Bamboo Blow removes resistances, critical hits, and blocking from the target for one turn.
+4719;PANDAWA;Ether;;2;1;1;;0;0;oui;2208;non;The Ether target becomes stabilized. If the target is an ally, they gain MP and become Unlockable. If the target is an opponent, they can no longer lock.
+4720;PANDAWA;Téléportono;;1;1;5;;0;0;oui;2209;non;The Pandawa can't bear to be too far away from his Bamboo Milk. Thankfully, nature has ways of taking care of this, as Barrelhop allows the Pandawa to teleport, ending up right next to his Barrel.
+4721;PANDAWA;Happy Hour;;2;1;1;;0;0;oui;978;non;The Pandawa tricks any targets and makes them Merry. Cast on self, the Pandawa gains a melee armor. On allies, one heal over several turns. On the Barrel, pushes back any surrounding targets.
+4722;PANDAWA;Cocktail;;;;;;0;0;oui;7987;oui;The Pandawa's mastery of Cocktail mixology means they can improve healing in exchange for damage. The spells Flaming Burp and Bubble Trouble now heal allies.
+4723;PANDAWA;Maître de l'Ivresse;;;;;;0;0;oui;2212;oui;Master of his own Merriment, the Pandawa earns temporary bonuses for each change of state. The Pandawa regenerates Wakfu and Health Points by consuming Dizzy from targets using appropriate spells.
+4724;PANDAWA;Tonneau sans Fond;;;;;;0;0;oui;2213;oui;Bottomless Barrel increases the Barrel's capacity. The Pandawa instinctively takes the Barrel at the end of the turn and heals by drinking several liters.
+4725;PANDAWA;Tonneau Agressif;;;;;;0;0;oui;2214;oui;This passive can reduce the AP cost of the Chamrak spell when the Barrel is carried.
+4726;PANDAWA;Instinct Laiteux;;;;;;0;0;oui;2211;oui;Each time Dizzy is consumed from a target, the Pandawa's next spell gains increased damage. In addition, this passive puts all targets round the Barrel in the Dizzy state at the start of each of the Pandawa's turns.
+5148;PANDAWA;Bambouteille;;;;;;0;0;oui;5148;oui;The Pandawa gains a bonus that increases Dodge or Lock depending on whether they are Merry or Worn-Out. This passive also reduces the cost of Ether.
+5149;PANDAWA;Cyanose;;;;;;0;0;oui;5149;oui;With intimate knowledge of Bamboo Milk, the Pandawa can poison enemies using a recipe handed down from Pandawa to Pandawa over countless generations. But with taking such risks, the Pandawa loses the ability to effectively heal allies.
+5150;PANDAWA;Buvette;;;;;;0;0;oui;5150;oui;Party tonight, everyone grab a refreshment! At the start of Pandawa’s turn, all the allies around the Barrel gain Final Damage.
+5151;PANDAWA;Pandémie;;;;;;0;0;oui;5151;oui;A Pandawa that can handle his Barrel is a good Pandawa. That’s why, with this passive skill, Pandawa gains Robustness when carrying his Barrel.
+6844;PANDAWA;Soif;;2;1;1;;0;0;oui;664;non;If the Pandawa is carrying their barrel, they can use this spell to switch places with an ally or scald an enemy the enemy will take more indirect damage, such as poison.
+6845;PANDAWA;Ebriété;;1;0;4;;0;0;oui;949;non;Exhilaration applies or maintains Merriment, which comes in handy when there aren't any barrels nearby. This spell applies 5 levels of Dizzy if it is cast on a target other than the Pandawa themself.
+6846;PANDAWA;éméché;;;;;;0;0;oui;2215;oui;This passive increases the Pandawa's ability to become dizzy to take advantage of better preparation effects. With a passive like this, the party's going to be wild!
+6463;ROUBLARD;Barbrûlé;feu;2;3;5;monocible;60;76;oui;1800;non;The Rogue can cast this spell on a bomb. As a result, the damage is replicated adjacent to the bomb, and the Rogue gains Powder for each target hit.
+6464;ROUBLARD;Bombe collante;feu;2;1;1;zone;111;139;oui;6464;non;Places a sticky bomb on the target. When the target dies or three turns go by, an explosion is triggered around the target. If the target is a bomb, it is stabilized (can no longer be moved) and explodes if it suffers damage.
+6465;ROUBLARD;Exécution;feu;4;3;4;monocible;131;164;oui;6465;non;If the Rogue kills their enemy target with this spell, they gain Powder.
+6466;ROUBLARD;Croisement;feu;3;4;10;monocible;98;123;oui;6466;non;This shot can only be cast on the diagonal, but has very long range. It's ideal for those hard-to-reach places and can turn blind spots into dead targets. Bombs aligned with the target are pulled toward the point of impact.
+6467;ROUBLARD;Perforation;feu;6;1;1;monocible;131;164;oui;6467;non;This shot lets the Rogue break its target's Armor and then inflict colossal damage. This spell is very useful for attacks on cocky Fecas, and others of course.
+6468;ROUBLARD;Mitraille;terre;3;3;4;monocible;98;123;oui;1807;non;While keeping their distance, the Rogue can mow down anyone foolish enough to get in their crosshairs. If the spell is cast on a bomb, it is teleported 2 cells farther. If the cell is occupied, the bomb switches places with the target.
+6469;ROUBLARD;Tromblon;terre;4;3;4;zone;121;152;oui;2337;non;Inflicts damage and pushes the target. If the spell is cast on a bomb, the effects are applied in a cross around it.
+6470;ROUBLARD;Balle plombante;terre;5;3;5;monocible;164;205;oui;6470;non;This spell removes MP from the Rogue's targets in Runaway mode, or gains levels of Dagger Return in Sneaky mode. If the spell is cast on a bomb, the effects are applied in a straight line.
+6471;ROUBLARD;Dague boomerang;terre;3;3;5;zone;91;114;oui;6471;non;In Sneaky mode, the Rogue inflicts damage on their target and applies a state. In Runaway mode, the Rogue does damage in a boomerang area of effect and triggers the previously applied states, inflicting extra damage in a cross around each target affected.
+6472;ROUBLARD;Pulsar;terre;2;1;1;monocible;91;114;oui;1804;non;The Rogue can charge their Pulsar to deal devastating damage.
+6473;ROUBLARD;Coup rapide;air;2;3;5;monocible;55;69;oui;1811;non;"An accurate slap shot is better than any inaccurate slop shot." - Katsumimi the Rogue
+6474;ROUBLARD;Tricherie;air;3;3;4;monocible;83;104;oui;2331;non;The Rogue steals health from the target. If the spell is cast on a bomb, the Rogue switches places with it.
+6475;ROUBLARD;Espingole;air;5;3;6;monocible;127;159;oui;4824;non;This shot rebounds from one enemy to another, inflicting more and more damage. The Rogue's bombs are included in the rebounds, but do not take damage from them.
+6476;ROUBLARD;Oblitération;air;4;3;3;monocible;131;164;oui;6476;non;Inflicts Air damage in a 3-cell line. Affected targets are teleported farther.
+6478;ROUBLARD;Longue lame;air;6;3;4;monocible;197;246;oui;1814;non;In the right hands, this sword can seem magical. If the Rogue is in Sneaky mode, they apply a state to the target: at the end of the turn, if they're 6 or more cells away, the target will suffer extra damage.
+6479;ROUBLARD;Roublaboom;;;;;;0;0;oui;5357;oui;Lets the Rogue strengthen that valuable tool, the Boombot. In addition to gaining AP and MP, it can target fighters other than the Rogue's own bombs, but it dies at the end of its turn.
+6480;ROUBLARD;Grande évasion;;;;;;0;0;oui;6480;oui;If the Rogue uses Ruse to change modes, they switch places with the farthest bomb, within a radius of 6 cells, and then detonate it.
+6481;ROUBLARD;Bomber Fan;;;;;;0;0;oui;4311;oui;The Rogue gains 1 AP when a bomb explodes, but their bombs only have a single health point.
+6482;ROUBLARD;Artificier;;;;;;0;0;oui;6482;oui;Bombs evolve faster, but the Rogue can only place one of each element per turn.
+6483;ROUBLARD;Tunique renforcée;;;;;;0;0;oui;1816;oui;At the end of their turn, the Rogue uses bombs adjacent to them as a shield by absorbing their resistance.
+6484;ROUBLARD;Démineur;;;;;;0;0;oui;7064;oui;The Rogue can no longer change modes with Ruse, but changes modes automatically when they run out of Powder.
+6485;ROUBLARD;Lame rouillée;;;;;;0;0;oui;5123;oui;The Rogue's elemental spells in Runaway mode have fixed range, but generate Rusty Blades. These Rusty Blades are consumed in Sneaky mode to apply a stackable poison on a target.
+6486;ROUBLARD;Maître des lames;;;;;;0;0;oui;5050;oui;In Sneaky mode, the Rogue consumes their Powder to gain Armor.
+6487;ROUBLARD;Mur de poudre;;;;;;0;0;oui;6933;oui;The Rogue can create Powder Walls by placing bombs in a line spaced less than 5 cells apart. The Powder Wall inflicts damage on all fighters who start their turn inside it.
+6488;ROUBLARD;Fugitif;;;;;;0;0;oui;2334;oui;At the start of their turn, the Rogue switches places with their closest bomb, up to 4 cells away, then stabilizes it.
+6489;ROUBLARD;Défourailleur;;3;;;;0;0;oui;1823;non;The Rogue enters Fusillade mode for 2 turns, making all their bombs explode and gaining a boost to their direct damage inflicted and their MP.
+6490;ROUBLARD;Botte;;1;1;1;;0;0;oui;1817;non;The Rogue grabs the closest bomb, in the same line or diagonally, and moves it to the targeted cell. If the spell is cast on a bomb or the caster, nearby targets are pushed back 1 cell.
+6491;ROUBLARD;Evanescence;;2;1;1;monocible;91;0;oui;1810;non;The Rogue uses a bomb as a pivot to teleport to the other side.
+6492;ROUBLARD;Grappin;;1;1;1;;0;0;oui;6475;non;In Runaway mode, the Rogue uses their claw to get close to a fighter. In Sneaky mode, the Rogue attracts the target, then moves behind them.
+6493;ROUBLARD;Aimant;;2;1;4;;0;0;oui;1824;non;This spell must target one of the Rogue's bombs. It pulls all aligned fighters 2 cells closer, with no distance limit.
+6494;ROUBLARD;Fumigènes;;1;1;3;;0;0;non;1820;non;Smoke Bombs reduces an ally's ranged damage received, or reduces an enemy's ranged damage inflicted. In addition, the target no longer blocks line of sight. If the target is an ally, they become immune to damage from the Rogue's bombs.
+7062;ROUBLARD;Tir surprise;;;;;;0;0;oui;2332;oui;The Rogue will inflict additional damage on their next elemental spell after changing modes. The connection is lost if the Rogue uses their MP to move. In exchange, Ruse can no longer be used to switch places with another fighter.
+7063;ROUBLARD;Baril;;;;;;0;0;oui;4300;oui;The Rogue's Powder reserves are larger, but their bombs no longer evolve naturally.
+7064;ROUBLARD;Dynamite;;;;;;0;0;oui;6485;oui;The Rogue can cast Dynamite on other fighters. If they cast it on an ally, they share the damage increase with that ally. Casting it on an enemy makes the enemy vulnerable to explosions.
+7065;ROUBLARD;Explobombe;;;;;;0;0;oui;7065;oui;Bombs explode when they die. Talk about going out with a bang!
+7090;ROUBLARD;Bombes élémentaires;feu;;;;;0;0;oui;7090;oui;The Rogue's bombs have additional effects. However, the bombs' maximum level is reduced.
+7091;ROUBLARD;Maître Roublard;;;;;;0;0;oui;2339;oui;At start of turn, the Rogue accumulates the "Rogue Master" state up to a maximum level of 5. Upon switching from Sneaky to Runaway, or from Runaway to Sneaky, the Rogue will gain additional bonuses depending on the mode. In exchange, the Ruse spell has a 2 turn cooldown.
+7092;ROUBLARD;Jackpot;;;;;;0;0;oui;7092;oui;The Rogue switches places with the first bomb placed on their turn while in Sneaky mode, then switches places with it again at the end of the turn if the bomb is still on the field.
+7982;ROUBLARD;Tacticien;;;;;;0;0;oui;2335;oui;The Rogue regains AP by moving their bombs, but the bombs lose 1 level after being moved. The Rogue can regain up to 6 AP per turn.
+7983;ROUBLARD;Trainée de poudre;;;;;;0;0;non;5192;oui;The Rogue gains MP by summoning bombs. In exchange, Ruse now has a line of sight.
+7984;ROUBLARD;Bombes à retardement;;;;;;0;0;oui;7063;oui;Instead of directly placing bombs, the Rogue places glyphs. At the start of the next turn, these glyphs turn into bombs if the cell is still free. The bombs summoned in this way level up directly.
+5028;SACRIEUR;Sang pour sang;feu;3;1;1;monocible;120;150;oui;895;non;Inflicts high damage but also injures the caster.
+5029;SACRIEUR;Cage de sang;feu;4;1;2;monocible;121;152;oui;2104;non;Removes MP from the target and applies a penalty on healing received.
+5030;SACRIEUR;Furie sanguinaire;feu;2;1;3;monocible;70;88;oui;887;non;Steals health from a target.
+5031;SACRIEUR;Sang brûlant;feu;4;;;monocible;164;205;oui;898;non;Burns some of the caster's health to inflict heavy damage on nearby targets.
+5032;SACRIEUR;Punition;feu;3;1;1;monocible;197;246;oui;900;non;The caster instantly achieves their maximum berserker potential while losing all HP above 20%. Then they deal high Fire damage.
+5033;SACRIEUR;Pied rocheux;terre;3;1;3;monocible;91;114;oui;889;non;The Sacrier inflicts single-target damage and gains Armor. The Armor absorbs the next attacks received.
+5034;SACRIEUR;Tempête spirituelle;air;3;2;4;zone;98;123;oui;5034;non;Opponents in the area of effect suffer damage, then all fighters around the targeted cell are pushed back.
+5035;SACRIEUR;Démence;terre;2;1;1;monocible;83;104;oui;5035;non;The Sacrier rages, increasing their Lock, attracting enemies and inflicting damage.
+5036;SACRIEUR;Fracasse;terre;4;1;1;monocible;121;152;oui;892;non;Inflicts single-target damage and creates an Armor whose power depends on the Sacrier's missing HP. The Armor absorbs the next attacks received. The damage inflicted is greater if the target has Armor.
+5037;SACRIEUR;Colonnades;terre;5;0;2;zone;164;205;oui;2116;non;The Sacrier smashes the ground with incredible force, making stone columns sprout up around the target. They inflict damage and generate Armor for each enemy hit the Armor absorbs the next attacks received.
+5038;SACRIEUR;Aversion;air;4;1;3;monocible;121;152;oui;2099;non;Inflicts single-target damage on an enemy. This damage is greater if the Sacrier is stabilized.
+5039;SACRIEUR;Poing tatoué agrippant;terre;2;1;4;monocible;65;82;oui;5039;non;This spell moves the caster a few cells closer to their target.
+5040;SACRIEUR;Assaut;air;1;1;1;monocible;60;76;oui;847;non;The caster switches places with their target, dealing some damage in the process.
+5041;SACRIEUR;Projection;air;2;1;2;monocible;65;82;oui;883;non;The Sacrier uses their target to dash forward and jump to the other side.
+5042;SACRIEUR;Fulgurance;air;3;1;1;zone;121;152;oui;2101;non;The Sacrier inflicts damage on their enemies in a large area of effect then reappears on the other side of the targeted area.
+5043;SACRIEUR;Attirance;;2;2;7;;0;0;oui;844;non;Attracts a target towards the Sacrier from far away.
+5044;SACRIEUR;Transposition;;1;1;1;;0;0;oui;888;non;The Sacrier switches places with an ally or enemy.
+5045;SACRIEUR;Sacrifice;;3;1;2;;0;0;oui;878;non;With a gesture of self-sacrifice, the Sacrier takes blows on behalf of allies. Each time an ally suffers a spell that inflicts damage, the Sacrier suffers the damage, then switches places with the ally.
+5047;SACRIEUR;Armure sanguine;;2;1;1;;0;0;oui;2117;non;The Sacrier creates, for themself or an ally, powerful Armor that absorbs damage up to a certain threshold. Also, for one turn, they increase Lock to keep enemies in close combat and stabilize them so they can't be moved.
+5049;SACRIEUR;Traînée de sang;;;;;;0;0;oui;5101;oui;The Sacrier boosts their Lock and Dodge each time they inflict a flame return on themself. However, the flame returns are greater.
+5050;SACRIEUR;Placidité;;;;;;0;0;oui;5050;oui;As long as the Sacrier hasn't used MP to move, they heal themself using movement spells.
+5051;SACRIEUR;Sang tatoué;;;;;;0;0;oui;5051;oui;The Sacrier gains HP but loses Range, focusing on melee combat.
+5052;SACRIEUR;Refus de la mort;;;;;;0;0;oui;845;oui;When the Sacrier is mortally wounded, they gain resistance and a large amount of Armor. However, they won't be able to go above 20% max HP for a full turn.
+5053;SACRIEUR;Pacte de sang;;;;;;0;0;oui;877;oui;The Sacrier's max HP is reduced, but they gain Armor if they drop below 20% max HP and then if they go above 40% max HP afterward.
+5054;SACRIEUR;Transcendance;;;;;;0;0;oui;5194;oui;In exchange for one WP, the Sacrier can greatly increase their Dodge or Lock using their punishments.
+5192;SACRIEUR;Mobilité;;;;;;0;0;oui;5192;oui;The Sacrier can move their targets and themself more easily, but it costs their ability to keep opponents next to them.
+5193;SACRIEUR;Libation;;;;;;0;0;oui;5193;oui;The Sacrier loses their natural WP regeneration. However, they gain it by inflicting Flame Returns on themself.
+5194;SACRIEUR;Veines de Wakfu;;;;;monocible;1;0;oui;7208;oui;The Sacrier replaces the WP cost of their movement spells with an AP cost. If the Sacrier uses a spell to move an enemy, the enemy will suffer direct damage. However, if the Sacrier uses a spell to move themself, they suffer a flame return.
+5195;SACRIEUR;Fracasseur;;;;;;0;0;oui;5195;oui;This passive gives the Sacrier more control over their HP. When the Sacrier inflicts damage on a target, they steal some if the target's % of HP is higher than the Sacrier's. If the Sacrier's % of HP is higher than their target's, the Sacrier inflicts a flame return on themself.
+7211;SACRIEUR;Entaille;;1;1;6;monocible;10;0;oui;7211;non;The Sacrier inflicts part of their life as damage on an ally (or themself) to increase the damage inflicted next turn. Gash can be very powerful when combined with Sacrifice to move.
+7212;SACRIEUR;Transfert sanguin;;1;1;1;;0;0;oui;7212;non;The Sacrier transfers some of their health to an ally and then switches places with them. If they target themself, some of their Armor is converted to healing.
+7213;SACRIEUR;Circulation sanguine;;;;;;0;0;oui;7213;oui;The Sacrier's healing is significantly less reduced by resistance to healing, but the armor the Sacrier receives is reduced.
+7214;SACRIEUR;Jeu dangereux;;;;;;0;0;oui;7214;oui;This passive makes it much easier for the Sacrier to get out of a sticky situation when their HP is very low. However, they are harder to heal when their current HP are high.
+7215;SACRIEUR;Vision;;;;;;0;0;oui;7215;oui;This passive increases the range of the Sacrier's movement spells. In exchange, Armor gains are reduced by half if the Sacrier is not adjacent to another fighter.
+7216;SACRIEUR;Armure brûlante;;;;;;0;0;oui;7216;oui;The Sacrier turns their flame returns into Armor. However, if they have Armor left when their turn starts, they suffer it as damage.
+7217;SACRIEUR;Pacte de Wakfu;;;;;;0;0;oui;7207;oui;The Sacrier gains HP but suffers a flame return each time they use WP.
+7218;SACRIEUR;Coeur de Sacrieur;;;;;;0;0;oui;7218;oui;Under the influence of Bold Punishment, the Sacrier's melee mastery and distance mastery are added together to increase their damage and versatility, in exchange for their range.
+7219;SACRIEUR;Mal des transports;;;;;;0;0;oui;7219;oui;Targets moved by the Sacrier lose MP. If the Sacrier uses a spell to move themself, they also lose MP.
+7220;SACRIEUR;Pilier;;;;;;0;0;oui;880;oui;Makes the Sacrier less mobile but grants HP regeneration capabilities and a resistance bonus when the Sacrier is adjacent to their enemies.
+7224;SACRIEUR;Immolation;;;;;;0;0;oui;7224;oui;The Sacrier catches fire if they end their turn adjacent to an enemy. If no enemies are adjacent to the Sacrier when they start a turn, the Sacrier suffers a flame return equivalent to Flaming.
+7830;SACRIEUR;Exécuteur;;;;;;0;0;oui;5054;oui;This passive increases the range of the Sacrier's movement spells. In exchange, healing received is reduced by half if the Sacrier is adjacent to another fighter.
+912;SADIDA;Sadida Solitaire;;;;;;0;0;oui;912;oui;The Nettling spell, which allows Dolls to transform into a seed, no longer costs AP. However, the Sadida no longer regains WP when a Doll uses this spell.
+913;SADIDA;Garde Feuille;;;;;;0;0;oui;913;oui;The Sadida's Trees give bonuses on Armor Received and Heals Received to nearby fighters to help keep them better protected.
+914;SADIDA;Toxines;;3;1;1;;0;0;oui;4308;non;The Sadida applies toxins to the target for 2 turns. If the target is an enemy, they lose elemental resistance and take damage at start of turn. If the target is an ally, they gain elemental resistance and are healed at start of turn.
+915;SADIDA;Arbre;;1;;;;0;0;oui;915;non;The Sadida transforms into a tree for one turn. The Sadida can no longer move, but can heal and resistances are increased.
+916;SADIDA;Lien Poupesque;;;;;;0;0;oui;5463;oui;The Sadida's Dolls gain resistance. However, they pass on some of the damage they suffer to the Sadida.
+917;SADIDA;Don sylvestre;;;;;;0;0;oui;5055;oui;When the Sadida removes one of their Trees, the Tree's remaining HP are sent to nearby fighters. However, the Trees have less max HP.
+918;SADIDA;Larme du Sadida;eau;3;1;4;monocible;98;123;non;918;non;This spell can deal damage to an enemy or heal an ally without line of sight. It can also be used to make a doll more resistant. If the spell is cast on a seed, the Sadida summons an Inflatable that can increase allies' damage.
+919;SADIDA;Vent Empoisonné;air;2;2;2;zone;30;30;oui;919;non;The Sadida summons a powerful poisoned wind that affects all targets in an area around the target cell for 2 turns. Targets hit by the poison have their damage reduced and suffer damage for every MP or AP lost.
+920;SADIDA;Sacrifice Poupesque;;2;;;;0;0;oui;920;non;The Sadida sacrifices all their dolls. They are healed and gain AP based on the sacrificed dolls' level of Nettled.
+921;SADIDA;Vaporiser;eau;2;1;5;monocible;65;82;non;921;non;This spell makes a summons transparent (no longer blocks line of sight). If the target is one of the Sadida's Dolls, the Doll gains an additional level of Nettled at the end of its turn. If the spell is cast on a seed, the Sadida summons a Greedy with a permanent damage bonus.
+922;SADIDA;Drainage;eau;5;1;1;monocible;182;228;oui;922;non;The Sadida drains some Health Points from a target and redistributes them to nearby allies.
+925;SADIDA;Ronce;terre;3;1;5;monocible;91;114;oui;925;non;Inflicts Earth damage on an enemy or gives Armor to an ally. The Armor absorbs damage received. If the spell is cast on a seed, the Sadida summons a Sacrificial Doll that becomes more dangerous whenever the Sadida takes damage from an enemy.
+927;SADIDA;Herbes Folles;terre;2;1;2;monocible;60;76;oui;927;non;This spell reduces a target's movement. If it's cast on a seed, the Sadida summons a Sacrificial Doll that removes MP from enemies when it explodes.
+928;SADIDA;Coup de Froid;air;4;2;3;monocible;111;139;oui;928;non;This spell cools down the target, reducing its resistances as well as dealing damage to it. If the spell is cast on a seed, the Sadida summons a Greedy that can lower its targets' resistances.
+929;SADIDA;Engrais;terre;4;1;3;monocible;131;164;oui;929;non;This spell steals 1 MP from an enemy and inflicts Earth damage on them, or applies a large amount of Armor to an ally. The Armor absorbs hits received. If the spell is cast on a seed, the Sadida summons an Inflatable that can increase allies' mobility.
+930;SADIDA;Gadoule;eau;3;1;4;monocible;83;104;oui;930;non;This spell either heals an ally or removes an MP from an enemy while inflicting damage on them. If the spell is cast on a seed, the Sadida summons a Block that removes MP around it at end of turn.
+931;SADIDA;Rouille;eau;4;2;4;zone;102;127;oui;931;non;The Sadida heals allies and deals damage to enemies in the area of effect.
+932;SADIDA;Relent Boisé;air;3;1;4;monocible;91;114;oui;932;non;This spell allows the Sadida to curse an enemy: the enemy will take damage every time the Sadida inflicts poisons. If the spell is cast on a seed, the Sadida summons a Madoll that can poison targets.
+933;SADIDA;Exploupée;;;;;monocible;27;0;oui;933;oui;The Sadida's Dolls explode when they die, inflicting damage on enemies and healing allies in a 2-cell circle. However, the Dolls have less max HP.
+934;SADIDA;Kohmir;air;3;1;3;monocible;91;114;oui;934;non;K'mir enables the Sadida to exert a pull on a target for one turn. If the spell is cast on a seed, the Sadida summons a Block that can pull targets during its turn.
+935;SADIDA;Tremblement de Terre;terre;3;0;63;zone;60;76;oui;935;non;The Sadida deals damage in an area of effect around one of their summons. This spell can be cast anywhere on the battlefield, but it must target a doll or a tree.
+937;SADIDA;Ronces Multiples;terre;5;1;1;zone;167;209;oui;937;non;Inflicts Earth damage and removes MP in a large area of effect.
+938;SADIDA;Bourrasque;air;2;2;4;zone;51;63;oui;938;non;This spell repels any other fighters around the target. If the target is an ally, they gain a damage bonus for one turn. If the spell is cast on a seed, the Sadida summons a Madoll that will apply its effects in an area of effect.
+4959;SADIDA;Prière Sadida;;;;;;0;0;oui;4959;oui;The Sadida's Trees heal fighters who finish their turn on an adjacent cell.
+5055;SADIDA;Terrain infecté;;;;;;0;0;oui;7195;oui;The Sadida's Trees apply Toxines to enemies in their area of influence. The Sadida can only summon their Trees adjacent to a fighter.
+5057;SADIDA;Eveil Sylvestre;;2;1;1;;0;0;oui;2210;non;The Sadida transmits the very essence of the forest to a team member, awakening their senses to the beauty of nature. This process is long and dangerous, but it can restore life to an ally who's fallen in combat.
+5058;SADIDA;Murmures Sauvages;;;;;;0;0;oui;5058;oui;The Sadida can summon 2 Voodolls, but they are stabilized.
+5234;SADIDA;Venimeux;;;;;;0;0;oui;5234;oui;The Sadida cancels all MP reductions that they apply, but replaces them with Toxines. Toxines is a poison that inflicts damage at the start of the target's turn and can be maintained every turn.
+7053;SADIDA;Terrain d'entente;;;;;;0;0;oui;6997;oui;The Sadida's Trees protect adjacent fighters by giving them a resistance bonus. However, their area of influence is reduced.
+7054;SADIDA;Fertilisant;;1;1;1;;0;0;oui;7054;non;The Sadida nettles a Doll to quickly make it more powerful. However, the Doll is stabilized and skips a turn. On an enemy, the Sadida's dolls will deal more damage to that enemy for 1 turn. On an ally, the Sadida's dolls will heal that ally more for 1 turn.
+8139;SADIDA;Force de la nature;;2;1;1;;0;0;oui;8139;non;The Sadida can only cast this spell if they have Armor. They gain MP, range, damage inflicted, and healing provided, but can no longer gain Armor. The state is lost if the Sadida loses their starting Armor.
+8149;SADIDA;Bénédiction Voodoll;;;;;;0;0;oui;2324;oui;The Voodoll can no longer be linked to an enemy, but it gains mobility and range to support the Sadida's other dolls.
+8150;SADIDA;Poussée sylvestre;;;;;;0;0;oui;2118;oui;The Sadida instantly summons Trees with the Seed spell. At end of turn, the Sadida summons seeds adjacent to their Trees. However, the Trees no longer restore the Sadida's WP. The Sadida can remove the seeds from the battlefield by using the Seed spell.
+8151;SADIDA;Terrain fertile;;;;;;0;0;oui;5104;oui;Dolls and Seeds gain 1 additional level of Nettled if they are near one of the Sadida's Trees otherwise, they do not gain any Nettled.
+8152;SADIDA;Croissance accélérée;;;;;;0;0;oui;917;oui;Dolls gain Nettled more quickly. However, they lose all their levels of Nettled if they are transformed into seeds with the Nettling spell.
+8153;SADIDA;Dévouement poupesque;;;;;;0;0;oui;916;oui;The Sadida regains WP by sacrificing their dolls with the Seed spell, but the dolls are no longer transformed into seeds.
+8154;SADIDA;Mauvaise graine;;;;;;0;0;oui;588;oui;Seeds disappear if a fighter walks on them. If the fighter is an enemy, the enemy loses MP based on the seed's level of Nettled.
+8155;SADIDA;Cycle sylvestre;;;;;;0;0;oui;4300;oui;Trees summoned by the Sadida gain additional Nettled, but die at the end of the Sadida's next turn.
+8156;SADIDA;Communication végétale;;;;;;0;0;oui;7053;oui;The Sadida sends their remaining MP to their dolls at the end of the Sadida's turn. However, if the Sadida has no MP left at the end of their turn, their dolls lose all their MP.
+8157;SADIDA;Savoir Sadida;;;;;;0;0;oui;1420;oui;The Sadida's Seed spell can only be cast on an adjacent cell, but all of their Dolls have more range on their spells.
+8158;SADIDA;Chaîne de la nature;;;;;;0;0;oui;7193;oui;The Sadida gains Force of Will but also loses an MP each time they apply an MP reduction.
+4579;SRAM;Arnaque;eau;2;1;2;monocible;60;76;oui;2419;non;Inflicts Water damage and consumes Weak Point to inflict additional damage and heal themself. Depending on the amount of Weak Point consumed, the Sram regains AP, MP and WP, and applies Hemorrhage on the target after inflicting damage. Hemorrhage inflicts additional damage on the target when the Sram inflicts direct damage on it.
+4581;SRAM;Attaque mortelle;eau;5;1;2;monocible;176;220;oui;2420;non;Inflicts major damage on the target. The damage is greater if the target has less than half of its HP. This spell generates Weak Point.
+4583;SRAM;Attaque létale;eau;4;1;2;monocible;131;164;oui;2417;non;If the spell kills the enemy target, the Sram regains AP and MP. This spell generates Weak Point.
+4584;SRAM;Kleptosram;eau;2;1;2;monocible;60;76;oui;2418;non;Inflicts Water damage and generates more Weak Point if the target has its back turned.
+4585;SRAM;Attaque perfide;eau;3;1;2;monocible;121;152;oui;2421;non;Inflicts heavy Water damage that penetrates Armor. A portion of damage inflicted is converted into Armor on the target. This spell generates Weak Point.
+4586;SRAM;Mise à mort;feu;6;1;1;monocible;211;264;oui;2426;non;Inflicts Fire damage and consumes Weak Point to inflict additional damage. Depending on the amount of Weak Point consumed, the Sram regains AP, MP and WP, and applies Hemorrhage on the target after inflicting damage. Hemorrhage inflicts additional damage on the target when the Sram inflicts direct damage on it.
+4587;SRAM;Saignée mortelle;feu;3;1;5;monocible;91;114;oui;2425;non;Inflicts damage on and applies Hemorrhage to the target. Hemorrhage inflicts additional damage on the target when the Sram inflicts direct damage on it. The damage inflicted by the Hemorrhage activated by this spell is converted to health steal on the Sram. At the start of the Sram's next turn, they cast a replica of the spell on the target. This spell generates Weak Point.
+4588;SRAM;Premier Sang;feu;2;1;1;monocible;60;76;oui;2423;non;First Blood applies a high amount of Hemorrhage to enemies who don't have any. Hemorrhage inflicts additional damage on the target when the Sram inflicts direct damage on it. This spell generates Weak Point.
+4589;SRAM;Châtiment;feu;4;;;monocible;141;176;oui;2424;non;This spell's damage is greater if the Sram consumed Weak Point during their turn. This spell generates Weak Point.
+4590;SRAM;Ouvrir les veines;feu;2;1;1;monocible;65;82;oui;2422;non;In addition to inflicting damage, the Sram consumes Hemorrhage on their target to heal themself and gain Weak Point. This spell generates Weak Point.
+4592;SRAM;Traumatisme;air;4;1;4;monocible;131;164;oui;2431;non;Inflicts Air damage that is always melee and consumes Weak Point to inflict additional damage. Depending on the amount of Weak Point consumed, the Sram regains AP, MP and WP, and applies Hemorrhage on the target after inflicting damage. Hemorrhage inflicts additional damage on the target when the Sram inflicts direct damage on it.
+4593;SRAM;Coup Sournois;air;3;1;1;monocible;98;123;oui;2428;non;Inflicts Air damage on enemies and moves the caster away from the target. Each time the spell is cast, the damage is repeated on the previous targets. This spell generates Weak Point. The Sram gains additional Weak Point for each enemy that suffers damage.
+4594;SRAM;Coup pénétrant;air;4;1;1;monocible;131;164;oui;4594;non;Inflicts damage in a 3-cell line. A line of additional damage is applied to Armor. This spell's damage is always considered melee damage, even if the target is more than 2 cells away. This spell generates Weak Point.
+4595;SRAM;Fourberie;air;3;1;4;monocible;98;123;oui;4595;non;The Sram uses the Shadows to pass sneakily behind his target. This spell generates Weak Point.
+4596;SRAM;Effroi;air;3;1;1;monocible;83;104;oui;2427;non;Turns the target around before inflicting damage on it. The damage is greater if the Sram consumed Weak Point during their turn. This spell generates Weak Point.
+4597;SRAM;Sournoiserie;;2;1;6;;0;0;oui;2433;non;The Sram marks the target for 1 turn. If the target triggers one of the Sram's traps, the Sram teleports behind it.
+4601;SRAM;Galopade;;1;1;3;;0;0;oui;2434;non;Allows the Sram or one of their allies to gain mobility.
+4602;SRAM;Surineur;;2;;;;0;0;oui;2436;non;On the next turn, the Sram gains damage inflicted as a critical hit and from behind, and becomes stabilized for the current turn.
+4603;SRAM;Double;;2;1;1;;0;0;oui;2435;non;Allows the Sram to summon a controllable Double of themself with its own set of spells. The Sram can take control of the Double during their own turn. The Double is immune to the Sram's area-of-effect damage.
+4604;SRAM;Invisibility;;2;1;4;;0;0;oui;2432;non;Allows the Sram or one of their allies to become invisible. The target gains MP when the spell is cast. If the Sram makes themself invisible, their first spell inflicting damage on the following turn will be more powerful. An invisible target cannot be invisible again for 3 turns.
+4606;SRAM;Assaut Brutal;;;;;;0;0;oui;2440;oui;The Sram's costly spells do more damage but no longer generate Weak Point. The Execution and Trauma spells are no longer affected by this passive's effects.
+4607;SRAM;Passe-passe;;;;;;0;0;oui;2441;oui;When summoning the Double, the Sram switches places with it, before switching places with it again at the end of their turn.
+4608;SRAM;Assassin;;;;;;0;0;oui;2439;oui;The Sram no longer gains Weak Point upon killing an enemy but immediately regains 1 AP, 1 MP, 1 WP, and 20% of max HP instead.
+4609;SRAM;Piège de Répulsion II;;;;;;0;0;oui;4609;oui;The repulsion trap works differently. When triggered, the trap becomes single-target and pushes the target in the direction it is facing.
+4610;SRAM;Hémophilie;;;;;;0;0;oui;2437;oui;At the end of their turn, the Sram transforms their enemies' Hemorrhage into start-of-turn poison. This poison still inflicts melee damage.
+5089;SRAM;Crazy Scheme;;;;;;0;0;oui;2438;non;For mobile and efficient Srams!
+5122;SRAM;Embuscade;;;;;monocible;91;0;oui;5122;oui;The Sram's traps no longer give the Sram AP back when triggered but inflict damage on enemies. The Sram regains 1 WP when their traps are triggered.
+5123;SRAM;Bloody Blade;;;;;monocible;1;0;oui;5123;non;When attacking, the Sram's blade causes its targets to bleed. Coated in its victims' blood, it allows more health to be restored. Damage depends on the Sram's level.
+5124;SRAM;Retenue;;;;;;0;0;oui;5124;oui;The Sram loses their invisibility when inflicting direct damage only when using a spell costing 4 AP or more. This means they can use smaller spells before revealing themself. In exchange, they can no longer turn an ally invisible.
+5126;SRAM;Duperie;;;;;;0;0;oui;5126;oui;The Sram switches places with their Double after receiving direct damage.
+6850;SRAM;Assassinat;;1;2;2;;0;0;oui;579;non;The Sram reduces the target's resistances in order to kill it. If it is still alive at end of turn, it gains resistances for 1 turn.
+6902;STEAMER;Feu ardent;feu;2;3;6;zone;55;69;oui;2833;non;Inflicts damage in an area of effect. This ranged attack is versatile.
+6903;STEAMER;Crache flammes;feu;4;1;3;monocible;131;164;oui;2832;non;Inflicts damage and reduces the range over which the target can cast its spells.
+6904;STEAMER;Calcination;feu;4;3;6;monocible;164;205;oui;2835;non;Inflicts high damage but cannot be cast on targets that are already in the Foggernaut's field of vision. Targets must be hidden behind an obstacle or another fighter.
+6905;STEAMER;Flambage;feu;3;1;5;monocible;91;114;oui;2831;non;Inflicts damage. If the Foggernaut targets their own turret with this spell, it sets the surrounding cells on fire. These cells inflict Fire damage on targets that start or end their turn on them.
+6906;STEAMER;Sabordage;feu;5;1;4;monocible;164;205;oui;2834;non;Inflicts Fire damage. The damage is greater if the target is adjacent to one of the Foggernaut's turrets.
+6907;STEAMER;Courant;eau;3;1;4;monocible;55;69;oui;923;non;Inflicts damage and pushes the target. If the target hits another fighter or an obstacle, then the target suffers collision damage. If the Foggernaut has two levels of High Pressure, targets are pushed farther.
+6908;STEAMER;Évaporation;eau;4;2;3;monocible;111;139;oui;942;non;The Foggernaut jumps on the targeted cell. Water damage is inflicted on the enemies that they fly over on their way there. If the Foggernaut has two levels of High Pressure, they can move farther.
+6909;STEAMER;Ecume;eau;3;1;3;zone;98;123;oui;4102;non;Inflicts damage in an area of effect. If the Foggernaut has two levels of High Pressure, they recover the AP spent on the spell.
+6910;STEAMER;Flibuste;eau;3;3;4;monocible;98;123;non;4101;non;Inflicts damage without line of sight. If the Foggernaut has two levels of High Pressure, they can reduce the target's Critical Hits and Block.
+6911;STEAMER;Dissolution;eau;4;1;3;monocible;141;176;oui;5862;non;Inflicts damage in a straight line and with limited range. If the Foggernaut has two levels of High Pressure, they can apply a powerful poison that inflicts damage at the end of the target's turn for two turns. Each time the poison is triggered, the Foggernaut recovers a level of High Pressure.
+6912;STEAMER;À la masse;terre;3;1;1;monocible;98;123;oui;2826;non;Adds Armor to the Foggernaut the amount of Armor will absorb subsequent damage suffered. If the spell is cast on an ally, the ally also gains Armor.
+6913;STEAMER;Piétinement;terre;3;1;3;monocible;83;104;oui;2827;non;When cast on an enemy, inflicts damage and removes Movement Points from the target. When cast on an ally, stabilizes them.
+6914;STEAMER;Pilonnage;terre;2;1;4;zone;55;69;oui;2830;non;Inflicts damage in a cross-shaped area of effect. The power of the spell's damage increases with each use.
+6915;STEAMER;Marteau aimant;terre;4;1;4;monocible;111;139;oui;2828;non;When cast on a fighter, the target is attracted close to the Foggernaut. If the target is an enemy, the Foggernaut inflicts damage on them. If the target is an ally, the Foggernaut protects them by giving them a certain amount of Armor.
+6916;STEAMER;Choc;terre;6;1;3;monocible;211;264;oui;2829;non;Inflicts greater damage for each Stasis Point that the Foggernaut has at the time when they cast the spell.
+6917;STEAMER;Blindage;;2;1;5;;0;0;oui;2814;non;The Foggernaut applies armor to an ally. The amount of armor given is increased on the Foggernaut's mechanisms (blocks and turret).
+6918;STEAMER;Surtension;;3;1;5;monocible;153;191;oui;3571;non;This spell allows the caster to sacrifice a turret to recover HP and WP, or to inflict damage on an enemy. In the latter case, the spell's target takes more damage from the turret for 1 turn.
+6919;STEAMER;Machinerie;;2;1;3;;0;0;oui;2815;non;By using this spell, the Foggernaut can stabilize an enemy or improve an ally's mobility if using rails.
+6920;STEAMER;Embuscade;;3;1;3;;0;0;oui;3984;non;If the Foggernaut targets an empty cell, they place a glyph to which the Turret will teleport at the start of its next turn. If the Foggernaut targets a fighter, the Turret switches places with the target (7 cells max). In either case, the Turret activates immediately after it moves.
+6921;STEAMER;Transition;;1;1;1;;0;0;oui;4297;non;This mobility spell sends the target to the closest free microbot in a four-cell radius. Cast directly on a microbot, it teleports the Foggernaut Turret onto it.
+6922;STEAMER;Flux de Stasis;;2;1;3;;0;0;oui;2822;non;This spell strengthens the team's offensive potential, either by increasing an ally's damage or by weakening an enemy's resistances.
+6925;STEAMER;Modérateur d'énergie;;;;;;0;0;oui;6931;oui;The Foggernaut gains an MP and Range bonus at start of their turn if they are at full WP.
+6926;STEAMER;Routes sinueuses;;;;;;0;0;oui;2817;oui;The Foggernaut can place more microbots each turn. In exchange, the maximum length of rails (between two microbots) decreases.
+6927;STEAMER;Versatilité;;;;;;0;0;oui;4689;oui;The Foggernaut gains end-of-turn bonuses based on their positioning.
+6928;STEAMER;Blindage renforcé;;;;;;0;0;oui;6691;oui;The turret is more resistant to damage. In exchange, the Foggernaut can only place it at a range of up to 3 cells max, rather than 6.
+6929;STEAMER;Stratégie robotique;;;;;;0;0;oui;5462;oui;The Foggernaut steals HP when their Turret inflicts damage, in exchange for part of their indirect damage.
+6930;STEAMER;Technologie de transports;;;;;;0;0;oui;6930;oui;Microbot cost decreases. In exchange, the maximum range is reduced to 3.
+6931;STEAMER;Assistance tellurique;;;;;;0;0;oui;2816;oui;The Foggernaut summons blocks when casting an Earth spell on an empty cell. These blocks protect nearby allies. Blocks' protection zones cannot overlap.
+6932;STEAMER;Substitution mécanique;eau;;;;;0;0;oui;5461;oui;The turret applies additional effects when the Foggernaut casts an Earth or Water spell on it. The first time an effect is triggered during the turn, the Foggernaut recovers AP. In exchange, summoning or upgrading the Turret costs 1 WP.
+6933;STEAMER;Patience;;;;;;0;0;oui;6939;oui;The Foggernaut instantly gains 2 non-regenerable Stasis points (SP) on reaching their maximum SP. They can therefore temporarily exceed their maximum SP. In exchange, their max WP decreases at the start of the fight.
+6934;STEAMER;Alliage léger;;;;;;0;0;oui;2819;oui;Reduces the Foggernaut's movement ability while increasing their positioning ability with their rails.
+6935;STEAMER;Inversion d'énergie;;;;;;0;0;oui;4300;oui;The Foggernaut inverts their Wakfu Point and Stasis Point regeneration. They now naturally recover 1 SP at end of turn, and their Turret regenerates WP for them.
+6936;STEAMER;Revêtement à toute épreuve;;;;;;0;0;oui;7344;oui;The Foggernaut gains HP. In exchange, Fogginator inflicts heavy damage on them at end of turn.
+6937;STEAMER;Activation;feu;;;;monocible;17;0;oui;5456;oui;The Foggernaut can use the Turret spell on targets. The effect depends on the Turret's active element. If it is Fire, the Turret deals damage to the target. If it is Water, it switches places with the target. If it is Earth, it applies Armor to the target. The effects are boosted if the spell gets a critical hit.
+6938;STEAMER;Exécution immédiate;;;;;;0;0;oui;6925;oui;The Foggernaut's Turret is no longer automatically triggered at end of turn. Instead, the Foggernaut can trigger it manually.
+6939;STEAMER;Protection stasifiée;;;;;;0;0;oui;2820;oui;Leftover SP (after the first one) generated by the Turret are converted into Armor.
+6940;STEAMER;Roues chaudes;;;;;monocible;121;0;oui;6933;oui;The Foggernaut's rails inflict damage on enemies who start or end their turn on them, but Microbots cost 1 SP.
+6941;STEAMER;Conquête sereine;;;;;;0;0;oui;5245;oui;The Foggernaut gains an increased Block chance. In exchange, they lose max SP at the start of the fight.
+6942;STEAMER;Tacticien;feu;;;;;0;0;oui;5351;oui;The turret gains additional effects at the expense of its damage.
+6943;STEAMER;Mécanique avancée;;;;;;0;0;oui;7181;oui;The Foggernaut can summon two turrets in exchange for some of their direct damage inflicted.
+7810;STEAMER;Déploiement tactique;;;;;;0;0;non;7107;oui;The Foggernaut can place their Turret without line of sight, but only in a straight line.
+749;XELOR;Martel'heure;eau;3;1;4;monocible;83;104;oui;749;non;Inflicts damage and reduces the target's AP.
+750;XELOR;Perturbation;feu;3;2;3;monocible;83;104;oui;750;non;Inflicts area-of-effect damage over 5 cells in front of the Xelor.
+751;XELOR;Suspension;feu;4;3;4;monocible;131;164;oui;7156;non;This spell stabilizes the Xelor until the end of their turn while inflicting Fire damage. When cast on the dial, the current hour freezes and will not advance until the end of the turn.
+752;XELOR;Éclair obscur;feu;5;3;4;monocible;97;122;oui;752;non;Inflicts Fire damage on the spell's target. Then a rebound happens and damage is inflicted on another enemy present near the spell's target.
+753;XELOR;Poussière;feu;3;3;5;monocible;105;132;non;753;non;With each use, this spell increases its minimum and maximum casting ranges. This spell does not require a line of sight. It can therefore be cast through any obstacle to inflict great damage.
+754;XELOR;Aiguille;feu;4;2;4;monocible;111;139;oui;754;non;Inflicts Fire damage from a distance. If this spell kills a fighter, the spell cost is reimbursed immediately.
+756;XELOR;Mémoire;;;;;;0;0;oui;756;oui;Gains a large amount of WP while losing mobility through an MP restriction.
+757;XELOR;Prémonition;;3;1;4;;0;0;oui;757;non;This spell saves the target's HP. On the Xelor's next turn, the HP are set back to this value, thereby canceling any HP gains or losses that have happened in the meantime.
+758;XELOR;Maître du cadran;;;;;;0;0;oui;758;oui;Delayed effects (those with Sinistro, Sandglass, Against the Clock, etc.) are also triggered when the current hour goes around the dial.
+761;XELOR;Horlogerie;;;;;;0;0;oui;761;oui;The Xelor is teleported to the current hour on their Dial at the start of each turn. If the current hour cell is occupied by an obstacle, the Xelor switches places with the obstacle.
+763;XELOR;Horloge;eau;5;1;3;monocible;182;228;oui;763;non;Applies an indirect damage state. When the Xelor regains 12 Wakfu points in combat, the next Clock spell is twice as powerful.
+764;XELOR;Taque, Tique;;;;;;0;0;oui;764;oui;Increases the damage inflicted during even turns, and reduces it during odd turns. In order to make full use of this passive's potential, the Xelor can keep resources from one turn to the next to use them at the right time.
+765;XELOR;Tempus fugit;air;3;1;4;monocible;76;95;oui;765;non;The target is teleported to the current hour cell on the dial.
+766;XELOR;Rouage;;2;1;3;monocible;25;0;oui;766;non;Summons a Cog. This summons does not play a turn. By moving fighters, the Xelor generates charges based on the charges, the Cog deals damage around its position when the Xelor ends their turn.
+767;XELOR;Pointe-heure;air;2;2;4;monocible;60;76;oui;767;non;The target is teleported two cells back.
+771;XELOR;Retour spontané;air;3;1;3;monocible;98;123;oui;771;non;This spell cancels the last movement executed on the Xelor's turn. Whether from a pushback, attraction, teleportation, or position swap, the last target to have moved returns to its previous position.
+772;XELOR;Symétrie;air;3;1;3;monocible;76;95;oui;772;non;This spell allows the Xelor to teleport symmetrically in relation to its target or vice versa, depending on the current hour. If the destination cell is occupied by an obstacle, the fighter switches places with it.
+775;XELOR;Ralentissement;eau;1;1;1;monocible;35;44;oui;775;non;This very inexpensive spell boosts the Xelor's Force of Will for one turn (resistance and removal capacity). This spell is even craftier when the Xelor later attempts to remove AP from the target.
+776;XELOR;Contre la montre;;2;1;3;;0;0;oui;776;non;At the end of this spell's target's turn, the target is teleported to their start-of-turn cell. If the cell is occupied by an obstacle, the target of the spell and the obstacle switch places.
+777;XELOR;Sinistro;;2;2;5;;0;0;oui;777;non;Summons a Sinistro. This summons does not play a turn. Fighters near the Sinistro gain one AP.
+783;XELOR;Sablier;eau;3;1;2;monocible;121;152;oui;783;non;Applies an indirect damage state. At the start of the spell's target's turn, the Xelor inflicts area-of-effect damage on the target's position.
+785;XELOR;Cours du temps;;;;;;0;0;oui;785;oui;Transpositions caused by the Xelor's spells or passives make the Xelor regain 1 AP or 1 WP.
+1417;XELOR;Désynchronisation;eau;4;3;6;zone;102;127;oui;1417;non;Reduces AP in an area of effect while inflicting Water damage. Cast on the dial, the current hour advances by 6 hours.
+1418;XELOR;Paradoxe;air;4;1;3;zone;102;127;oui;1418;non;Teleports the targets within the spell's area of effect symmetrically in relation to the targeted cell. Targets that are symmetrically opposite to each other switch places.
+2839;XELOR;Dévouement;;4;1;3;;0;0;oui;2839;non;Increases AP on an ally for one turn.
+5344;XELOR;Régulateur;;3;1;2;;0;0;oui;5344;non;Summons a Regulator. The Regulator redirects the damage taken by the Xelor's other summons (Dial, Sinistro, and Cog) toward itself.
+5351;XELOR;Présage;;;;;;0;0;oui;5351;oui;The Xelor regains WP when they reduce an enemy's AP. However, the Xelor no longer regains WP based on their remaining AP at the end of the turn.
+5352;XELOR;Promptitude;;;;;;0;0;non;5352;oui;Depending on the current hour's position when the dial is summoned, the Xelor's elemental spells are cast without line of sight, meaning they can target through obstacles. However, these spells can only be cast in a straight line.
+5353;XELOR;Tique, Taque;;;;;;0;0;oui;5353;oui;Reduces Force of Will on even turns and increases it on odd turns. In order to make full use of this passive's potential, the Xelor can keep resources from one turn to the next to use them at the right time.
+7184;XELOR;Contre-horaire;;;;;;0;0;oui;7184;oui;Every other turn, the current hour goes the other way.
+7185;XELOR;Déjà vu;;;;;;0;0;oui;7185;oui;Depending on the current hour's position when the dial is summoned, the Xelor's damage is reduced but regenerates the Xelor's health.
+7186;XELOR;Connaissance du passé;;;;;;0;0;oui;7186;oui;The dial costs more to summon. However, when the current hour goes all the way around the dial, the Xelor regains AP and WP.
+7187;XELOR;Présages violents;;;;;monocible;32;0;oui;7187;oui;The current hour inflicts high damage on any fighter starting their turn on it.
+7188;XELOR;Dimension sombre;;;;;;0;0;oui;7188;oui;The current hour gives a Force of Will bonus, improving the Xelor's ability to remove AP. However, the Xelor's AP removals can now only happen from the current hour or if they have Punctuality.
+7189;XELOR;Ralentissement du temps;;;;;;0;0;oui;7189;oui;The Dial spreads its hour cells over a 6-cell ring rather than a 3-cell ring. Each hour cell is 4 cells from the next, unlike the Dial's standard layout (2 cells).
+7190;XELOR;Rémanence;;;;;;0;0;non;7190;oui;The Xelor's summons (Dial, Sinistro, Cog, Regulator) can no longer block line of sight enemy and ally spells can go through them.
+7191;XELOR;Mécanismes spécialisés;;;;;;0;0;oui;7191;oui;The Xelor's summons (Dial, Sinistro, Cog and Regulator) gain an ability: When one is summoned, the Xelor immediately switches places with it (within a maximum Range of 6 cells).
+7192;XELOR;Permutation momentanée;;;;;;0;0;oui;7192;oui;The Dial, which is Stabilized, can be repositioned anywhere on the field with this passive. The Xelor switches places with their Dial at the end of every turn.
+7193;XELOR;Mage de combat;;;;;;0;0;oui;7193;oui;AP removals in melee combat (within 2 cells or less of the Xelor) are replaced with a damage penalty on the target.
+7195;XELOR;Flétrissement;;;;;monocible;6;0;oui;7195;oui;AP removals from a distance (3 or more cells from the Xelor) are replaced by application of indirect damage on the target.
+7196;XELOR;Assimilation;;;;;;0;0;oui;7196;oui;Lowers the Xelor's WP gauge, but gives them greater WP regeneration capacity.
+7066;ZOBAL;Coup de pied fouetté;feu;3;1;3;monocible;83;104;oui;7066;non;This spell inflicts damage and turns the target around so that its back faces the caster.
+7067;ZOBAL;Félure;feu;3;1;1;zone;91;114;oui;3303;non;A simple yet effective spell that causes damage in an area of effect and reduces the protection and heals received by enemies.
+7068;ZOBAL;Détraquage;feu;4;;;zone;131;164;oui;3304;non;This spell inflicts damage on enemies in an area of effect. If there are allies in the damage area, they receive a damage bonus.
+7069;ZOBAL;Névrose;feu;4;1;1;monocible;176;220;oui;3305;non;Depending on the target, this spell can pull enemies in around an ally, or inflict considerable single-target damage on an enemy.
+7070;ZOBAL;Cabriole;feu;6;3;5;monocible;153;191;oui;3307;non;The Masqueraider teleports several cells away, dealing damage along the way. If any allies are in their path, those allies gain armor.
+7071;ZOBAL;Signe;eau;2;1;4;monocible;70;88;oui;7071;non;This flexible spell can heal an ally or inflict damage on an enemy.
+7072;ZOBAL;Armature;;4;1;5;;0;0;oui;3309;non;This spell gives a good amount of Armor and Lock to an ally to help them appreciate the joys of melee fighting.
+7073;ZOBAL;Rescousse;eau;3;1;5;zone;76;95;oui;3310;non;Deliverance can deal area damage, or heal and give Dodge in an area of effect, depending on the targeted fighter.
+7074;ZOBAL;Acharnement;eau;5;1;5;zone;139;174;oui;3312;non;This spell has an area of effect: It inflicts damage on enemies and heals allies.
+7075;ZOBAL;Sarabande;eau;5;1;1;monocible;197;246;oui;7075;non;When cast on an enemy, the Masqueraider inflicts damage and may remove one Wakfu Point. On an ally, they heal him.
+7076;ZOBAL;Fugue;air;3;1;3;monocible;98;123;oui;7076;non;The Masqueraider inflicts damage on a target, then moves back 1 cell while pushing it back.
+7077;ZOBAL;Poursuite;air;2;1;1;monocible;30;38;oui;3313;non;Pursuit is used to push the target back and chase after them so they can't get away.
+7078;ZOBAL;Culbute;air;2;1;4;monocible;51;63;oui;3315;non;The Masqueraider pulls the target and slips behind their back.
+7079;ZOBAL;Cavalcade;air;2;1;1;monocible;51;63;oui;3316;non;Cavalcade can link the Masqueraider to a target. They can then pull the target with them.
+7080;ZOBAL;Dislocation;air;4;1;5;monocible;98;123;oui;3317;non;The Masqueraider leaps toward their target and switches places with the target.
+7084;ZOBAL;Esprit masqué;;4;1;1;;0;0;oui;7084;non;The power of masks can be used to summon a copy of oneself. Be careful, though. The Masqueraider also suffers the damage received by their Masked Spirit (except for damage causing the death of the Masked Spirit).
+7085;ZOBAL;Danse motivante;;3;1;3;;0;0;oui;7085;non;This spell applies a state that boosts an ally's (or the Masqueraider's) mobility and protection for two turns.
+7086;ZOBAL;Danse macabre;;2;1;1;;0;0;oui;7086;non;A simple dance, or a deadly ritual? Nobody knows for sure. Either way, the Masqueraider's Dance of Death can revive allies.
+7087;ZOBAL;Voltige;;3;6;6;;0;0;oui;7087;non;The Masqueraider teleports to an empty cell next to an allied or enemy fighter. If the Masqueraider finishes their turn right after this action, they gain resistance until the next turn.
+7088;ZOBAL;Aura de brutalité;;2;1;1;;0;0;oui;7088;non;The Masqueraider is surrounded by a Brutality Aura. Adjacent allies inflict more damage on their opponents.
+7089;ZOBAL;Solidité;;1;1;1;;0;0;oui;7089;non;The Masqueraider stabilizes their target. The target is immune to all movement effects (teleportation, pushback, etc.) for 1 turn.
+7093;ZOBAL;Jeu de jambes;;;;;;0;0;oui;7093;oui;The Masqueraider gains mobility but loses resistance.
+7094;ZOBAL;Bas les masques;;;;;;0;0;oui;3364;oui;The Masqueraider regains 2 AP when they start wearing a mask different from the one they already have.
+7095;ZOBAL;Poussées violentes;;;;;monocible;13;0;oui;7095;oui;"Dopu" was a famous Masqueraider specializing in collisions. He pushed his opponents around so much that they took pushback damage. An ancestral art that was thought to have been lost since the Dofus Era...
+7096;ZOBAL;Art de la vengeance;;;;;;0;0;oui;7096;oui;The Masqueraider gains melee damage based on their Lock.
+7097;ZOBAL;Masque de vie;;;;;;0;0;oui;7097;oui;This passive gives the Masqueraider a health-stealing ability on targets they attack from the front.
+7098;ZOBAL;Carnaval;;;;;;0;0;oui;3357;oui;Masks do not consume WP but they have a shared recast time of 4 turns.
+7099;ZOBAL;Armure unique;;;;;;0;0;oui;7099;oui;This passive significantly strengthens the Armor given to a target that has none at all. Giving Armor in the right situation is an art.
+7100;ZOBAL;Ancre;;;;;;0;0;oui;3363;oui;The Masqueraider increases their Lock to keep opponents in close combat but loses mobility in exchange.
+7101;ZOBAL;Brute;;;;;;0;0;oui;3356;oui;The Masqueraider specializes in dealing damage, and inflicts more damage on their opponents. In exchange, their ability to give and receive Armor is reduced.
+7102;ZOBAL;Protecteur reculé;;;;;;0;0;oui;5348;oui;With this passive, the amount of healing provided varies depending on the Masqueraider's recent actions. Heals increase if the Masqueraider didn't heal anyone on the previous turn, and decrease if they did heal someone on the previous turn.
+7103;ZOBAL;Collisions de support;;;;;;0;0;oui;7103;oui;The Masqueraider increases their support potential through collisions. Add a dash of crash and smash!
+7104;ZOBAL;érosion;;;;;;0;0;oui;7104;oui;Changes the Psychopath Mask so that the Masqueraider's spells remove resistance from opponents, specifically from the direct target of the spell. The resistance is removed before the spell's effects (damage, etc.) are applied. In exchange, the Masqueraider's offensive ability is reduced.
+7105;ZOBAL;Virevolte;;;;;;0;0;oui;7105;oui;Increases damage from the side but reduces damage from the front.
+7106;ZOBAL;Collisions régénérantes;;;;;;0;0;oui;7106;oui;Collisions gain a healing effect. When you push one obstacle into another, the second one will receive the healing.
+7107;ZOBAL;Miroirs;;;;;;0;0;oui;7107;oui;The Masqueraider switches places with the direct target of a spell cast in melee. The Masqueraider cannot switch places if they are being carried or stabilized.
+7108;ZOBAL;Au contact;;;;;;0;0;oui;5347;oui;The Masqueraider increases their damage and resistance abilities if they stay adjacent to a fighter (allied or enemy). If they move away and finish their turn in an isolated position, they have a penalty instead.
+7111;ZOBAL;Art de la fuite;;;;;;0;0;oui;7111;oui;The Masqueraider gains ranged damage based on their Dodge.
+7112;ZOBAL;Regard masqué;;;;;;0;0;oui;5359;oui;The Masqueraider gains mobility, but can no longer cast any spells on adjacent cells.
+7113;ZOBAL;Poussées d'entrave;;;;;;0;0;oui;7113;oui;Pushes that cause a collision remove MP instead of AP. Useful for Masqueraiders who want to reduce their opponents' mobility.

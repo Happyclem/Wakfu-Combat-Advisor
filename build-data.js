@@ -312,7 +312,11 @@ function buildSpells(classDisplay) {
       ap,
       mp: num(r['CoutPm'] || r['CoutPM']),
       wp: num(r['CoutPW']),
-      u: parseUses(r['Usages'], eff + ' ' + descRaw),  // usages par tour (défaut 3)
+      u: parseUses(r['Usages'], eff + ' ' + descRaw),  // usages par tour (défaut 3 ; source autobuilder via colonne Usages)
+      id: num(r['Id']) || undefined,                   // id officiel Ankama (clé d'appariement autobuilder)
+      mcc: num(r['MaxParCible']) || undefined,         // max lancers par cible (0/absent = illimité)
+      cd: num(r['Cooldown']) || undefined,             // cooldown en tours (0/absent = aucun)
+      icon: num(r['iconId']) || undefined,             // iconId Ankama (affichage)
       dm: num(r['Dommage lvl245']),
       dc: num(r['Dommage lvl245 critique']),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
@@ -368,6 +372,10 @@ function buildCommonSpells() {
     mp: num(r['CoutPM'] || r['CoutPm']),
     wp: num(r['CoutPW']),
     dm: 0,
+    id: num(r['Id']) || undefined,
+    mcc: num(r['MaxParCible']) || undefined,
+    cd: num(r['Cooldown']) || undefined,
+    icon: num(r['iconId']) || undefined,
     lvl: num(r['Niveau de déblocage'] || r['Niveau de deblocage']),
     rng: clean(r['Portée']) || '',
     desc: clean(r['Effets']),
@@ -415,7 +423,8 @@ function main() {
 // ⚠ FICHIER GÉNÉRÉ — ne pas éditer à la main. Source : data-raw/Sorts_*.csv et
 // Passifs_*.csv. Régénérer avec :  node build-data.js
 // Sorts  : n, el, ap, mp, wp, dm (dommage niv.245), dc (crit niv.245),
-//          pf (Point Faible généré — Sram), fin (finisseur), lvl, rng, type, los, desc.
+//          pf (Point Faible généré — Sram), fin (finisseur), lvl, rng, type, los, desc,
+//          id (id Ankama), mcc (max/cible), cd (cooldown), icon (iconId) — source autobuilder.
 // Passifs: n, lvl, desc.
 `;
   fs.writeFileSync(

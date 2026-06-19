@@ -1,0 +1,333 @@
+Id;Classe;BreedId;Nom;gfxId;StatsPlates;EffetsScripts;EffetsEtats;EffetsConditionnels;DescEN
+6988;FECA;1;Glyphe augmenté;5244;;oui;oui;oui;Glyphs now have a "2-cell circle" size, but cost the Feca 1 additional WP to summon.
+6989;FECA;1;Ligne;6989;{"RANGE":1};non;non;non;Initially, the Range of Fire spells is not variable. This passive removes this constraint but adds a straight-line casting requirement.
+6990;FECA;1;Un pour tous;2269;;non;non;non;The Feca protects their allies at the expense of the Feca's own protection. Useful for team game configurations in which the Feca is rarely hit.
+6991;FECA;1;Maître des boucliers;6691;;oui;oui;non;The Feca can apply the effects of their shields instantly. However, they must wait to use them again.
+6992;FECA;1;Qui veut la paix prépare la guerre;2295;;oui;non;non;Limits the Feca's ability to give their allies Armor, while improving the Feca's damage, thereby adopting a purely offensive role.
+6993;FECA;1;Marché pacifiste;866;;oui;non;non;Improves the Feca's capability to give Armor while reducing the Feca's likelihood of performing Blocks.
+6994;FECA;1;Connaissance de la carte;5104;;non;non;non;This passive makes glyphs much less expensive to use, while restricting the damage they inflict.
+6995;FECA;1;La meilleure défense est l’attaque;5245;;oui;oui;oui;This passive rewards the Feca if they attack their targets using classic damage.
+6996;FECA;1;Armure de combat;2374;;oui;non;non;Transforms the Feca's damage into protection for allies. The Feca receives less Armor for themselves.
+6997;FECA;1;Peau rocheuse;6997;{"BLOCK_PERCENTAGE":30};non;oui;non;The Feca limits their ability to provide support and decides to set off for the front to take hits.
+6998;FECA;1;Oeil pour oeil;2324;;non;oui;non;The Feca increases their offensive and protective potential when the situation so requires and their allies are in danger.
+6999;FECA;1;Glyphes persistants;6999;;non;non;non;Glyphs now last two turns, but they can no longer be merged. This passive is useful in fixed locations, or when glyph damage is not a priority.
+7000;FECA;1;Berger;7000;;non;non;non;The Feca increases the effectiveness of a single shield by concentrating all their attention on it. A true guide needs little guidance to show the way.
+7001;FECA;1;Expérience du terrain;2272;;non;oui;non;The Feca increases their resistance to attacks received at the expense of their ability to protect allies. Very useful for solo Fecas!
+7002;FECA;1;Boucliers élémentaires;7002;;non;non;non;Fire shields help allies inflict more damage. Earth shields increase their mobility. Water shields increase their range. Each bonus cannot be stacked with itself and lasts 1 turn from when the shield is applied.
+7003;FECA;1;Carapace d’épines;685;;oui;oui;non;On each turn, the Feca transforms their favorite form of protection into damage inflicted.
+7004;FECA;1;Compréhension du Wakfu;7004;{"GIVEN_ARMOR_PERCENTAGE":100,"RECEIVED_ARMOR_PERCENTAGE":100};oui;non;non;This passive improves the Armors that a Feca gives to their allies or themselves, but the Feca loses one WP each time they do this.
+7005;FECA;1;Protecteur du troupeau;7005;;oui;oui;non;This passive reinforces the Feca's tank aspect, and rewards them by regenerating HP for successfully filling that role.
+7328;OSAMODAS;2;Rage du Mulou;7328;;non;oui;non;The summons is harder to keep alive but gains bonuses for turns passed on the field.
+7329;OSAMODAS;2;Don animal;7329;;non;non;non;The Osamodas regains 1 WP at the start of the turn if their summons is on the field. On the other hand, summoning the same entity again is more difficult.
+7330;OSAMODAS;2;Vision du Corbac;7330;{"RANGE":2};non;non;non;Summons no longer hinder line of sight. The Osamodas gains range to better take advantage of this.
+7331;OSAMODAS;2;Guerrier invocateur;7331;;oui;non;non;The Osamodas sacrifices some of their summons's power to become stronger.
+7332;OSAMODAS;2;Invocateur solitaire;7332;;non;non;oui;At the end of the turn, the Osamodas gains AP for the next turn if their summons isn't on the field.
+7333;OSAMODAS;2;Transcendance draconique;7338;;non;oui;non;In dragon form, the first elemental spell cast on the Osamodas or their summons has its area of effect increased.
+7334;OSAMODAS;2;Esprit du phénix;7334;;non;non;non;The Osamodas can more quickly re-summmon a creature that has come back in their Gobgob. However, their summons have less HP.
+7335;OSAMODAS;2;Force-Taure;7335;;oui;non;non;The Osamodas and their summons inflict more single-target damage at the expense of their Dodge.
+7336;OSAMODAS;2;Synergie animale;7336;;oui;non;non;The Osamodas sacrifices some of their power and transfers it to their summons. When a summons kills an enemy, the Osamodas regenerates WP.
+7337;OSAMODAS;2;Symbiose;7337;;non;oui;non;The Osamodas gains a melee-combat damage bonus in exchange for some of their resistances when their summons returns to the Gobgob.
+7338;OSAMODAS;2;Puissance draconique;7333;;non;non;non;The Osamodas becomes more powerful in dragon form but has more difficulty regenerating WP.
+7339;OSAMODAS;2;Étoile du Sud;7339;;oui;non;non;The Gobgob's auras apply an effect on fighters while they are in the aura.
+7340;OSAMODAS;2;Sacrifice animal;7340;{"WAKFU_POINT":3};non;non;non;The Osamodas gains max WP but loses flexibility in managing their summons.
+7341;OSAMODAS;2;Étoile de l'Est;7341;;non;non;non;The Gobgob's auras can be applied on the Osamodas but last for less time.
+7342;OSAMODAS;2;Dévouement animal;7342;;oui;oui;oui;The Osamodas gains support abilities in exchange for some of their damage.
+7343;OSAMODAS;2;Art du dressage;7343;;non;non;non;Two creatures from the Gobgob can be summoned on the field at the same time. In exchange, damage they suffer is transferred to the Osamodas. You cannot summon the same creature twice on the field, but two Osamodas can each summon a different creature.
+7344;OSAMODAS;2;Partage animal;7344;;non;oui;oui;The Osamodas sacrifices some of their resistances and gives them to their summons. When the Osamodas is attacked, their summons gain bonuses.
+2009;ENUTROF;3;Géologie avancée;2028;;non;non;non;The Excavation spell's range is no longer modifiable. In exchange, when the Enutrof moves a Mine, they recover 1 AP if they are in normal form and heal themself if they are in Drhellzerker form.
+2028;ENUTROF;3;Art des marcheurs;7093;;non;non;non;The Enutrof uses their MP instead of their AP to move their Mines.
+2039;ENUTROF;3;Bénédiction Enutrof;2039;;non;oui;oui;The Enutrof gains 1 Treasures at start of turn, but can only accumulate up to a maximum of 2 instead of 3.
+5059;ENUTROF;3;Placements boursiers;5059;;non;non;non;Purses apply their effects 1 turn after being picked up. They can stack up to 6 levels in this way.
+5071;ENUTROF;3;Cupidité;5071;;non;non;non;The Enutrof can no longer pick up Purses by walking on them, but collects them directly with the Excavation spell.
+5075;ENUTROF;3;Phorzertanker;5075;;non;non;non;The Enutrof exchanges the offensive bonuses of their Drhellzerker form for defensive bonuses.
+5076;ENUTROF;3;Côté en bourse;5076;;non;non;non;Purses summoned by the Enutrof instantly appear as Fat Pouches. However, they can be picked up by enemies.
+6326;ENUTROF;3;Intérêts créditeurs;6326;;non;non;non;With this passive, the Enutrof acquires Treasures from the targets they've left broke. In exchange, the Enutrof can't put them in debt as often.
+8272;ENUTROF;3;Échange asynchrone;4300;;non;non;non;The Enutrof copies their distance mastery to melee mastery by switching to Drhellzerker mode. Their elemental spells in Drhellzerker mode lose 2 max Range.
+8273;ENUTROF;3;Marchepied;7596;;non;non;non;In Drhellzerker mode, the first dodge of the turn is always 100% guaranteed. In exchange, the Enutrof's Dodge is reduced to 0 at the start of the fight.
+8274;ENUTROF;3;Marchand d'âge;5126;;non;non;non;In Drhellzerker mode, the Enutrof's neutral spells are also limited in Range, but they cost 1 MP less.
+8275;ENUTROF;3;La binocle;7330;;non;non;non;When the Enutrof is in Drhellzerker mode, Treasures no longer gives them WP at end of turn, but their elemental spells have a Range bonus.
+8276;ENUTROF;3;Assurance tous risques;845;;non;non;non;The Enutrof consumes their Treasures at end of turn to gain Armor.
+8277;ENUTROF;3;Protection minérale;2009;;non;oui;oui;If the Enutrof finishes their turn on a Mine, they destroy it to gain elemental resistances for 1 turn. The destroyed Mine cannot be dug up for 1 full turn.
+8278;ENUTROF;3;Optimisation focale;1420;;non;non;non;The Excavation spell has greater maximum range, but also greater minimum range, preventing the Enutrof from manipulating their Mines at very short range.
+8279;ENUTROF;3;Tunnelier;7184;;non;non;non;The Drheller has less MP, but when it digs up a Mine, it teleports onto it.
+8280;ENUTROF;3;Héritage;727;;non;non;non;The Drheller gains AP and MP based on the level of Treasures that the Enutrof has at end of turn. In exchange, the Drheller dies if it ends its turn in melee range of an enemy.
+4606;SRAM;4;Assaut Brutal;2440;;oui;non;non;The Sram's costly spells do more damage but no longer generate Weak Point. The Execution and Trauma spells are no longer affected by this passive's effects.
+4607;SRAM;4;Passe-passe;5103;;non;non;non;When summoning the Double, the Sram switches places with it, before switching places with it again at the end of their turn.
+4608;SRAM;4;Assassin;2439;;oui;non;non;The Sram no longer gains Weak Point upon killing an enemy but immediately regains 1 AP, 1 MP, 1 WP, and 20% of max HP instead.
+4609;SRAM;4;Piège de Répulsion II;7191;;non;non;non;The repulsion trap works differently. When triggered, the trap becomes single-target and pushes the target in the direction it is facing.
+4610;SRAM;4;Hémophilie;5123;;non;non;non;At the end of their turn, the Sram transforms their enemies' Hemorrhage into start-of-turn poison. This poison still inflicts melee damage.
+5122;SRAM;4;Embuscade;588;;non;non;non;The Sram's traps no longer give the Sram AP back when triggered but inflict damage on enemies. The Sram regains 1 WP when their traps are triggered.
+5124;SRAM;4;Retenue;5124;;non;non;non;The Sram loses their invisibility when inflicting direct damage only when using a spell costing 4 AP or more. This means they can use smaller spells before revealing themself. In exchange, they can no longer turn an ally invisible.
+5126;SRAM;4;Duperie;5126;;oui;non;non;The Sram switches places with their Double after receiving direct damage.
+8503;SRAM;4;;6999;;non;non;non;
+8504;SRAM;4;;4609;;non;non;non;
+8508;SRAM;4;;5122;;non;oui;non;
+8510;SRAM;4;;2437;;non;non;non;
+8511;SRAM;4;;2441;;non;non;non;
+8512;SRAM;4;;2118;;non;non;non;
+8513;SRAM;4;;2438;;oui;non;non;
+756;XELOR;5;Mémoire;756;{"WAKFU_POINT":6};non;non;non;Gains a large amount of WP while losing mobility through an MP restriction.
+758;XELOR;5;Maître du cadran;758;;non;non;non;Delayed effects (those with Sinistro, Sandglass, Against the Clock, etc.) are also triggered when the current hour goes around the dial.
+761;XELOR;5;Horlogerie;761;;oui;oui;oui;The Xelor is teleported to the current hour on their Dial at the start of each turn. If the current hour cell is occupied by an obstacle, the Xelor switches places with the obstacle.
+764;XELOR;5;Taque, Tique;764;;non;oui;non;Increases the damage inflicted during even turns, and reduces it during odd turns. In order to make full use of this passive's potential, the Xelor can keep resources from one turn to the next to use them at the right time.
+785;XELOR;5;Cours du temps;785;;oui;non;oui;Transpositions caused by the Xelor's spells or passives make the Xelor regain 1 AP or 1 WP.
+5351;XELOR;5;Présage;5351;;non;non;non;The Xelor regains WP when they reduce an enemy's AP. However, the Xelor no longer regains WP based on their remaining AP at the end of the turn.
+5352;XELOR;5;Promptitude;5352;;non;non;non;Depending on the current hour's position when the dial is summoned, the Xelor's elemental spells are cast without line of sight, meaning they can target through obstacles. However, these spells can only be cast in a straight line.
+5353;XELOR;5;Tique, Taque;5353;;non;oui;non;Reduces Force of Will on even turns and increases it on odd turns. In order to make full use of this passive's potential, the Xelor can keep resources from one turn to the next to use them at the right time.
+7184;XELOR;5;Contre-horaire;7184;;non;oui;non;Every other turn, the current hour goes the other way.
+7185;XELOR;5;Déjà vu;7185;;oui;non;non;Depending on the current hour's position when the dial is summoned, the Xelor's damage is reduced but regenerates the Xelor's health.
+7186;XELOR;5;Connaissance du passé;7186;;non;non;non;The dial costs more to summon. However, when the current hour goes all the way around the dial, the Xelor regains AP and WP.
+7187;XELOR;5;Présages violents;7187;;oui;oui;non;The current hour inflicts high damage on any fighter starting their turn on it.
+7188;XELOR;5;Dimension sombre;7188;;non;non;non;The current hour gives a Force of Will bonus, improving the Xelor's ability to remove AP. However, the Xelor's AP removals can now only happen from the current hour or if they have Punctuality.
+7189;XELOR;5;Ralentissement du temps;7189;;non;non;non;The Dial spreads its hour cells over a 6-cell ring rather than a 3-cell ring. Each hour cell is 4 cells from the next, unlike the Dial's standard layout (2 cells).
+7190;XELOR;5;Rémanence;7190;;non;non;non;The Xelor's summons (Dial, Sinistro, Cog, Regulator) can no longer block line of sight enemy and ally spells can go through them.
+7191;XELOR;5;Mécanismes spécialisés;7191;;oui;non;non;The Xelor's summons (Dial, Sinistro, Cog and Regulator) gain an ability: When one is summoned, the Xelor immediately switches places with it (within a maximum Range of 6 cells).
+7192;XELOR;5;Permutation momentanée;7192;;oui;oui;oui;The Dial, which is Stabilized, can be repositioned anywhere on the field with this passive. The Xelor switches places with their Dial at the end of every turn.
+7193;XELOR;5;Mage de combat;7193;;oui;oui;non;AP removals in melee combat (within 2 cells or less of the Xelor) are replaced with a damage penalty on the target.
+7195;XELOR;5;Flétrissement;7195;;oui;oui;non;AP removals from a distance (3 or more cells from the Xelor) are replaced by application of indirect damage on the target.
+7196;XELOR;5;Assimilation;7196;;non;non;non;Lowers the Xelor's WP gauge, but gives them greater WP regeneration capacity.
+2059;ECAFLIP;6;Tarot veinard;5456;;non;non;non;Tarot cards increase the Ecaflip's Lucky Day and give them a boost to critical hit rate based on the cards' numerical value.
+2062;ECAFLIP;6;Pucif;7931;;oui;non;non;This passive reduces elemental healing done by the Ecaflip. In exchange, each elemental heal is replicated at the end of the target's turn before being transferred to the nearest ally.
+2068;ECAFLIP;6;La Mésaventure;2068;;non;non;non;Unlocks an extra tarot card (added to the draw pile). This card reduces the target's mobility and damage but increases their resistance for one turn.
+2076;ECAFLIP;6;En veine;5246;;non;non;non;Each Critical Hit point given by the Ecaflip (to themself or someone else) increases their Lucky Day by 1. However, when Critical Hit is given, it only lasts one turn.
+2080;ECAFLIP;6;L'Infortune;2080;;oui;non;non;Unlocks an extra tarot card (added to the draw pile). This tarot card converts the target's Critical Hit into Block, at a rate of one to one, for one turn.
+5246;ECAFLIP;6;Tarot divinatoire;4959;;oui;oui;non;The Ecaflip earns bonuses by playing cards in pairs of the same color. However, Roll Again costs more.
+5249;ECAFLIP;6;Impact félin;5249;;non;non;non;This passive changes how the number of uses of Feline Leap is generated. Ending a turn adjacent to an enemy gives the spell two extra uses.
+5250;ECAFLIP;6;Le Destin d'Ecaflip;5250;;non;non;non;Unlocks an extra tarot card (added to the draw pile). This tarot card inflicts serious damage on the target. However, if the target is still alive the next turn, the Ecaflip takes the same damage.
+5251;ECAFLIP;6;Triche;852;;non;oui;non;This passive allows the Ecaflip to play the first card of their turn for free. However, unless they use Roll Again, the Ecaflip can only draw a single card.
+7954;ECAFLIP;6;Veine soigneuse;5463;;oui;oui;non;With this passive, Lucky Day increases healing done by the Ecaflip. However, Lucky Day only lasts one turn, no matter how it's generated.
+7955;ECAFLIP;6;Tarot félin;7928;;oui;non;non;When the Ecaflip uses a tarot card on a fighter, they switch places with them. However, the Ecaflip will be stabilized until their turn ends.
+7956;ECAFLIP;6;La fortune sourit aux audacieux;5466;;non;oui;non;With this passive activated, the Ecaflip will regenerate Wakfu points when badly injured.
+7957;ECAFLIP;6;Pile, je gagne;5251;;oui;non;non;This passive boosts the Ecaflip's natural resistance and survival abilities. They regenerate and gain resistance bonuses when they play a card with 100 Lucky Day. In exchange, the Ecaflip loses all their dodge.
+7958;ECAFLIP;6;Dés généreux;7935;;non;non;non;This passive transforms Lucky Star, applied when the Ecaflip goes over 100 Critical Hit. Instead of boosting damage, Lucky Star now boosts healing.
+7959;ECAFLIP;6;Félin suprême;2059;;non;non;non;This passive changes the Feline Leap spell. It can be cast without line of sight, but it costs more.
+7960;ECAFLIP;6;Black Jack;5101;;oui;oui;non;Cards in the Ecaflip's hand are added up at the start of the turn. If their total value is equal to or less than 20, the Ecaflip gains Armor. If their value is over 20, the Ecaflip gets a penalty to final Armor received for 1 turn.
+7961;ECAFLIP;6;Atouts périodiques;5461;;non;non;non;This passive allows for some control over cards. On odd turns, the Ecaflip can only draw and play odd-numbered tarot cards, and on even turns, they can only draw and play even-numbered tarot cards.
+7999;ECAFLIP;6;Sept fétiche;866;;non;oui;non;Every six tarot cards played with their normal effect (not doubled by Lucky Day), the Ecaflip maximizes their Lucky Day and empties their draw pile.
+8000;ECAFLIP;6;L'Univers;8000;;non;non;non;Cuts Lucky Day gains in half. Unlocks the Universe card when the Ecaflip reaches exactly 42 Lucky Day (the card is not in the draw pile).
+8001;ECAFLIP;6;Veine des cartes;2062;;oui;oui;oui;This passive grants control over Lucky Day based on the cards still in the Ecaflip's hand at the end of their turn.
+628;ENIRIPSA;7;Médecin sans barrière;628;;non;non;non;Changes how Propagator works: Performing heals no longer increases it, but inflicting damage does. Propagator is consumed on a single-target heal, and improves the healing performed.
+644;ENIRIPSA;7;Marquage précis;567;;oui;oui;non;Only one mark of a given type can be active at a time. When this mark is consumed or triggered, the Eniripsa gains 10% of their level in Propagator points.
+1415;ENIRIPSA;7;Soin unique;1415;;oui;non;non;Each turn, the first single-target healing spell cast by the Eniripsa is more powerful. In exchange, after the improved healing spell, any additional healing spells cast by the Eniripsa during their turn have reduced effects.
+1536;ENIRIPSA;7;Paroxysme vital;646;;oui;non;non;This passive increases the Eniripsa's heals received, but changes the ability activation threshold to require a certain amount of HP.
+1537;ENIRIPSA;7;Serial marqueur;1537;;oui;non;non;Each mark placed on a target heals the fighters around that target. In exchange, Fire spells become harder to cast.
+5451;ENIRIPSA;7;Délai;5451;;oui;oui;non;This passive delays half of the healing that the Eniripsa performs on their targets.
+5453;ENIRIPSA;7;Tous pour moi;5453;;oui;oui;non;The Eniripsa's HP increase significantly. In exchange, the Coney spell can only be cast on adjacent targets.
+5454;ENIRIPSA;7;Ponction;5454;;oui;non;non;When the Eniripsa has 80% or more of their maximum HP, their heals performed are increased. However, they also take damage equivalent to 10% of the healing they perform.
+5455;ENIRIPSA;7;Nature morte;1420;;non;non;non;When the Coney dies, a glyph appears on its position. In exchange, the Coney is more expensive.
+5463;ENIRIPSA;7;Vampiripsa;5463;;non;non;non;This passive changes how Propagator works. Damage inflicted is lower, but the Eniripsa absorbs half of the damage inflicted via Propagator.
+7987;ENIRIPSA;7;Radiance;7987;;non;non;non;When the Eniripsa ends their turn, they consume their Propagator to heal themself and their nearby allies.
+7990;ENIRIPSA;7;Présence;7330;;oui;oui;non;At end of turn, if the Eniripsa is isolated, they gain mobility for the next turn, but lose their Propagator. Conversely, if there are one or more fighters near the Eniripsa, the Eniripsa gains Propagator, but loses Range on the next turn.
+7991;ENIRIPSA;7;Super Lapino II;7344;;non;non;non;The Eniripsa now immediately summons the Super Coney, instead of waiting a turn. In exchange, the Coney spell now has a two-turn cooldown, and the Super Coney dies at the end of its turn.
+7992;ENIRIPSA;7;Transgression;5245;;non;non;non;This passive increases the Eniripsa's resistance potential when under the effects of Unnatural Remedies. In exchange, their range decreases while in this mode.
+7993;ENIRIPSA;7;Elixir de vent;959;;oui;non;non;This passive increases the Eniripsa's Dodge when they accumulate Propagator. In addition, consuming Propagator on a target removes Lock from it. However, the Eniripsa's Lock drops to 0.
+7994;ENIRIPSA;7;Apprenti alchimiste;2040;;non;non;non;When Propagator is triggered, the Eniripsa steals 1 MP from the target. In exchange, the Eniripsa's generation of Propagator is cut in half.
+7995;ENIRIPSA;7;Secret de fabrication;877;;non;non;non;Propagator now applies its effects for a longer time: it lasts two turns.
+7996;ENIRIPSA;7;Marque anbareul;5101;;non;non;non;Repulsion immediately triggers marks, but does not push the marked targets.
+7997;ENIRIPSA;7;Paradoxe Contre-naturel;5055;;non;non;non;Heals performed in normal mode increase the Propagator level twice as much, but in exchange, heals performed with Unnatural Remedies no longer increase the Propagator level.
+7998;ENIRIPSA;7;Ambivalence;525;;non;non;non;Unnatural Remedies can now be cast on a target other than the Eniripsa, triggering different effects.
+4795;IOP;8;Virilité;525;;non;oui;oui;The Iop has more health points, but they can no longer use the Jump spell without line of sight (behind obstacles).
+4796;IOP;8;Compulsion;521;;oui;oui;non;The Iop gains a level of Wrath at the start of each turn. However, they lose Wrath at the end of each turn.
+4797;IOP;8;Autorité;523;;oui;non;non;The Iop gains the ability to attract or repel targets by attacking them from the front or from behind.
+4798;IOP;8;Duelliste;522;;non;oui;non;If the Iop ends their turn facing an enemy, both of them gain a large amount of resistance for 1 turn.
+4799;IOP;8;Roi de la Colline;1399;;non;oui;non;The Iop gains a large amount of Lock and Flaming if they end their turn on their standard. However, they lose all their Lock if they don't end it on their standard.
+5100;IOP;8;Bravoure;5100;;oui;non;non;The Iop gains Armor at end of turn based on their Power level. However, the Iop has to finish near their enemies at end of turn to gain Power.
+5101;IOP;8;Précipitation;5101;;non;non;oui;The Iop gains 1 MP every time they use one of their spells to move, but they also lose resistances for 1 turn.
+5102;IOP;8;Ralliement;7186;;non;non;non;When the Iop summons their standard, nearby targets are drawn to the Iop. The Bravery Standard spell loses 1 Range.
+5103;IOP;8;Mini-Bond;5103;;non;non;non;The Jump spell can be used multiple times in a turn and costs less AP. However, its range is reduced, and it costs 1 WP.
+5104;IOP;8;Faille Sismique;5104;;non;non;non;Gutting Gust removes Dodge and gives Lock to the target and the Iop.
+8413;IOP;8;Destin;6997;;non;non;non;The standard's aura no longer gives resistance it becomes a redirection aura: Allies within the aura will redirect some of the damage they suffer to the Iop.
+8414;IOP;8;Impétueux;7096;;oui;oui;non;When the Iop uses the Jump spell, its AP cost is refunded. However, the Iop will lose the same amount of AP at the start of their next turn.
+8415;IOP;8;Démonstration;5132;;oui;oui;non;The Iop recovers WP and Preparation at end of turn based on the level of the Wrath state. However, they no longer recover WP instantly with Concentration.
+8416;IOP;8;Frappe et court;5352;;non;non;non;The Iop instantly recovers MP after using their Wrath. However, the Wrath is only triggered at a minimum of level 2.
+8417;IOP;8;Dissipation;7105;;non;non;non;The Gutting Gust and Uppercut spells can be cast at longer range. However, the Iop no longer gains Concentration by performing combos.
+8418;IOP;8;Avant-poste;7107;;non;non;non;The Iop can use the Bravery Standard spell without line of sight (through obstacles). However, the Standard is destroyed if the Iop uses it to jump on top of it.
+8419;IOP;8;Fortification;5454;;oui;non;non;If the Iop is on their Standard, each successful Block restores some of their HP. Also, if they end on their Standard, half of their Critical Hit is converted to Block until the end of the next turn.
+8420;IOP;8;Le Iop de Wazemmes;7111;;oui;non;non;Damage inflicted by the Iop up to a range of 3 cells is considered melee damage. However, they receive less Armor.
+8421;IOP;8;Conquête;5102;;oui;oui;oui;When the Iop kills an enemy, they place a conquest glyph on this cell. If the cell is free at end of turn, they summon or move their Standard onto the conquest. If they kill an enemy while a conquest glyph is already present, the new glyph replaces the old one.
+8422;IOP;8;Porte-étendard;5131;;non;non;non;The Iop can use the Bravery Standard on themself to deploy the Bravery Aura around them at end of turn. In doing so, they become stabilized, and the aura's area of effect is larger. However, the Bravery Standard is more fragile.
+6945;CRA;9;Archer futé;4801;;non;non;non;Each Sharpened Arrowhead that the Cra gains gives them a Luminous Arrow. In exchange, the Luminous Arrow spell will now have non-modifiable range.
+6946;CRA;9;Éclaireur spécialisé;1420;;non;non;non;The Evasive state heals the Cra's missing HP. However, the area required to be Evasive becomes larger.
+6947;CRA;9;Balises discrètes;615;;non;non;non;Cra Beacons no longer block line of sight. When Beagon is cast, targets aligned with the beacon are pushed back.
+6948;CRA;9;Parti pris;5072;;non;non;non;When the Cra obtains their Sharpened Arrowhead, they convert MP into AP if they are in Precision Shot. If they have not cast Precision Shot, they convert AP to MP instead.
+6949;CRA;9;Distance focale;7330;;non;non;non;The Cra can naturally cast their elemental spells 2 cells farther. In return, the minimum range of their elemental spells also increases by 2.
+6950;CRA;9;Précision vorace;5122;;non;non;non;When the Cra is affected by Precision Shot, their spells that consume Precision steal 25% of the damage inflicted. However, Precision Shot can only be cast once per turn.
+6951;CRA;9;La voie de l'arc;5077;;non;oui;oui;When the Cra removes MP from a target, they generate Precision and Sharpening. They no longer gain any at end of turn when Evasive.
+6952;CRA;9;Débalisage massif;615;;non;non;non;The Beagon spell immediately destroys all the Cra's beacons to generate Sharpening and Precision.
+6953;CRA;9;Étude balistique;620;;non;non;non;Beacons' redirected damage is no longer applied to allies in addition, allies hit by a Beacon gain 1 Range. However, the Cra can now only summon one beacon in each element.
+6955;CRA;9;Paradoxe du Crâ;2076;;non;non;non;To be able to acquire the Evasive bonus, the Cra must have at least one enemy within 3 cells or less.
+6956;CRA;9;Éclaireur intouchable;588;{"WILLPOWER":20};oui;non;non;The Cra gains Force of Will. In return, their Dodge is reduced to 0 at the start of the fight.
+6957;CRA;9;Instinct du chasseur;6930;;oui;non;non;The Cra's single-target spells have different effects on their Beacons. In exchange, their Beacons must be spaced farther apart when placed.
+6958;CRA;9;Balisage rapproché;610;;non;non;non;The Cra can remove their Beacons for free. However, the summoning range of the Beacons can no longer be modified.
+6959;CRA;9;Tireur solitaire;5073;;non;non;non;The Cra can gain bonuses when Evasive reaches level 40 or higher. However, the state also requires that there be no allies around the Cra.
+6960;CRA;9;Esprit affûté;852;;non;non;non;The Cra gains Sharpening when they cast their Precision Shot. However, they can no longer increase their Precision level above 200.
+6961;CRA;9;L'art des Balises;3362;;non;non;non;Beacons can be cast without line of sight but cost 1 WP more.
+6962;CRA;9;Tir divergent;586;;oui;oui;non;When the Sharpened Arrowhead is consumed, the caster and the target of the spell suffer an MP removal.
+6963;CRA;9;Perforation Crâ;619;;non;non;non;When the Cra has the Sharpened Arrowhead, their next single-target spell runs through the target and inflicts damage in a straight line. In return, their Sharpened Arrowhead no longer gives them damage inflicted.
+7795;CRA;9;Pointe protectrice;6997;;oui;non;non;If the Cra ends their turn with Sharpening, that state is consumed to give the Cra elemental resistance for the following turn.
+912;SADIDA;10;Sadida Solitaire;912;;non;non;non;The Nettling spell, which allows Dolls to transform into a seed, no longer costs AP. However, the Sadida no longer regains WP when a Doll uses this spell.
+913;SADIDA;10;Garde Feuille;913;;non;non;non;The Sadida's Trees give bonuses on Armor Received and Heals Received to nearby fighters to help keep them better protected.
+916;SADIDA;10;Lien Poupesque;5463;;non;non;non;The Sadida's Dolls gain resistance. However, they pass on some of the damage they suffer to the Sadida.
+917;SADIDA;10;Don sylvestre;5055;;non;non;non;When the Sadida removes one of their Trees, the Tree's remaining HP are sent to nearby fighters. However, the Trees have less max HP.
+933;SADIDA;10;Exploupée;933;;non;non;non;The Sadida's Dolls explode when they die, inflicting damage on enemies and healing allies in a 2-cell circle. However, the Dolls have less max HP.
+4959;SADIDA;10;Prière Sadida;4959;;oui;non;oui;The Sadida's Trees heal fighters who finish their turn on an adjacent cell.
+5055;SADIDA;10;Terrain infecté;7195;;non;non;non;The Sadida's Trees apply Toxines to enemies in their area of influence. The Sadida can only summon their Trees adjacent to a fighter.
+5058;SADIDA;10;Murmures Sauvages;5058;;non;non;non;The Sadida can summon 2 Voodolls, but they are stabilized.
+5234;SADIDA;10;Venimeux;5234;;oui;oui;non;The Sadida cancels all MP reductions that they apply, but replaces them with Toxines. Toxines is a poison that inflicts damage at the start of the target's turn and can be maintained every turn.
+7053;SADIDA;10;Terrain d'entente;6997;;non;non;non;The Sadida's Trees protect adjacent fighters by giving them a resistance bonus. However, their area of influence is reduced.
+8149;SADIDA;10;Bénédiction Voodoll;2324;;non;non;non;The Voodoll can no longer be linked to an enemy, but it gains mobility and range to support the Sadida's other dolls.
+8150;SADIDA;10;Poussée sylvestre;2118;;oui;oui;oui;The Sadida instantly summons Trees with the Seed spell. At end of turn, the Sadida summons seeds adjacent to their Trees. However, the Trees no longer restore the Sadida's WP. The Sadida can remove the seeds from the battlefield by using the Seed spell.
+8151;SADIDA;10;Terrain fertile;5104;;non;non;non;Dolls and Seeds gain 1 additional level of Nettled if they are near one of the Sadida's Trees otherwise, they do not gain any Nettled.
+8152;SADIDA;10;Croissance accélérée;917;;non;oui;oui;Dolls gain Nettled more quickly. However, they lose all their levels of Nettled if they are transformed into seeds with the Nettling spell.
+8153;SADIDA;10;Dévouement poupesque;916;;non;non;non;The Sadida regains WP by sacrificing their dolls with the Seed spell, but the dolls are no longer transformed into seeds.
+8154;SADIDA;10;Mauvaise graine;588;;non;non;non;Seeds disappear if a fighter walks on them. If the fighter is an enemy, the enemy loses MP based on the seed's level of Nettled.
+8155;SADIDA;10;Cycle sylvestre;4300;;oui;non;non;Trees summoned by the Sadida gain additional Nettled, but die at the end of the Sadida's next turn.
+8156;SADIDA;10;Communication végétale;7053;;oui;oui;oui;The Sadida sends their remaining MP to their dolls at the end of the Sadida's turn. However, if the Sadida has no MP left at the end of their turn, their dolls lose all their MP.
+8157;SADIDA;10;Savoir Sadida;1420;;non;non;non;The Sadida's Seed spell can only be cast on an adjacent cell, but all of their Dolls have more range on their spells.
+8158;SADIDA;10;Chaîne de la nature;7193;{"WILLPOWER":20};oui;non;non;The Sadida gains Force of Will but also loses an MP each time they apply an MP reduction.
+5049;SACRIEUR;11;Traînée de sang;5101;;oui;non;non;The Sacrier boosts their Lock and Dodge each time they inflict a flame return on themself. However, the flame returns are greater.
+5050;SACRIEUR;11;Placidité;5050;;oui;non;non;As long as the Sacrier hasn't used MP to move, they heal themself using movement spells.
+5051;SACRIEUR;11;Sang tatoué;5051;;oui;oui;non;The Sacrier gains HP but loses Range, focusing on melee combat.
+5052;SACRIEUR;11;Refus de la mort;845;;non;oui;non;When the Sacrier is mortally wounded, they gain resistance and a large amount of Armor. However, they won't be able to go above 20% max HP for a full turn.
+5053;SACRIEUR;11;Pacte de sang;877;;oui;non;non;The Sacrier's max HP is reduced, but they gain Armor if they drop below 20% max HP and then if they go above 40% max HP afterward.
+5054;SACRIEUR;11;Transcendance;5194;;non;non;non;In exchange for one WP, the Sacrier can greatly increase their Dodge or Lock using their punishments.
+5192;SACRIEUR;11;Mobilité;5192;;oui;oui;non;The Sacrier can move their targets and themself more easily, but it costs their ability to keep opponents next to them.
+5193;SACRIEUR;11;Libation;5193;;non;oui;non;The Sacrier loses their natural WP regeneration. However, they gain it by inflicting Flame Returns on themself.
+5194;SACRIEUR;11;Veines de Wakfu;7208;;oui;non;oui;The Sacrier replaces the WP cost of their movement spells with an AP cost. If the Sacrier uses a spell to move an enemy, the enemy will suffer direct damage. However, if the Sacrier uses a spell to move themself, they suffer a flame return.
+5195;SACRIEUR;11;Fracasseur;5195;;oui;non;non;This passive gives the Sacrier more control over their HP. When the Sacrier inflicts damage on a target, they steal some if the target's % of HP is higher than the Sacrier's. If the Sacrier's % of HP is higher than their target's, the Sacrier inflicts a flame return on themself.
+7213;SACRIEUR;11;Circulation sanguine;7213;;oui;non;non;The Sacrier's healing is significantly less reduced by resistance to healing, but the armor the Sacrier receives is reduced.
+7214;SACRIEUR;11;Jeu dangereux;7214;;oui;non;non;This passive makes it much easier for the Sacrier to get out of a sticky situation when their HP is very low. However, they are harder to heal when their current HP are high.
+7215;SACRIEUR;11;Vision;7215;;oui;non;non;This passive increases the range of the Sacrier's movement spells. In exchange, Armor gains are reduced by half if the Sacrier is not adjacent to another fighter.
+7216;SACRIEUR;11;Armure brûlante;7216;;oui;non;non;The Sacrier turns their flame returns into Armor. However, if they have Armor left when their turn starts, they suffer it as damage.
+7217;SACRIEUR;11;Pacte de Wakfu;7207;;oui;oui;non;The Sacrier gains HP but suffers a flame return each time they use WP.
+7218;SACRIEUR;11;Coeur de Sacrieur;7218;;non;non;non;Under the influence of Bold Punishment, the Sacrier's melee mastery and distance mastery are added together to increase their damage and versatility, in exchange for their range.
+7219;SACRIEUR;11;Mal des transports;7219;;oui;non;non;Targets moved by the Sacrier lose MP. If the Sacrier uses a spell to move themself, they also lose MP.
+7220;SACRIEUR;11;Pilier;880;;oui;non;non;Makes the Sacrier less mobile but grants HP regeneration capabilities and a resistance bonus when the Sacrier is adjacent to their enemies.
+7224;SACRIEUR;11;Immolation;7224;;oui;oui;non;The Sacrier catches fire if they end their turn adjacent to an enemy. If no enemies are adjacent to the Sacrier when they start a turn, the Sacrier suffers a flame return equivalent to Flaming.
+7830;SACRIEUR;11;Exécuteur;5054;;oui;non;non;This passive increases the range of the Sacrier's movement spells. In exchange, healing received is reduced by half if the Sacrier is adjacent to another fighter.
+4722;PANDAWA;12;Cocktail;7987;;oui;non;non;The Pandawa's mastery of Cocktail mixology means they can improve healing in exchange for damage. The spells Flaming Burp and Bubble Trouble now heal allies.
+4723;PANDAWA;12;Maître de l'Ivresse;2212;;oui;non;oui;Master of his own Merriment, the Pandawa earns temporary bonuses for each change of state. The Pandawa regenerates Wakfu and Health Points by consuming Dizzy from targets using appropriate spells.
+4724;PANDAWA;12;Tonneau sans Fond;2213;;oui;oui;non;Bottomless Barrel increases the Barrel's capacity. The Pandawa instinctively takes the Barrel at the end of the turn and heals by drinking several liters.
+4725;PANDAWA;12;Tonneau Agressif;2214;;oui;non;non;This passive can reduce the AP cost of the Chamrak spell when the Barrel is carried.
+4726;PANDAWA;12;Instinct Laiteux;2211;;oui;oui;oui;Each time Dizzy is consumed from a target, the Pandawa's next spell gains increased damage. In addition, this passive puts all targets round the Barrel in the Dizzy state at the start of each of the Pandawa's turns.
+5148;PANDAWA;12;Bambouteille;5148;;oui;non;non;The Pandawa gains a bonus that increases Dodge or Lock depending on whether they are Merry or Worn-Out. This passive also reduces the cost of Ether.
+5149;PANDAWA;12;Cyanose;5149;;oui;non;non;With intimate knowledge of Bamboo Milk, the Pandawa can poison enemies using a recipe handed down from Pandawa to Pandawa over countless generations. But with taking such risks, the Pandawa loses the ability to effectively heal allies.
+5150;PANDAWA;12;Buvette;5150;;non;oui;oui;Party tonight, everyone grab a refreshment! At the start of Pandawa’s turn, all the allies around the Barrel gain Final Damage.
+5151;PANDAWA;12;Pandémie;5151;;oui;non;non;A Pandawa that can handle his Barrel is a good Pandawa. That’s why, with this passive skill, Pandawa gains Robustness when carrying his Barrel.
+6846;PANDAWA;12;Éméché;2215;;oui;non;non;This passive increases the Pandawa's ability to become dizzy to take advantage of better preparation effects. With a passive like this, the party's going to be wild!
+6479;ROUBLARD;13;Roublaboom;5357;;non;non;non;Lets the Rogue strengthen that valuable tool, the Boombot. In addition to gaining AP and MP, it can target fighters other than the Rogue's own bombs, but it dies at the end of its turn.
+6480;ROUBLARD;13;Grande évasion;6480;;non;non;non;If the Rogue uses Ruse to change modes, they switch places with the farthest bomb, within a radius of 6 cells, and then detonate it.
+6481;ROUBLARD;13;Bomber Fan;4311;;non;non;non;The Rogue gains 1 AP when a bomb explodes, but their bombs only have a single health point.
+6482;ROUBLARD;13;Artificier;6482;;non;non;non;Bombs evolve faster, but the Rogue can only place one of each element per turn.
+6483;ROUBLARD;13;Tunique renforcée;1816;;oui;oui;oui;At the end of their turn, the Rogue uses bombs adjacent to them as a shield by absorbing their resistance.
+6484;ROUBLARD;13;Démineur;7064;;oui;oui;non;The Rogue can no longer change modes with Ruse, but changes modes automatically when they run out of Powder.
+6485;ROUBLARD;13;Lame rouillée;5123;;non;non;non;The Rogue's elemental spells in Runaway mode have fixed range, but generate Rusty Blades. These Rusty Blades are consumed in Sneaky mode to apply a stackable poison on a target.
+6486;ROUBLARD;13;Maître des lames;5050;;oui;non;non;In Sneaky mode, the Rogue consumes their Powder to gain Armor.
+6487;ROUBLARD;13;Mur de poudre;6933;;oui;oui;non;The Rogue can create Powder Walls by placing bombs in a line spaced less than 5 cells apart. The Powder Wall inflicts damage on all fighters who start their turn inside it.
+6488;ROUBLARD;13;Fugitif;2334;;oui;non;non;At the start of their turn, the Rogue switches places with their closest bomb, up to 4 cells away, then stabilizes it.
+7062;ROUBLARD;13;Tir surprise;2332;;non;non;non;The Rogue will inflict additional damage on their next elemental spell after changing modes. The connection is lost if the Rogue uses their MP to move. In exchange, Ruse can no longer be used to switch places with another fighter.
+7063;ROUBLARD;13;Baril;4300;;non;non;non;The Rogue's Powder reserves are larger, but their bombs no longer evolve naturally.
+7064;ROUBLARD;13;Dynamite;6485;;non;non;non;The Rogue can cast Dynamite on other fighters. If they cast it on an ally, they share the damage increase with that ally. Casting it on an enemy makes the enemy vulnerable to explosions.
+7065;ROUBLARD;13;Explobombe;7065;;non;non;non;Bombs explode when they die. Talk about going out with a bang!
+7090;ROUBLARD;13;Bombes élémentaires;7090;;non;oui;oui;The Rogue's bombs have additional effects. However, the bombs' maximum level is reduced.
+7091;ROUBLARD;13;Maître Roublard;2339;;non;oui;non;At start of turn, the Rogue accumulates the "Rogue Master" state up to a maximum level of 5. Upon switching from Sneaky to Runaway, or from Runaway to Sneaky, the Rogue will gain additional bonuses depending on the mode. In exchange, the Ruse spell has a 2 turn cooldown.
+7092;ROUBLARD;13;Jackpot;7092;;non;non;non;The Rogue switches places with the first bomb placed on their turn while in Sneaky mode, then switches places with it again at the end of the turn if the bomb is still on the field.
+7982;ROUBLARD;13;Tacticien;2335;;non;non;non;The Rogue regains AP by moving their bombs, but the bombs lose 1 level after being moved. The Rogue can regain up to 6 AP per turn.
+7983;ROUBLARD;13;Trainée de poudre;5192;;non;non;non;The Rogue gains MP by summoning bombs. In exchange, Ruse now has a line of sight.
+7984;ROUBLARD;13;Bombes à retardement;7063;;oui;oui;oui;Instead of directly placing bombs, the Rogue places glyphs. At the start of the next turn, these glyphs turn into bombs if the cell is still free. The bombs summoned in this way level up directly.
+7093;ZOBAL;14;Jeu de jambes;7093;;oui;oui;non;The Masqueraider gains mobility but loses resistance.
+7094;ZOBAL;14;Bas les masques;3364;;oui;non;non;The Masqueraider regains 2 AP when they start wearing a mask different from the one they already have.
+7095;ZOBAL;14;Poussées violentes;7095;;oui;non;non;"Dopu" was a famous Masqueraider specializing in collisions. He pushed his opponents around so much that they took pushback damage. An ancestral art that was thought to have been lost since the Dofus Era...
+7096;ZOBAL;14;Art de la vengeance;7096;;oui;non;non;The Masqueraider gains melee damage based on their Lock.
+7097;ZOBAL;14;Masque de vie;7097;;non;non;non;This passive gives the Masqueraider a health-stealing ability on targets they attack from the front.
+7098;ZOBAL;14;Carnaval;3357;;non;oui;non;Masks do not consume WP but they have a shared recast time of 4 turns.
+7099;ZOBAL;14;Armure unique;7099;{"RECEIVED_ARMOR_PERCENTAGE":100};non;non;non;This passive significantly strengthens the Armor given to a target that has none at all. Giving Armor in the right situation is an art.
+7100;ZOBAL;14;Ancre;3363;;oui;non;non;The Masqueraider increases their Lock to keep opponents in close combat but loses mobility in exchange.
+7101;ZOBAL;14;Brute;3356;;oui;non;non;The Masqueraider specializes in dealing damage, and inflicts more damage on their opponents. In exchange, their ability to give and receive Armor is reduced.
+7102;ZOBAL;14;Protecteur reculé;5348;;oui;oui;non;With this passive, the amount of healing provided varies depending on the Masqueraider's recent actions. Heals increase if the Masqueraider didn't heal anyone on the previous turn, and decrease if they did heal someone on the previous turn.
+7103;ZOBAL;14;Collisions de support;7103;;oui;oui;non;The Masqueraider increases their support potential through collisions. Add a dash of crash and smash!
+7104;ZOBAL;14;Érosion;7104;;oui;oui;non;Changes the Psychopath Mask so that the Masqueraider's spells remove resistance from opponents, specifically from the direct target of the spell. The resistance is removed before the spell's effects (damage, etc.) are applied. In exchange, the Masqueraider's offensive ability is reduced.
+7105;ZOBAL;14;Virevolte;7105;;oui;non;non;Increases damage from the side but reduces damage from the front.
+7106;ZOBAL;14;Collisions régénérantes;7106;;oui;non;non;Collisions gain a healing effect. When you push one obstacle into another, the second one will receive the healing.
+7107;ZOBAL;14;Miroirs;7107;;oui;non;non;The Masqueraider switches places with the direct target of a spell cast in melee. The Masqueraider cannot switch places if they are being carried or stabilized.
+7108;ZOBAL;14;Au contact;5347;;non;oui;non;The Masqueraider increases their damage and resistance abilities if they stay adjacent to a fighter (allied or enemy). If they move away and finish their turn in an isolated position, they have a penalty instead.
+7111;ZOBAL;14;Art de la fuite;7111;;oui;non;non;The Masqueraider gains ranged damage based on their Dodge.
+7112;ZOBAL;14;Regard masqué;5359;{"MOVEMENT_POINT":1};non;non;non;The Masqueraider gains mobility, but can no longer cast any spells on adjacent cells.
+7113;ZOBAL;14;Poussées d'entrave;7113;{"WILLPOWER":10};oui;non;non;Pushes that cause a collision remove MP instead of AP. Useful for Masqueraiders who want to reduce their opponents' mobility.
+6271;OUGINAK;15;Terrier;6271;;oui;non;non;At end of turn, the Ouginak switches places with their Bow Wow. The Bow Wow then switches places with the Ouginak at the end of its turn.
+6272;OUGINAK;15;Art Canin;6275;;oui;oui;oui;The Ouginak steals part of the indirect damage they inflict and converts it to armor. This is damage done outside of their turn, such as poisons. In exchange, their damage is reduced. The armor obtained with Canine Art is limited to 50% of the Ouginak's max HP per turn.
+6273;OUGINAK;15;Maître Chien;6273;;non;non;non;The Bow Wow copies the Ouginak's actions. However, it can no longer cast spells.
+6274;OUGINAK;15;Compagnon;6274;;non;non;non;The Bow Wow is more resistant and has more AP. In exchange, it can no longer dodge. When it dies, the Ouginak regains 2 WP.
+6275;OUGINAK;15;Ardeur;7328;;non;oui;non;The Ouginak's mobility is reduced, but they gain lots of damage-dealing power if they can finish their turn adjacent to their Prey.
+6276;OUGINAK;15;Epuisement;6276;;non;non;non;The Ouginak loses range, but their indirect damage increases. This is damage done outside of their turn, such as poisons.
+6277;OUGINAK;15;Pillage;6277;{"RECEIVED_ARMOR_PERCENTAGE":30};oui;oui;non;The Ouginak sacrifices damage in order to improve their ability to take a hit. They gain HP and armor received. They also gain armor at the start of their turn if adjacent to prey.
+6278;OUGINAK;15;Crocs Futés;6278;{"BLOCK_PERCENTAGE":20};non;non;non;The Ouginak gains Block to become more resistant. When it transforms into a Were-Ouginak, it converts its Block into Critical Hits to go on the attack.
+6279;OUGINAK;15;Flair;6279;;non;non;non;The Ouginak's Prey are poisoned and take damage every turn.
+6280;OUGINAK;15;Marchandage;6280;;non;non;non;The Ouginak gains resistance based on its Fury when it transforms into a Were-Ouginak. In exchange, it loses Fury at start of turn.
+6281;OUGINAK;15;Pistage;5103;{"MOVEMENT_POINT":1};oui;non;non;The Ouginak is more effective when attacking its targets from behind. To get there more easily, it gains mobility.
+6282;OUGINAK;15;Force sage;7185;;oui;oui;non;MP removals are replaced by application of indirect damage on the target.
+7553;OUGINAK;15;Acharné;7193;{"WILLPOWER":20};oui;non;oui;The Ouginak gains force of will to bind targets more easily. The Ouginak gains Fury each time they remove MP. In exchange, they lose damage inflicted.
+7554;OUGINAK;15;Chasse ouverte;7554;;non;non;non;The Ouginak gains Fury and damage upon attacking its Prey, but its maximum Fury decreases.
+7555;OUGINAK;15;Digestion;6272;;oui;oui;non;The Ouginak gains Fury and heals themself when they do indirect damage this is damage done outside of their turn, such as poisons. In exchange, they sacrifice some of their damage.
+7556;OUGINAK;15;Énergie Canine;7343;{"WAKFU_POINT":3};non;non;non;The Ouginak has more max WP, but their damage bonus in Were-Ouginak form is reduced.
+7557;OUGINAK;15;Fureur;7557;;oui;non;non;The Ouginak has greater maximum Fury. In exchange, their max WP decreases.
+7558;OUGINAK;15;Traqueur Canin;7558;;non;oui;oui;The Ouginak converts damage into resistance when it ends its turn in contact with Prey.
+7596;OUGINAK;15;Canin'Os;7596;;oui;non;non;The Ouginak gains lock. When it transforms into a Were-Ouginak, its lock is converted to dodge.
+6925;STEAMER;16;Modérateur d'énergie;6931;;non;oui;non;The Foggernaut gains an MP and Range bonus at start of their turn if they are at full WP.
+6926;STEAMER;16;Routes sinueuses;2817;;non;non;non;The Foggernaut can place more microbots each turn. In exchange, the maximum length of rails (between two microbots) decreases.
+6927;STEAMER;16;Versatilité;4689;;oui;oui;oui;The Foggernaut gains end-of-turn bonuses based on their positioning.
+6928;STEAMER;16;Blindage renforcé;6691;;non;non;non;The turret is more resistant to damage. In exchange, the Foggernaut can only place it at a range of up to 3 cells max, rather than 6.
+6929;STEAMER;16;Stratégie robotique;5462;;non;non;non;The Foggernaut steals HP when their Turret inflicts damage, in exchange for part of their indirect damage.
+6930;STEAMER;16;Technologie de transports;6930;;non;non;non;Microbot cost decreases. In exchange, the maximum range is reduced to 3.
+6931;STEAMER;16;Assistance tellurique;2816;;oui;oui;oui;The Foggernaut summons blocks when casting an Earth spell on an empty cell. These blocks protect nearby allies. Blocks' protection zones cannot overlap.
+6932;STEAMER;16;Substitution mécanique;5461;;oui;oui;non;The turret applies additional effects when the Foggernaut casts an Earth or Water spell on it. The first time an effect is triggered during the turn, the Foggernaut recovers AP. In exchange, summoning or upgrading the Turret costs 1 WP.
+6933;STEAMER;16;Patience;6939;;oui;oui;non;The Foggernaut instantly gains 2 non-regenerable Stasis points (SP) on reaching their maximum SP. They can therefore temporarily exceed their maximum SP. In exchange, their max WP decreases at the start of the fight.
+6934;STEAMER;16;Alliage léger;2819;;non;non;non;Reduces the Foggernaut's movement ability while increasing their positioning ability with their rails.
+6935;STEAMER;16;Inversion d'énergie;4300;;non;non;non;The Foggernaut inverts their Wakfu Point and Stasis Point regeneration. They now naturally recover 1 SP at end of turn, and their Turret regenerates WP for them.
+6936;STEAMER;16;Revêtement à toute épreuve;7344;;oui;non;non;The Foggernaut gains HP. In exchange, Fogginator inflicts heavy damage on them at end of turn.
+6937;STEAMER;16;Activation;5456;;non;non;non;The Foggernaut can use the Turret spell on targets. The effect depends on the Turret's active element. If it is Fire, the Turret deals damage to the target. If it is Water, it switches places with the target. If it is Earth, it applies Armor to the target. The effects are boosted if the spell gets a critical hit.
+6938;STEAMER;16;Exécution immédiate;6925;;oui;non;non;The Foggernaut's Turret is no longer automatically triggered at end of turn. Instead, the Foggernaut can trigger it manually.
+6939;STEAMER;16;Protection stasifiée;2820;;non;non;non;Leftover SP (after the first one) generated by the Turret are converted into Armor.
+6940;STEAMER;16;Roues chaudes;6933;;non;oui;oui;The Foggernaut's rails inflict damage on enemies who start or end their turn on them, but Microbots cost 1 SP.
+6941;STEAMER;16;Conquête sereine;5245;{"BLOCK_PERCENTAGE":50};non;non;non;The Foggernaut gains an increased Block chance. In exchange, they lose max SP at the start of the fight.
+6942;STEAMER;16;Tacticien;5351;;non;non;non;The turret gains additional effects at the expense of its damage.
+6943;STEAMER;16;Mécanique avancée;7181;;oui;non;non;The Foggernaut can summon two turrets in exchange for some of their direct damage inflicted.
+7810;STEAMER;16;Déploiement tactique;7107;;oui;non;non;The Foggernaut can place their Turret without line of sight, but only in a straight line.
+4686;ELIOTROPE;18;Rage;4686;;oui;oui;oui;The Eliotrope gains Celestial Gift instantly after casting the Celestial Portal spell. However, the AP bonus from Celestial Gift maxes out at 1 time per turn.
+4687;ELIOTROPE;18;Traquenard;4687;;non;non;non;Celestial Gift provides a very high damage bonus, but only if the target has its back to the Eliotrope.
+4688;ELIOTROPE;18;Effervescence;7185;;non;non;non;This passive allows the Eliotrope to deal much greater damage with their next spell after changing modes. In exchange, the damage bonus from Calm lasts only one turn.
+4689;ELIOTROPE;18;Intermédiaire;4689;;non;non;non;Celestial Portal no longer costs AP to cast, but Celestial Gift gives an MP bonus instead of an AP bonus.
+4690;ELIOTROPE;18;Résilience;4690;;oui;non;non;The Eliotrope no longer recovers WP upon gaining Celestial Gift. Instead, they gain Armor to absorb incoming attacks.
+5056;ELIOTROPE;18;Disciple du portail;5348;;oui;oui;non;This passive allows the Eliotrope to create a temporary portal under them when they cast the Exaltation spell. The portal can exceed the limit of 4, but it cannot be moved and will disappear at the end of the turn. In exchange, the Eliotrope can no longer use the Portal spell until the end of their turn.
+5131;ELIOTROPE;18;Transitoire;5352;;oui;oui;oui;If the Eliotrope or an ally goes through a Portal, they gain MP for the current turn. In exchange, they can no longer use portals to move until the following turn. This passive applies to all of the team's portals.
+5132;ELIOTROPE;18;Réminiscence;5132;;oui;oui;non;The Eliotrope automatically changes modes at end of turn. Also, they can cast Exaltation on another ally from a distance.
+5143;ELIOTROPE;18;Portail céleste;5143;;oui;non;non;The Eliotrope teleports to the closest portal at the start of the turn.
+7202;ELIOTROPE;18;Interstellaire;5101;;oui;oui;oui;Allies that use one of the Eliotrope's portals more than 6 cells away are no longer affected by Long Teleportation, but the starting portal is destroyed. This passive applies to all of the team's portals.
+7203;ELIOTROPE;18;Dimension blanche;5104;;oui;non;oui;Fighters around portals gain Critical Hits at the start of the Eliotrope's turn if the Eliotrope is in Calm mode, and lose Critical Hits if the Eliotrope is Exalted.
+7204;ELIOTROPE;18;Quiétude;880;;oui;non;non;The Eliotrope regains AP (instead of gaining a damage inflicted bonus) when the Exaltation spell is cast.
+7205;ELIOTROPE;18;Espace-temps;4688;;oui;oui;oui;Instead of lasting indefinitely, portals last for 2 turns. This passive applies to all of the team's portals.
+7206;ELIOTROPE;18;Porta(i)l;7206;;non;non;non;The Eliotrope now has just two portals, but they can move them around more easily and at a greater distance. Also, their damage and heals performed through portals are increased.
+7207;ELIOTROPE;18;Bouclier de la fin;7207;;oui;oui;oui;The Eliotrope must place their portals adjacent to a fighter. In return, allies who use their portals are healed and gain AP. This passive applies to all of the team's portals.
+7208;ELIOTROPE;18;Épée du début;7208;;non;non;non;The Eliotrope can get Celestial Gift by casting spells on adjacent targets. In exchange, the maximum range of all of their spells is reduced.
+7209;ELIOTROPE;18;Cicatrisation;5454;;oui;non;non;The Eliotrope is healed for part of their missing HP when ending their turn in Calm mode, in exchange for one WP. If they are on a portal, the healing is greater.
+7210;ELIOTROPE;18;Concentration;7343;;non;non;non;Celestial Portal is more useful and can be cast multiple times per turn. In exchange, it is harder to cast.
+7720;ELIOTROPE;18;Méditation;5131;;oui;non;non;The Eliotrope no longer gains damage by starting their turn in Calm mode, but gains MP and elemental resistance instead. Celestial Gift is also consumed if heals are performed, which then boosts healing.
+7814;ELIOTROPE;18;Souffle de la déesse;6925;;oui;non;non;If the Eliotrope casts the Portal spell on an ally while standing on a portal, they switch places, but the caster does not place a new portal.
+5579;HUPPERMAGE;19;Dynamo;5579;;oui;non;non;The Huppermage's Runes are ephemeral and will disappear at end of turn, allowing them to manage their runes differently.
+5580;HUPPERMAGE;19;Initiative de l'âme;5132;;oui;non;oui;The Huppermage gains 2 AP for the current turn if the first spell they cast is Heart of Light.
+5581;HUPPERMAGE;19;Distension Élémentaire;5347;;non;non;non;Elemental spells gain 2 Range when the Heart of the same element is active.
+5582;HUPPERMAGE;19;Liaison Lumineuse;7107;;non;non;non;The Huppermage switches places with their Will-o'-the-Wisp when they summon it.
+5583;HUPPERMAGE;19;Universalité;5583;;oui;non;oui;The Huppermage's knowledge allows them to convert their runes into bonuses at the end of the turn, in exchange for some of their Quadramental Breeze.
+5584;HUPPERMAGE;19;Sauvegarde Runique;4300;;non;non;non;The Huppermage can save 3 runes onto their Will-o'-the-Wisp, provided they have exactly 1 rune. In return, the Will-o'-the-Wisp spell can only be used once per turn.
+5585;HUPPERMAGE;19;Plénitude;5585;;non;non;non;With serene efficiency, you catalyze the power of the elements and release them in the form of energy to create spells with astonishing effects.
+5586;HUPPERMAGE;19;Profusion Runique;5586;;oui;oui;oui;At the end of the turn, the Huppermage increases the abilities of their Light spells for the following turn based on the number of runes they have.
+5587;HUPPERMAGE;19;Absorption Quadramentale;7193;{"WILLPOWER":20};oui;non;non;The Huppermage gains Force of Will to obstruct their opponents. They generate QB for each reduction (AP, MP, or Range) performed.
+5588;HUPPERMAGE;19;Réfraction Élémentaire;5588;;non;non;non;The Huppermage sacrifices some of the Heart of Light's power so they can cast it several times on the same turn.
+7797;HUPPERMAGE;19;Extension des sens;5584;;non;non;non;The Huppermage can regenerate QB under the effects of Heart of Light by meeting certain conditions, but the Heart lasts longer.
+7798;HUPPERMAGE;19;Transcendance Runique;5587;;oui;non;non;The Huppermage doubles their QB regeneration when they have all their runes. Otherwise, their regeneration is halved.
+7800;HUPPERMAGE;19;Combinaison Élémentaire;5348;;non;oui;oui;The Huppermage increases the abilities of their Light spells by creating elemental combinations.
+7801;HUPPERMAGE;19;Pulsation;7191;;non;non;non;The Will-o'-the-Wisp attracts fighters when placed it repels them when consumed.
+7802;HUPPERMAGE;19;Antithèse;5581;;oui;non;non;The Huppermage regenerates QB when generating Runes. However, elemental spells inflict less damage.
+7803;HUPPERMAGE;19;Essor de l'âme;5454;;non;non;non;The Huppermage uses the Heart of Light to gain resistance in other elements.
+7804;HUPPERMAGE;19;Altruisme de l'âme;5455;;oui;non;non;The Huppermage sacrifices the damage granted by Heart of Light to gain heals performed. This passive also allows them to recover Quadramental Breeze each time they heal an ally.
+7805;HUPPERMAGE;19;Nouveau souffle;5582;;non;non;non;The Huppermage has better control of their Will-o'-the-Wisp. However, they can only place one at a time.
