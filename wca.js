@@ -835,7 +835,7 @@ function initCSQ(){
   const st=getEffStats();
   CSQ.steps=[]; CSQ.remAP=S.remainingAP??st.ap??6; CSQ.remMP=st.mp??3; CSQ.remWP=st.wp??0;
   CSQ.pfCur=showsRes()?resVal():0;
-  resetMonHP(); renderCSQ();
+  resetMonHP(); renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
   // Changement de cible seulement : ne touche pas aux étapes ni aux ressources.
@@ -868,7 +868,10 @@ function addToCSQ(sp){
   if(!S.monster){alert("Sélectionne une cible d'abord.");return;}
   if(!S.build) return;
   const ap=effApCost(sp),mp=sp.mpCost||0,wp=sp.wpCost||0;
-  if(ap>CSQ.remAP||mp>CSQ.remMP||wp>CSQ.remWP){
+  // Limite d'usages/tour (même contrainte que le knapsack auto, cf. canAdd).
+  const maxU=sp.uses||3, usedU=CSQ.steps.reduce((n,s)=>n+(s.sp===sp||s.sp.name===sp.name?1:0),0);
+  const blocked = usedU>=maxU || ap>CSQ.remAP || mp>CSQ.remMP || wp>CSQ.remWP;
+  if(blocked){
     const el=document.getElementById('csqres');
     if(el){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);}
     return;
@@ -878,7 +881,7 @@ function addToCSQ(sp){
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
   if(dmg>0) applyDmgToMon(dmg);
-  renderCSQ();
+  renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function removeFromCSQ(idx){
   const keep=CSQ.steps.filter((_,i)=>i!==idx).map(s=>s.sp);
@@ -1122,9 +1125,14 @@ function renderAdvisor(){
         const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:9px;color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
         // Eniripsa : dégât conditionnel sur les PV (auto selon l'état réel)
         const eniHp=(r.spell.lowTgtDmg>0||r.spell.selfHpBonus>0)?`<span style="font-size:9px;color:var(--dim)" title="${r.spell.lowTgtDmg>0?'Dégât plein si la cible a ≥ 80 % PV':'Bonus si l’Eniripsa a ≥ 80 % PV'}">❤</span>`:'';
-        return `<div class="sr ${isBest?'best':''}" data-sn="${r.spell.name}" style="cursor:pointer">
+        // Compteur d'usages/tour : combien de fois ce sort est déjà dans la séquence perso vs sa limite.
+        const maxU=r.spell.uses||3;
+        const usedU=CSQ.steps.reduce((n,s)=>n+(s.sp.name===r.spell.name?1:0),0);
+        const exhausted=usedU>=maxU;
+        const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="Usages par tour">${usedU}/${maxU}</span>`;
+        return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" style="cursor:pointer">
           <span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}
+          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}${useTxt}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
       }).join('')

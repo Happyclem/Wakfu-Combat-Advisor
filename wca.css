@@ -119,6 +119,9 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:13px
 .srn{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srd{font-family:var(--mono);color:var(--green);font-size:11px}
 .srdpa{font-family:var(--mono);color:var(--muted);font-size:10px}
+.srus{font-family:var(--mono);font-size:10px;color:var(--dim);padding:0 2px;flex-shrink:0}
+.srus.exhausted{color:var(--red);font-weight:700}
+.sr.exhausted{opacity:.45}
 /* El badge */
 .eb{font-size:9px;padding:1px 4px;border-radius:2px;font-weight:700;flex-shrink:0}
 .eb.Feu{background:#3a1a00;color:#f08030}.eb.Eau{background:#001a3a;color:#40a0f0}
