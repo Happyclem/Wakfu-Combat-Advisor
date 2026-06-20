@@ -36,10 +36,10 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 .pbgrp .pb:not(:first-child){border-left:none}
 .pb.on,.pb:hover{border-color:var(--gold);color:var(--gold);background:var(--gdim)}
 .pbgrp .pb.on{box-shadow:inset 0 0 0 1px var(--gold)}
-/* Header center — effets actifs + orientation */
-#hd-center{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;overflow:hidden}
-#sitbuffs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center}
-#sitbuffs .btn{padding:3px 8px;font-size:var(--fs-10);white-space:nowrap}
+/* Toggles/compteurs spécifiques à la classe — sur leur propre ligne dans la boîte de combat. */
+#sitbuffs{flex-basis:100%;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#sitbuffs:empty{display:none}
+#sitbuffs .btn{padding:4px 9px;font-size:var(--fs-10);white-space:nowrap}
 /* ── DOCKING (zones gauche/centre/droite, onglets déplaçables) ── */
 #dockroot{flex:1;display:flex;min-height:0;overflow:hidden}
 .dz{display:flex;flex-direction:column;min-width:120px;overflow:hidden;background:var(--bg);position:relative}
@@ -301,8 +301,6 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   html,body{overflow:auto}
   #app{display:flex;flex-direction:column;height:auto;min-height:100vh;width:100%}
   #hd{flex-wrap:wrap;height:auto;min-height:38px;padding:6px 8px}
-  #hd-center{flex-basis:100%;order:9;justify-content:flex-start}
-  #hdc{margin-left:0}
   /* Les zones s'empilent verticalement ; les resizers horizontaux disparaissent. */
   #dockroot{flex-direction:column;overflow:visible}
   .dz-resizer{display:none}

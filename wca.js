@@ -295,6 +295,7 @@ const MECHS = (typeof window!=='undefined' && window.WCA_MECHANICS) || {};
 // Le multiplicateur de dégâts réel (Concentration, Précision…) demande une
 // calibration en jeu : seul le Point Faible du Sram est modélisé (voir MECHS).
 const CLASS_NOTES = {
+  sram:       '🗡 Point Faible : applique-le sur ta cible puis déclenche tes finisseurs (dégâts ×2 au max).',
   cra:        '🎯 Précision / Affûtage : monte la jauge avant tes gros sorts (Tir précis).',
   iop:        '🔥 Concentration : tape pour la monter ; à 100 elle régénère du PW et booste les dégâts.',
   feca:       '🛡 Glyphes & boucliers : pose-les sur cases vides, ils déclenchent tes effets.',
@@ -314,9 +315,10 @@ const CLASS_NOTES = {
   foggernaut: '⚙ Stasis & tourelles : alimente tes machines pour les dégâts.',
   forgelance: '🔱 Lance : gère ta portée et tes charges.',
 };
-// Rappel de classe : seulement pour les classes SANS mécanique modélisée
-// (celles avec mécanique fournissent déjà des conseils chiffrés via mech.advice).
-function getClassNote(){ if(getMech()) return []; const n=CLASS_NOTES[S.build?.class]; return n?[{p:'L',msg:n}]:[]; }
+// Rappel de classe : toujours affiché en conseil de base (priorité L), même pour les classes
+// modélisées — leur mech.advice peut ne rien renvoyer au repos (ex. Sram à 0 Point Faible),
+// donc ce rappel garantit qu'aucune classe ne se retrouve sans aucun conseil.
+function getClassNote(){ const n=CLASS_NOTES[S.build?.class]; return n?[{p:'L',msg:n}]:[]; }
 function getMech(){ return MECHS[S.build?.class]||null; }
 function getPlayerMech(){ return S.combat.mechanics['__p']||{}; }
 // ── ACCÈS GÉNÉRIQUE À LA RESSOURCE DE CLASSE ──────────────────────
@@ -1096,6 +1098,7 @@ function renderAdvisor(){
   }
   // Toggles de combat : visibles dès qu'un build est présent.
   document.getElementById('combatcard').style.display='';
+  renderSitBuffs(); // toggles/compteurs spécifiques classe (vivent désormais dans cette boîte)
   // Gauge
   const mech=getMech(), pm=getPlayerMech(), gc=document.getElementById('gaugecard');
   if(mech?.res){
