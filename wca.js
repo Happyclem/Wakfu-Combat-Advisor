@@ -20,9 +20,17 @@ function iconImg(folder,name,fallback,cls,title){
 // Élément → icône statistics (fire/water/earth/air_coin), fallback emoji.
 const ELEM_ICON={Feu:'fire_coin',Eau:'water_coin',Terre:'earth_coin',Air:'air_coin'};
 const ELEM_EMOJI={Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
+// Couleur par élément (liseré, barre de dégât) — posée en inline pour ne dépendre d'aucune
+// cascade de variable CSS.
+const ELEM_COL={Feu:'#f08030',Eau:'#40a0f0',Terre:'#60c030',Air:'#e0c000',Neutre:'#8890b0'};
+function elemCol(el){ return ELEM_COL[el]||ELEM_COL.Neutre; }
 function elemIcon(el,cls){ const f=ELEM_ICON[el]; return f?iconImg('statistics',f,ELEM_EMOJI[el]||'⚪',cls||'icn-sm',el):(ELEM_EMOJI[el]||'⚪'); }
 function spellIcon(sp,cls){ return iconImg('spells',sp&&sp.icon,ELEM_EMOJI[sp&&sp.element]||'✨',cls||'icn',sp&&sp.name); }
 function statIcon(name,fallback,cls,title){ return iconImg('statistics',name,fallback,cls||'icn-sm',title); }
+// Classe WCA → id Ankama (classIcons/<id>.png).
+const CLASS_ID={feca:1,osamodas:2,enutrof:3,sram:4,xelor:5,ecaflip:6,eniripsa:7,iop:8,cra:9,
+  sadida:10,sacrier:11,pandawa:12,rogue:13,masqueraider:14,ouginak:15,foggernaut:16,eliotrope:17,huppermage:18,forgelance:19};
+function classIcon(cls,size){ const id=CLASS_ID[cls]; return id?iconImg('classIcons',id,'',size||'icn',cls):''; }
 // ── DATA ─────────────────────────────────────────────────────────
 let MONS=[], SPD={}, GPD=[], CSP=[];
 function loadData(){
@@ -810,26 +818,13 @@ function resetMonHP(){
   renderHPBars();
 }
 function renderHPBars(){
-  // Barre de la cible visée dans le panneau Conseils
-  const m=S.monster, max=m?m._maxHp||m.hp||0:0, cur=m?m._currentHp??max:0;
-  const pct=max>0?Math.max(0,Math.round(cur/max*100)):0;
-  const col=pct>50?'var(--green)':pct>25?'var(--gold)':'var(--red)';
-  const txt=max>0?`${cur.toLocaleString('fr')} / ${max.toLocaleString('fr')}`:'-';
-  const ah=document.getElementById('advhpcard'); if(ah) ah.style.display=max>0?'':'none';
-  const an=document.getElementById('advhpname'); if(an){
-    const pct=m&&m._hemo>0?Math.round(m._hemo*HEMO_PCT_PER_LVL*100):0;
-    const hemo=m&&m._hemo>0?` · 🩸 Hémo ${m._hemo} (+${pct}% dégâts)`:'';
-    an.innerHTML=(m?(m.name||m.n||''):'')+(S.targets.length>1?` (${S.focusIdx+1}/${S.targets.length})`:'')
-      +(hemo?`<span style="font-size:var(--fs-10);color:var(--red);font-weight:600">${hemo}</span>`:'');
-  }
-  const at=document.getElementById('advhptxt'); if(at){at.textContent=txt;at.style.color=col;}
-  const ab=document.getElementById('advhpbar'); if(ab){ab.style.width=pct+'%';ab.style.background=col;}
-  // Barres par cible dans la liste (gauche)
+  // Barres de vie par cible dans le panneau Cibles (la barre de la cible visée dans le
+  // Conseiller a été retirée : elle faisait doublon avec celle-ci).
   S.targets.forEach(t=>{
     const mx=t._maxHp||t.hp||0, c=isDead(t)?0:(t._currentHp??mx);
     const p=mx>0?Math.max(0,Math.round(c/mx*100)):0;
     const cc=isDead(t)?'var(--dim)':p>50?'var(--green)':p>25?'var(--gold)':'var(--red)';
-    const bar=document.getElementById('tgthp_'+t.uid); if(bar){bar.style.width=p+'%';bar.style.background=cc;}
+    const bar=document.getElementById('tgthp_'+t.uid); if(bar){bar.style.width=p+'%';bar.style.backgroundColor=cc;}
     const lab=document.getElementById('tgthpt_'+t.uid); if(lab){lab.textContent=mx>0?`${c.toLocaleString('fr')}/${mx.toLocaleString('fr')}`:'-';lab.style.color=cc;}
   });
 }
@@ -846,7 +841,7 @@ function renderPlayerStatus(){
     const cur=Math.max(0,Math.round(pm.hp)), pct=Math.max(0,Math.min(100,Math.round(cur/mx*100)));
     const col=pct>50?'var(--green)':pct>25?'var(--gold)':'var(--red)';
     hpt.style.display=''; txt.textContent=`${cur.toLocaleString('fr')} / ${mx.toLocaleString('fr')}`; txt.style.color=col;
-    const b=document.getElementById('plrhpbar'); b.style.width=pct+'%'; b.style.background=col;
+    const b=document.getElementById('plrhpbar'); b.style.width=pct+'%'; b.style.backgroundColor=col;
   } else { hpt.style.display='none'; txt.textContent=''; }
   document.getElementById('plrres').innerHTML=gains.length?('Regagné : '+gains.map(([k,v])=>`<span style="color:var(--gold)">+${v} ${k}</span>`).join(' ')):'';
 }
@@ -921,7 +916,7 @@ function renderCSQ(){
     else{
       se.innerHTML=CSQ.steps.map((s,i)=>{
         const co=[s.ap?`${s.ap}PA`:'',s.mp?`${s.mp}PM`:'',s.wp?`${s.wp}PW`:''].filter(Boolean).join(' ');
-        return `<div class="ss" data-d="${i}" style="cursor:pointer" title="Clic pour retirer">${spellIcon(s.sp,'icn-sm')}<span style="font-weight:600">${s.sp.name}</span>
+        return `<div class="ss" data-el="${s.sp.element||'Neutre'}" data-d="${i}" style="cursor:pointer" title="Clic pour retirer">${spellIcon(s.sp,'icn-sm')}<span style="font-weight:600">${s.sp.name}</span>
           <span class="ssap">${co}</span>${s.dmg>0?`<span class="ssdmg">${s.dmg.toLocaleString('fr')}</span>`:''}
           ${s.pfGen>0?`<span class="badge badge-pf">+${s.pfGen}PF</span>`:''}
           <span style="color:var(--dim);margin-left:auto;padding:0 3px;font-size:var(--fs-11)">✕</span></div>`;
@@ -940,7 +935,7 @@ function renderCSQ(){
       const mx=mech.res.max;
       document.getElementById('csqpfl').textContent=mech.res.label;
       const f=document.getElementById('csqpff');
-      f.style.width=Math.min(100,CSQ.pfCur/mx*100)+'%'; f.style.background=mech.res.color;
+      f.style.width=Math.min(100,CSQ.pfCur/mx*100)+'%'; f.style.backgroundColor=mech.res.color;
       document.getElementById('csqpfv').textContent=CSQ.pfCur+'/'+mx;
     }
   }
@@ -967,25 +962,30 @@ function renderMonPanel(){
   if(cnt) cnt.textContent=S.targets.length;
   list.innerHTML=S.targets.map((t,i)=>{
     const focused=i===S.focusIdx, dead=isDead(t);
-    const res=`${elemIcon('Feu')}${t.rf||0} ${elemIcon('Eau')}${t.re||0} ${elemIcon('Terre')}${t.rt||0} ${elemIcon('Air')}${t.ra||0}`;
-    return `<div class="tgtrow ${focused?'foc':''} ${dead?'dead':''}" data-uid="${t.uid}" data-card="${t.uid}"
-        style="border:1px solid ${focused?'var(--gold)':'var(--border)'};border-radius:6px;padding:6px 8px;margin-bottom:6px;opacity:${dead?0.5:1};cursor:pointer">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="prio" style="font-family:var(--mono);font-size:var(--fs-10);color:var(--gold);width:14px">${i+1}</span>
-        <button class="tfoc btn sml" data-foc="${t.uid}" title="Viser"
-          style="padding:1px 6px;color:${focused?'var(--gold)':'var(--dim)'}">${focused?'●':'○'}</button>
-        <span style="flex:1;min-width:0;font-weight:700;font-size:var(--fs-12);color:${dead?'var(--dim)':'var(--gold)'}">${t.name}${t.level?` <span style="font-weight:400;color:var(--dim);font-size:var(--fs-10)">niv.${t.level}</span>`:''}${dead?' 💀':''}</span>
-        <span style="display:flex;flex-direction:column;gap:1px">
-          <span class="tup" data-up="${t.uid}" style="cursor:pointer;font-size:var(--fs-9);line-height:1;color:var(--muted)">▲</span>
-          <span class="tdn" data-dn="${t.uid}" style="cursor:pointer;font-size:var(--fs-9);line-height:1;color:var(--muted)">▼</span>
+    // Résistances en grille colorée par élément : repérage de l'élément le plus/moins résisté.
+    const resCell=(el,v)=>`<span class="rescell" data-el="${el}">${elemIcon(el,'icn-sm')}<b>${v||0}</b></span>`;
+    const res=resCell('Feu',t.rf)+resCell('Eau',t.re)+resCell('Terre',t.rt)+resCell('Air',t.ra);
+    const sub=[t.level?`niv.${t.level}`:'',t.fam||''].filter(Boolean).join(' · ');
+    // Hémorragie active sur la cible (DoT Feu) → badge (info auparavant dans le Conseiller).
+    const hemoPct=t._hemo>0?Math.round(t._hemo*HEMO_PCT_PER_LVL*100):0;
+    const hemoBadge=t._hemo>0?`<span class="tgthemo" title="Hémorragie ${t._hemo} : +${hemoPct}% dégâts subis">🩸${t._hemo}</span>`:'';
+    return `<div class="tgtrow ${focused?'foc':''} ${dead?'dead':''}" data-uid="${t.uid}" data-card="${t.uid}">
+      <div class="tgthead">
+        <span class="prio">${i+1}</span>
+        <button class="tfoc btn sml" data-foc="${t.uid}" title="Viser">${focused?'●':'○'}</button>
+        <span class="tgtname">${t.name}${dead?' 💀':''}${sub?`<span class="tgtsub">${sub}</span>`:''}</span>
+        ${hemoBadge}
+        <span class="tgtmove">
+          <span class="tup" data-up="${t.uid}">▲</span>
+          <span class="tdn" data-dn="${t.uid}">▼</span>
         </span>
-        <span class="trm" data-rm="${t.uid}" style="cursor:pointer;color:var(--dim);font-size:var(--fs-12);padding:0 2px">✕</span>
+        <span class="trm" data-rm="${t.uid}">✕</span>
       </div>
-      ${(t._maxHp||t.hp)?`<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
-        <div class="hpt" style="flex:1;height:6px"><div id="tgthp_${t.uid}" class="hpf" style="width:100%"></div></div>
-        <span id="tgthpt_${t.uid}" style="font-family:var(--mono);font-size:var(--fs-9)"></span>
+      ${(t._maxHp||t.hp)?`<div class="tgthp">
+        <div class="hpt" style="flex:1;height:7px"><div id="tgthp_${t.uid}" class="hpf" style="width:100%"></div></div>
+        <span id="tgthpt_${t.uid}" class="tgthptxt"></span>
       </div>`:''}
-      <div class="meta" style="margin-top:3px">${res}</div>
+      <div class="resgrid">${res}</div>
     </div>`;
   }).join('');
   renderHPBars();
@@ -1092,7 +1092,11 @@ function renderAdvisor(){
   } else gc.style.display='none';
   // Tips : mécanique calibrée (Sram) + rappel de classe informationnel
   const tips=[...(mech?.advice(pm)||[]), ...getClassNote()], tc=document.getElementById('tipscard');
-  if(tips.length){tc.style.display='';document.getElementById('tipscontent').innerHTML=tips.map(t=>`<div class="tip ${t.p}"><div class="tipd"></div><div>${t.msg}</div></div>`).join('');}
+  if(tips.length){
+    tc.style.display='';
+    document.getElementById('tipscontent').innerHTML=tips.map(t=>`<div class="tip ${t.p}"><div class="tipd"></div><div>${t.msg}</div></div>`).join('');
+    applyTipsCollapse(); // respecte l'état replié/déplié (replié par défaut)
+  }
   else tc.style.display='none';
   // Ranking
   const ranked=rankSpells(S.critMode), rl=document.getElementById('ranklist'), re=document.getElementById('rankempty');
@@ -1127,8 +1131,10 @@ function renderAdvisor(){
     ranked.forEach(r=>{ const k=r.spell.element||'Neutre'; (byEl[k]||(byEl[k]=[])).push(r); });
     const ord=['Feu','Eau','Terre','Air','Neutre'];
     const sortedEls=[...ord.filter(e=>byEl[e]),...Object.keys(byEl).filter(e=>!ord.includes(e))];
+    // Dégât max global → barres de dégâts proportionnelles (comparaison visuelle d'un coup d'œil).
+    const maxDmg=Math.max(1,...ranked.map(r=>r.damage));
     rl.innerHTML=sortedEls.map(el=>
-      `<div class="elhdr" style="font-size:var(--fs-10);color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
+      `<div class="elhdr">${elemIcon(el,'icn-sm')} ${el}</div>`+
       byEl[el].map(r=>{
         const isBest=r.spell.name===bestName;
         // Coût PA effectif (Ecaflip Dé six réduit) — affiché barré si différent du coût de base.
@@ -1154,8 +1160,12 @@ function renderAdvisor(){
         const usedU=CSQ.steps.reduce((n,s)=>n+(s.sp.name===r.spell.name?1:0),0);
         const exhausted=usedU>=maxU;
         const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="Usages par tour">${usedU}/${maxU}</span>`;
-        return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" style="cursor:pointer">
-          ${spellIcon(r.spell)}<span class="srn">${isBest?'★ ':''}${r.spell.name}</span>
+        const pct=Math.round(r.damage/maxDmg*100);
+        const ecol=elemCol(r.spell.element);
+        return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" data-el="${r.spell.element||'Neutre'}" style="border-left-color:${ecol}">
+          <div class="sr-bar" style="width:${pct}%;background:linear-gradient(90deg,${ecol}88,${ecol}22)"></div>
+          ${isBest?'<span class="sr-crown" title="Meilleur dégât/PA">👑</span>':''}
+          ${spellIcon(r.spell)}<span class="srn">${r.spell.name}</span>
           <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}${useTxt}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>
           <span class="srdpa">${r.dpa}/PA</span></div>`;
@@ -1208,7 +1218,7 @@ function renderDmgSeq(){
         if(showRes){
           document.getElementById('seqpfl').textContent=mech.res.label;
           const f=document.getElementById('seqpff');
-          f.style.width=Math.min(100,pfSim/resMax*100)+'%'; f.style.background=mech.res.color;
+          f.style.width=Math.min(100,pfSim/resMax*100)+'%'; f.style.backgroundColor=mech.res.color;
           document.getElementById('seqpfv').textContent=pfSim+'/'+resMax;
         }
       }
@@ -1220,7 +1230,7 @@ function renderDmgSeq(){
       return g>0?`<span style="font-size:var(--fs-9);color:${mech.res.color}">+${g}</span>`:'';
     };
     document.getElementById('seqsteps').innerHTML=seq.chosen.map((r,i)=>
-      `<div class="ss" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
+      `<div class="ss" data-el="${r.spell.element||'Neutre'}" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
         ${spellIcon(r.spell,'icn-sm')}<span>${r.spell.name}</span>
         <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
         <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
@@ -1345,7 +1355,7 @@ function renderSpellsTab(){
     de.innerHTML=deck.map(sp=>{
       const spL=sp.spellLevel||lvl, dS=sp.damageMax>0?scale(sp.damageMin||0,sp.damageMax,spL):0;
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:'',sp.wpCost?`${sp.wpCost}PW`:''].filter(Boolean).join(' ');
-      return `<div class="sc dk" data-n="${sp.name}">
+      return `<div class="sc dk" data-n="${sp.name}" data-el="${sp.element||'Neutre'}">
         ${spellIcon(sp)}
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -1379,7 +1389,7 @@ function renderSpellsTab(){
       const inD=isInDeck(sp.name);
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:''].filter(Boolean).join(' ');
       const meta=[sp.range?`◎${sp.range}`:'',sp.spellType==='zone'?'zone':'',sp.los===false?'sans LdV':''].filter(Boolean).join(' · ');
-      return `<div class="sc ${inD?'dk':''}" data-n="${sp.name}">
+      return `<div class="sc ${inD?'dk':''}" data-n="${sp.name}" data-el="${sp.element||'Neutre'}">
         ${spellIcon(sp)}
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
@@ -1618,7 +1628,11 @@ document.getElementById('pnsave').addEventListener('click',()=>{
 function renderNameBanner(){
   const name=S.playerName||S.detectedName, b=document.getElementById('namedbanner');
   if(!b) return;
-  if(name){b.style.display='';b.textContent=S.playerName?`Personnage : ${name}`:`Détecté : ${name}`;}
+  if(name){
+    b.style.display='';
+    const ic=classIcon(S.build?.class,'icn-sm');
+    b.innerHTML=`${ic}<span>${S.playerName?`Personnage : ${name}`:`Détecté : ${name}`}</span>`;
+  }
   else b.style.display='none';
 }
 
@@ -1964,6 +1978,20 @@ function applyZoom(){
 }
 // Taille du texte : saisie en POURCENTAGE (80–150 %), convertie vers le facteur de zoom.
 const FONT_PCT_MIN=80, FONT_PCT_MAX=150;
+// Encart Conseils repliable (replié par défaut → réduit le scroll vertical).
+function applyTipsCollapse(){
+  const c=document.getElementById('tipscontent'), t=document.getElementById('tipstoggle');
+  if(!c||!t) return;
+  const open=!!S.tipsOpen;
+  c.style.display=open?'':'none';
+  t.classList.toggle('open',open);
+  const arr=t.querySelector('.collarrow'); if(arr) arr.textContent=open?'▾':'▸';
+}
+function setupTipsToggle(){
+  const t=document.getElementById('tipstoggle'); if(!t) return;
+  t.addEventListener('click',()=>{ S.tipsOpen=!S.tipsOpen; save(); applyTipsCollapse(); });
+  applyTipsCollapse();
+}
 function setupFontSlider(){
   const inp=document.getElementById('fontsize'); if(!inp) return;
   inp.value=Math.round((S.zoom||1)*100);
@@ -2053,7 +2081,7 @@ function populateLogPath(){
 loadData(); load();
 DOCK.init(); // place les panneaux dans les zones (après load() : restaure la disposition)
 applyZoom(); setupFontSlider();
-setupShortcuts(); setupHelp(); populateLogPath();
+setupShortcuts(); setupHelp(); populateLogPath(); setupTipsToggle();
 syncCls(); renderAll(); initCSQ();
 // Synchronise l'état visuel des toggles de combat avec l'état restauré.
 document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===S.position));

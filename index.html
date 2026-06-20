@@ -136,21 +136,13 @@
     <div class="cp on" id="cp-advisor" data-dock="advisor" data-title="⚔ Conseiller" data-zone="center">
       <div id="idle"><div style="font-size:32px">⚔</div><div>Configure un build et une cible<br>pour voir les conseils</div></div>
       <div id="advcontent" style="display:none;flex-direction:column;gap:10px">
-        <!-- HP mini -->
-        <div id="advhpcard" class="card" style="display:none;padding:8px 12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-            <span id="advhpname" style="font-size:12px;font-weight:700;color:var(--gold)"></span>
-            <span id="advhptxt" style="font-family:var(--mono);font-size:11px"></span>
-          </div>
-          <div class="hpt"><div id="advhpbar" class="hpf" style="width:100%"></div></div>
-        </div>
         <!-- Player status -->
         <div id="plrcard" class="card" style="display:none;padding:8px 12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;font-weight:700;color:var(--sky)">👤 <span id="plrname"></span></span>
             <span id="plrhptxt" style="font-family:var(--mono);font-size:11px"></span>
           </div>
-          <div class="hpt" id="plrhpt"><div id="plrhpbar" class="hpf" style="width:100%;background:var(--green)"></div></div>
+          <div class="hpt" id="plrhpt"><div id="plrhpbar" class="hpf" style="width:100%;background-color:var(--green)"></div></div>
           <div id="plrres" style="margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--muted)"></div>
         </div>
         <!-- Gauge -->
@@ -158,10 +150,10 @@
           <div class="sh">Mécanique</div>
           <div id="gaugecontent"></div>
         </div>
-        <!-- Tips -->
+        <!-- Tips (repliable) -->
         <div id="tipscard" class="card" style="display:none">
-          <div class="sh">Conseils</div>
-          <div id="tipscontent"></div>
+          <div class="sh collapsible" id="tipstoggle"><span class="collarrow">▸</span> Conseils</div>
+          <div id="tipscontent" style="display:none"></div>
         </div>
         <!-- Calc mode -->
         <div id="modecard" class="card" style="display:none;padding:6px">
@@ -195,27 +187,30 @@
           </div>
           <div id="killsteps"></div>
         </div>
-        <!-- Ranking -->
-        <div class="card">
-          <div class="sh" id="ranktitle">⚡ Sorts — Dégâts/PA</div>
-          <p style="font-size:10px;color:var(--dim);margin-bottom:6px">Clic → ajoute à la séquence</p>
-          <div id="ranklist"></div>
-          <div id="rankempty" style="font-size:11px;color:var(--dim)"></div>
-        </div>
-        <!-- Custom seq -->
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div class="sh" style="margin:0">🖊 Séquence personnalisée</div>
-            <button class="btn sml" id="csqreset">✕ Vider</button>
+        <!-- Sorts (ranking) + Séquence personnalisée, côte à côte -->
+        <div id="seqcols">
+          <!-- Colonne gauche : sorts cliquables -->
+          <div class="card seqcol-left">
+            <div class="sh" id="ranktitle">⚡ Sorts — Dégâts/PA</div>
+            <p style="font-size:var(--fs-10);color:var(--dim);margin-bottom:6px">Clic → ajoute à la séquence</p>
+            <div id="ranklist"></div>
+            <div id="rankempty" style="font-size:var(--fs-11);color:var(--dim)"></div>
           </div>
-          <div id="csqres" style="margin-bottom:6px"></div>
-          <div id="csqsteps" style="margin-bottom:6px"></div>
-          <div id="csqsum" style="padding-top:6px;border-top:1px solid var(--border);font-size:11px"></div>
-          <div id="csqpfrow" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
-            <div class="gr" style="margin:0">
-              <span class="gl" id="csqpfl">Jauge</span>
-              <div class="gb"><div class="gf" id="csqpff" style="background:var(--red)"></div></div>
-              <span class="gv" id="csqpfv">—</span>
+          <!-- Colonne droite : séquence en construction (collante) -->
+          <div class="card seqcol-right">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div class="sh" style="margin:0">🖊 Séquence personnalisée</div>
+              <button class="btn sml" id="csqreset">✕ Vider</button>
+            </div>
+            <div id="csqres" style="margin-bottom:6px"></div>
+            <div id="csqsteps" style="margin-bottom:6px"></div>
+            <div id="csqsum" style="padding-top:6px;border-top:1px solid var(--border);font-size:var(--fs-11)"></div>
+            <div id="csqpfrow" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+              <div class="gr" style="margin:0">
+                <span class="gl" id="csqpfl">Jauge</span>
+                <div class="gb"><div class="gf" id="csqpff" style="background-color:var(--red)"></div></div>
+                <span class="gv" id="csqpfv">—</span>
+              </div>
             </div>
           </div>
         </div>
