@@ -43,6 +43,8 @@ function loadData(){
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   uses:s.u||3, // usages par tour (défaut 3)
+  maxPerTgt:s.mcc||0, // max lancers sur une MÊME cible / tour (0 = pas de limite par cible)
+  cooldown:s.cd||0,   // tours de recharge (0 = aucun) — limite à 1 lancer/tour dans le séquenceur
   icon:s.icon, id:s.id, // icône WakfuAssets (spells/<icon>.png) + Id Ankama
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
@@ -624,13 +626,22 @@ function rankSpells(crit){
 const FINISHER_SEQ_MARGIN=1.03;
 // Budget de PW du joueur pour une séquence (un seul tour). Défaut 6 si non renseigné.
 function wpBudget(){ const st=getEffStats(); return st.wp!=null?st.wp:6; }
-// Peut-on ajouter `sp` à la séquence `seq` sans dépasser ses usages/tour ni le PW dispo ?
-// (contraintes réalistes : la plupart des sorts sont limités à `uses`/tour ; le PW est rare.)
+// Nombre max de lancers d'un sort sur UN tour contre la cible visée, en combinant :
+//  • uses        : usages/tour du sort,
+//  • maxPerTgt   : max lancers sur une même cible/tour (mcc) — la séquence vise une seule cible,
+//  • cooldown    : un sort en recharge ne peut être relancé le même tour → plafonné à 1.
+function castCap(sp){
+  let cap=sp.uses||3;
+  if(sp.maxPerTgt>0) cap=Math.min(cap,sp.maxPerTgt);
+  if(sp.cooldown>0)  cap=Math.min(cap,1);
+  return cap;
+}
+// Peut-on ajouter `sp` à la séquence `seq` sans dépasser son plafond de lancers ni le PW dispo ?
 function canAdd(seq,sp,wpMax){
-  const maxU=sp.uses||3;
+  const cap=castCap(sp);
   let used=0, wp=(sp.wpCost||0);
   for(const s of seq){ if(s===sp||s.name===sp.name) used++; wp+=(s.wpCost||0); }
-  if(used>=maxU) return false;             // limite d'usages/tour atteinte
+  if(used>=cap) return false;              // plafond de lancers atteint (usages/mcc/cooldown)
   if(wp>wpMax) return false;               // dépasserait le budget PW
   return true;
 }
@@ -886,8 +897,8 @@ function addToCSQ(sp){
   if(!S.monster){alert("Sélectionne une cible d'abord.");return;}
   if(!S.build) return;
   const ap=effApCost(sp),mp=sp.mpCost||0,wp=sp.wpCost||0;
-  // Limite d'usages/tour (même contrainte que le knapsack auto, cf. canAdd).
-  const maxU=sp.uses||3, usedU=CSQ.steps.reduce((n,s)=>n+(s.sp===sp||s.sp.name===sp.name?1:0),0);
+  // Plafond de lancers (usages/tour + mcc + cooldown, comme le knapsack auto, cf. castCap).
+  const maxU=castCap(sp), usedU=CSQ.steps.reduce((n,s)=>n+(s.sp===sp||s.sp.name===sp.name?1:0),0);
   const blocked = usedU>=maxU || ap>CSQ.remAP || mp>CSQ.remMP || wp>CSQ.remWP;
   if(blocked){
     const el=document.getElementById('csqres');
@@ -1131,8 +1142,6 @@ function renderAdvisor(){
     ranked.forEach(r=>{ const k=r.spell.element||'Neutre'; (byEl[k]||(byEl[k]=[])).push(r); });
     const ord=['Feu','Eau','Terre','Air','Neutre'];
     const sortedEls=[...ord.filter(e=>byEl[e]),...Object.keys(byEl).filter(e=>!ord.includes(e))];
-    // Dégât max global → barres de dégâts proportionnelles (comparaison visuelle d'un coup d'œil).
-    const maxDmg=Math.max(1,...ranked.map(r=>r.damage));
     rl.innerHTML=sortedEls.map(el=>
       `<div class="elhdr">${elemIcon(el,'icn-sm')} ${el}</div>`+
       byEl[el].map(r=>{
@@ -1155,16 +1164,16 @@ function renderAdvisor(){
         const elioP=(r.spell.portalDmg>0||r.spell.portalBonus>0)?`<span style="font-size:var(--fs-9);color:${isModeOn('portail')?'var(--gold)':'var(--dim)'}" title="Dégât majoré via Portail">🌀</span>`:'';
         // Eniripsa : dégât conditionnel sur les PV (auto selon l'état réel)
         const eniHp=(r.spell.lowTgtDmg>0||r.spell.selfHpBonus>0)?`<span style="font-size:var(--fs-9);color:var(--dim)" title="${r.spell.lowTgtDmg>0?'Dégât plein si la cible a ≥ 80 % PV':'Bonus si l’Eniripsa a ≥ 80 % PV'}">❤</span>`:'';
-        // Compteur d'usages/tour : combien de fois ce sort est déjà dans la séquence perso vs sa limite.
-        const maxU=r.spell.uses||3;
+        // Compteur de lancers : combien de fois ce sort est déjà dans la séquence perso vs son plafond.
+        const maxU=castCap(r.spell);
         const usedU=CSQ.steps.reduce((n,s)=>n+(s.sp.name===r.spell.name?1:0),0);
         const exhausted=usedU>=maxU;
-        const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="Usages par tour">${usedU}/${maxU}</span>`;
-        const pct=Math.round(r.damage/maxDmg*100);
+        const capTip=r.spell.cooldown>0?`Cooldown ${r.spell.cooldown} tour(s) → 1/tour`
+          :r.spell.maxPerTgt>0?`Max ${r.spell.maxPerTgt}/cible/tour`:'Usages par tour';
+        const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="${capTip}">${usedU}/${maxU}</span>`;
         const ecol=elemCol(r.spell.element);
         return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" data-el="${r.spell.element||'Neutre'}" style="border-left-color:${ecol}">
-          <div class="sr-bar" style="width:${pct}%;background:linear-gradient(90deg,${ecol}88,${ecol}22)"></div>
-          ${isBest?'<span class="sr-crown" title="Meilleur dégât/PA">👑</span>':''}
+          <span class="srstar">${isBest?'★':''}</span>
           ${spellIcon(r.spell)}<span class="srn">${r.spell.name}</span>
           <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}${useTxt}
           <span class="srd">${r.damage.toLocaleString('fr')}</span>

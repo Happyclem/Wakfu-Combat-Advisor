@@ -141,21 +141,14 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 /* Ranking */
 .elhdr{display:flex;align-items:center;gap:4px;font-size:var(--fs-10);color:var(--muted);
   margin:8px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.sr{position:relative;display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--inp);
+.sr{display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--inp);
   border:1px solid var(--border);border-left:3px solid var(--el-col,var(--border));border-radius:var(--r);
-  margin-bottom:4px;cursor:pointer;overflow:hidden;transition:transform .12s,box-shadow .12s,border-color .12s;font-size:var(--fs-11)}
+  margin-bottom:4px;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;font-size:var(--fs-11)}
 .sr:hover{border-color:var(--hl);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.4)}
-.sr.best{border-color:var(--gold);background:linear-gradient(90deg,var(--gdim),transparent 70%)}
-/* Barre de dégât proportionnelle (fond), teintée par l'élément. Dégradé qui s'estompe
-   vers la droite pour se lire comme un remplissage de jauge. */
-.sr-bar{position:absolute;left:0;top:0;bottom:0;z-index:0;transition:width .3s;pointer-events:none;
-  background:linear-gradient(90deg,
-    color-mix(in srgb,var(--el-col,var(--hl)) 42%,transparent),
-    color-mix(in srgb,var(--el-col,var(--hl)) 14%,transparent))}
-.sr>*{position:relative;z-index:1}
-/* Couronne en absolu (coin haut-droit) → n'altère JAMAIS l'alignement des icônes/noms. */
-.sr-crown{position:absolute;top:2px;right:4px;z-index:2;font-size:var(--fs-9);
-  filter:drop-shadow(0 0 3px var(--gold));pointer-events:none}
+.sr.best{border-color:var(--gold);background:var(--gdim)}
+/* Étoile « meilleur sort » : largeur fixe TOUJOURS présente (vide sinon) → toutes les
+   colonnes icône/nom restent parfaitement alignées d'une ligne à l'autre. */
+.srstar{width:12px;flex-shrink:0;text-align:center;color:var(--gold);font-size:var(--fs-10)}
 .sr.best .srn{color:var(--gold)}
 .srk{color:var(--dim);font-size:var(--fs-10);width:16px;text-align:center;flex-shrink:0}
 .srn{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
