@@ -10,22 +10,9 @@
 
 <div id="hd">
   <h1>⚔ WAKFU COMBAT ADVISOR</h1>
-  <div id="fsctl" title="Taille du texte global (%)">
-    <span style="font-size:11px;color:var(--muted)">A</span>
-    <input type="number" id="fontsize" min="80" max="150" step="5" value="110"/>
-    <span style="font-size:11px;color:var(--muted)">%</span>
-  </div>
   <div id="cw"><div class="led" id="led"></div><span id="clbl">Aucun log</span></div>
   <div id="hd-center">
     <div id="sitbuffs"></div>
-  </div>
-  <div id="hdc">
-    <div class="pb" data-rng="melee" style="border-right:none" title="Maîtrise mêlée (cible au contact)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/melee_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🗡"> Mêlée</div>
-    <div class="pb on" data-rng="distance" style="border-radius:0 var(--r) var(--r) 0;margin-right:6px" title="Maîtrise distance (cible à 2 cases ou plus)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/distance_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🏹"> Distance</div>
-    <div class="pb on" data-pos="normal" style="border-right:none;border-radius:var(--r) 0 0 var(--r)">⬛ Face</div>
-    <div class="pb" data-pos="side" style="border-radius:0;border-right:none">↔ Côté</div>
-    <div class="pb" data-pos="back" style="border-radius:0"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/rear_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🔙"> Dos</div>
-    <div class="pb" id="crit-btn"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/critical_hit.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="⚡"> CC</div>
   </div>
 </div>
 
@@ -150,7 +137,24 @@
           <div class="sh">Mécanique</div>
           <div id="gaugecontent"></div>
         </div>
-        <!-- Tips (repliable) -->
+        <!-- Toggles de combat (boîte propre, toujours visible) -->
+        <div id="combatcard" class="card" style="display:none;padding:8px">
+          <div id="hdc">
+            <div class="pbgrp">
+              <div class="pb" data-rng="melee" title="Maîtrise mêlée (cible au contact)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/melee_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🗡"> Mêlée</div>
+              <div class="pb on" data-rng="distance" title="Maîtrise distance (cible à 2 cases ou plus)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/distance_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🏹"> Distance</div>
+            </div>
+            <div class="pbgrp">
+              <div class="pb on" data-pos="normal">⬛ Face</div>
+              <div class="pb" data-pos="side">↔ Côté</div>
+              <div class="pb" data-pos="back"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/rear_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🔙"> Dos</div>
+            </div>
+            <div class="pbgrp">
+              <div class="pb" id="crit-btn"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/critical_hit.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="⚡"> CC</div>
+            </div>
+          </div>
+        </div>
+        <!-- Conseils (repliable) -->
         <div id="tipscard" class="card" style="display:none">
           <div class="sh collapsible" id="tipstoggle"><span class="collarrow">▸</span> Conseils</div>
           <div id="tipscontent" style="display:none"></div>

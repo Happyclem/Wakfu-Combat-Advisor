@@ -25,7 +25,12 @@ const ELEM_EMOJI={Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
 const ELEM_COL={Feu:'#f08030',Eau:'#40a0f0',Terre:'#60c030',Air:'#e0c000',Neutre:'#8890b0'};
 function elemCol(el){ return ELEM_COL[el]||ELEM_COL.Neutre; }
 function elemIcon(el,cls){ const f=ELEM_ICON[el]; return f?iconImg('statistics',f,ELEM_EMOJI[el]||'⚪',cls||'icn-sm',el):(ELEM_EMOJI[el]||'⚪'); }
-function spellIcon(sp,cls){ return iconImg('spells',sp&&sp.icon,ELEM_EMOJI[sp&&sp.element]||'✨',cls||'icn',sp&&sp.name); }
+// Icône du sort ; si le sort n'a pas d'icône propre, on retombe sur l'icône de son ÉLÉMENT
+// (pièce élémentaire) plutôt que sur un emoji.
+function spellIcon(sp,cls){
+  if(sp&&sp.icon!=null&&sp.icon!=='') return iconImg('spells',sp.icon,ELEM_EMOJI[sp.element]||'⚪',cls||'icn',sp.name);
+  return elemIcon(sp&&sp.element,cls||'icn');
+}
 function statIcon(name,fallback,cls,title){ return iconImg('statistics',name,fallback,cls||'icn-sm',title); }
 // Classe WCA → id Ankama (classIcons/<id>.png).
 const CLASS_ID={feca:1,osamodas:2,enutrof:3,sram:4,xelor:5,ecaflip:6,eniripsa:7,iop:8,cra:9,
@@ -918,7 +923,6 @@ function removeFromCSQ(idx){
 }
 function renderCSQ(){
   const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
-  const EL={Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
   const re=document.getElementById('csqres');
   if(re) re.innerHTML=rbar(CSQ.remAP,maxAP,'var(--gold)','PA')+(maxMP>0?rbar(CSQ.remMP,maxMP,'var(--blue)','PM'):'')+(maxWP>0?rbar(CSQ.remWP,maxWP,'var(--purple)','PW'):'');
   const se=document.getElementById('csqsteps');
@@ -964,7 +968,6 @@ document.getElementById('ranklist')?.addEventListener('click',e=>{
 });
 
 // ── PANNEAU CIBLES ───────────────────────────────────────────────
-const EL = {Feu:'🔴',Eau:'🔵',Terre:'🟢',Air:'🟡',Neutre:'⚪'};
 function renderMonPanel(){
   const sec=document.getElementById('monsec'), list=document.getElementById('tgtlist');
   const cnt=document.getElementById('tgtcount');
@@ -1086,11 +1089,13 @@ function renderAdvisor(){
   renderHPBars();
   renderPlayerStatus();
   if(!hasBuild){
-    ['gaugecard','tipscard','seqcard'].forEach(id=>document.getElementById(id).style.display='none');
+    ['combatcard','gaugecard','tipscard','seqcard'].forEach(id=>document.getElementById(id).style.display='none');
     document.getElementById('ranklist').innerHTML='';
     document.getElementById('rankempty').textContent='Configure un build.';
     return;
   }
+  // Toggles de combat : visibles dès qu'un build est présent.
+  document.getElementById('combatcard').style.display='';
   // Gauge
   const mech=getMech(), pm=getPlayerMech(), gc=document.getElementById('gaugecard');
   if(mech?.res){
@@ -1101,14 +1106,15 @@ function renderAdvisor(){
        <div class="gb"><div class="gf" style="width:${pct}%;background:${r.color}"></div></div>
        <span class="gv">${val}/${r.max}</span></div>`;
   } else gc.style.display='none';
-  // Tips : mécanique calibrée (Sram) + rappel de classe informationnel
+  // Tips : mécanique calibrée (Sram) + rappel de classe informationnel.
+  // La carte héberge aussi les toggles de combat → toujours visible (même sans conseil).
   const tips=[...(mech?.advice(pm)||[]), ...getClassNote()], tc=document.getElementById('tipscard');
-  if(tips.length){
-    tc.style.display='';
-    document.getElementById('tipscontent').innerHTML=tips.map(t=>`<div class="tip ${t.p}"><div class="tipd"></div><div>${t.msg}</div></div>`).join('');
-    applyTipsCollapse(); // respecte l'état replié/déplié (replié par défaut)
-  }
-  else tc.style.display='none';
+  tc.style.display='';
+  const tcc=document.getElementById('tipscontent');
+  tcc.innerHTML=tips.length
+    ? tips.map(t=>`<div class="tip ${t.p}"><div class="tipd"></div><div>${t.msg}</div></div>`).join('')
+    : '<div class="muted-sm">Aucun conseil pour ce contexte.</div>';
+  applyTipsCollapse(); // respecte l'état replié/déplié (replié par défaut)
   // Ranking
   const ranked=rankSpells(S.critMode), rl=document.getElementById('ranklist'), re=document.getElementById('rankempty');
   const hasRes=!!mech?.res, resTracks=showsRes(), dispPF=currentPF();
@@ -1393,7 +1399,7 @@ function renderSpellsTab(){
   const ord=['Feu','Eau','Terre','Air','Neutre'];
   const sorted=[...ord.filter(e=>byEl[e]),...Object.keys(byEl).filter(e=>!ord.includes(e))];
   ae.innerHTML=sorted.map(el=>
-    `<div class="elhdr" style="font-size:var(--fs-10);color:var(--muted);margin:6px 0 3px;font-weight:700">${EL[el]||'⚪'} ${el}</div>`+
+    `<div class="elhdr">${elemIcon(el,'icn-sm')} ${el}</div>`+
     byEl[el].map(sp=>{
       const inD=isInDeck(sp.name);
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:''].filter(Boolean).join(' ');
@@ -1975,18 +1981,13 @@ function setupShortcuts(){
 // ── RENDER ALL ───────────────────────────────────────────────────
 function renderAll(){ renderPerso();renderAdvisor();renderMonPanel();renderSpellsTab();renderPassivesTab();renderNameBanner(); }
 
-// ── TAILLE TEXTE GLOBALE (slider) ────────────────────────────────
-// Le curseur agit sur --ui-scale → html{font-size} ; comme toutes les tailles de texte
-// sont en rem, seul le TEXTE grossit. Les espacements/bordures (en px) restent fixes.
+// Les tailles de base sont confortables (+2px) : plus de réglage de taille de texte.
+// On nettoie seulement un éventuel zoom de layout laissé par un très ancien état sauvegardé.
 function applyZoom(){
-  const z = S.zoom || 1;
-  document.documentElement.style.setProperty('--ui-scale', z);
-  // Nettoie l'ancien zoom de layout au cas où un état sauvegardé l'aurait laissé.
+  document.documentElement.style.setProperty('--ui-scale', 1);
   const app = document.getElementById('app');
   if(app){ app.style.zoom=''; app.style.height=''; app.style.width=''; }
 }
-// Taille du texte : saisie en POURCENTAGE (80–150 %), convertie vers le facteur de zoom.
-const FONT_PCT_MIN=80, FONT_PCT_MAX=150;
 // Encart Conseils repliable (replié par défaut → réduit le scroll vertical).
 function applyTipsCollapse(){
   const c=document.getElementById('tipscontent'), t=document.getElementById('tipstoggle');
@@ -2001,19 +2002,6 @@ function setupTipsToggle(){
   t.addEventListener('click',()=>{ S.tipsOpen=!S.tipsOpen; save(); applyTipsCollapse(); });
   applyTipsCollapse();
 }
-function setupFontSlider(){
-  const inp=document.getElementById('fontsize'); if(!inp) return;
-  inp.value=Math.round((S.zoom||1)*100);
-  const apply=()=>{
-    let p=parseInt(inp.value,10); if(isNaN(p)) return;       // ignore les saisies vides en cours
-    p=Math.max(FONT_PCT_MIN,Math.min(FONT_PCT_MAX,p));
-    S.zoom=p/100; applyZoom(); save();
-  };
-  inp.addEventListener('input',apply);
-  // À la sortie du champ, normalise l'affichage (reclampe + réécrit la valeur).
-  inp.addEventListener('change',()=>{ apply(); inp.value=Math.round((S.zoom||1)*100); });
-}
-
 // ── TOOLTIP DESCRIPTION SORTS (Ctrl + survol) ────────────────────
 let _ctrlDown=false;
 const _spTip=(()=>{ const d=document.createElement('div'); d.id='sptip'; document.body.appendChild(d); return d; })();
@@ -2055,13 +2043,15 @@ function setupHelp(){
     <button class="btn sml full" id="dockreset" style="margin-top:6px">↺ Réinitialiser la disposition</button>
     <div class="hph" style="margin-top:8px">Raccourcis clavier</div>
     <div class="hpr"><b>1 / 2 / 3</b> → Face / Côté / Dos</div>
-    <div class="hpr"><b>C</b> → bascule Coup Critique</div>`;
+    <div class="hpr"><b>C</b> → bascule Coup Critique</div>
+    <div class="hph" style="margin-top:8px">À propos</div>
+    <div class="hpr">🔗 <a href="https://github.com/Happyclem/Wakfu-Combat-Advisor" target="_blank" rel="noopener" class="hplink">Projet sur GitHub</a></div>`;
   document.body.appendChild(panel);
   panel.querySelector('#dockreset')?.addEventListener('click',()=>{ DOCK.reset(); });
   const place=()=>{ const r=btn.getBoundingClientRect(); panel.style.top=(r.bottom+6)+'px'; panel.style.right=Math.max(8,window.innerWidth-r.right)+'px'; };
   btn.addEventListener('click',e=>{ e.stopPropagation(); if(panel.classList.toggle('on')) place(); });
   document.addEventListener('click',e=>{ if(!panel.contains(e.target)&&e.target!==btn) panel.classList.remove('on'); });
-  (document.getElementById('hdc')||document.getElementById('hd')).appendChild(btn);
+  document.getElementById('hd').appendChild(btn);
 }
 // ── CHEMIN DU LOG (détection OS) ─────────────────────────────────
 function detectOS(){
@@ -2089,7 +2079,7 @@ function populateLogPath(){
 // ── INIT ─────────────────────────────────────────────────────────
 loadData(); load();
 DOCK.init(); // place les panneaux dans les zones (après load() : restaure la disposition)
-applyZoom(); setupFontSlider();
+applyZoom(); // nettoie un éventuel zoom de layout hérité d'un ancien état
 setupShortcuts(); setupHelp(); populateLogPath(); setupTipsToggle();
 syncCls(); renderAll(); initCSQ();
 // Synchronise l'état visuel des toggles de combat avec l'état restauré.
