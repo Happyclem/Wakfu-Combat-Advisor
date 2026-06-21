@@ -141,10 +141,12 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 /* Séquence perso en 2 colonnes : sorts cliquables (gauche) | séquence (droite, collante).
    Container query → repli en 1 colonne quand le panneau Conseiller lui-même est étroit
    (et pas seulement la fenêtre), car il vit dans une zone de docking redimensionnable. */
-#advcontent{container-type:inline-size}
-#seqcols{display:grid;grid-template-columns:1fr minmax(180px,250px);gap:8px;align-items:start}
-.seqcol-right{position:sticky;top:0;max-height:calc(100vh - 80px);overflow-y:auto}
-@container (max-width:480px){ #seqcols{grid-template-columns:1fr} .seqcol-right{position:static;max-height:none} }
+/* Sorts | Séquence côte à côte, via flex-wrap : dès que les deux colonnes ne tiennent plus
+   (chacune a une largeur mini), la séquence passe AUTOMATIQUEMENT sous les sorts — sans
+   dépendre des container queries (qui ne se déclenchaient pas dans la zone de docking). */
+#seqcols{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.seqcol-left{flex:3 1 260px;min-width:0}
+.seqcol-right{flex:1 1 220px;min-width:0}
 /* Ranking */
 .elhdr{display:flex;align-items:center;gap:4px;font-size:var(--fs-10);color:var(--muted);
   margin:8px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
@@ -257,8 +259,9 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   background:var(--inp);border:1px solid var(--red);color:var(--red);
   box-shadow:0 4px 16px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-/* 2-col spell/passive grids */
-#allspells,#passlist{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;align-items:start}
+/* Grilles de sorts/passifs : auto-fit → 2 colonnes si la place le permet, sinon 1 colonne.
+   Basé sur la largeur RÉELLE de la grille (pas la fenêtre) → suit la zone de docking. */
+#allspells,#passlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 8px;align-items:start}
 #allspells .sc,#passlist .pc{margin-bottom:4px}
 #allspells .elhdr,#passlist .elhdr{grid-column:1/-1}
 #helppanel .hplink{color:var(--gold);text-decoration:none}
@@ -272,8 +275,8 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   background:var(--inp);border:1px solid var(--gold);color:var(--text);font-size:var(--fs-11);line-height:1.5;
   box-shadow:0 4px 18px rgba(0,0,0,.6);pointer-events:none;opacity:0;transition:opacity .1s;white-space:pre-wrap}
 #sptip.on{opacity:1}
-/* Ranking conseiller : 2 colonnes groupées par élément (comme l'onglet Sorts) */
-#ranklist{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;align-items:start}
+/* Ranking conseiller : 2 colonnes si la place le permet, sinon 1 (auto-fit sur largeur réelle). */
+#ranklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 8px;align-items:start}
 #ranklist .elhdr{grid-column:1/-1}
 /* ── Checklist état vide guidé ── */
 .ckl{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-top:8px}
@@ -305,5 +308,6 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   #dockroot{flex-direction:column;overflow:visible}
   .dz-resizer{display:none}
   .dz,.dz[data-zone="left"],.dz[data-zone="center"],.dz[data-zone="right"]{flex:0 0 auto;max-height:60vh;border-left:none;border-top:1px solid var(--border)}
-  #ranklist,#allspells,#passlist,#perstats-cols{grid-template-columns:1fr}
+  /* #ranklist/#allspells/#passlist se replient déjà seuls (auto-fit) ; reste #perstats-cols. */
+  #perstats-cols{grid-template-columns:1fr}
 }

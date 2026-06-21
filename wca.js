@@ -77,7 +77,7 @@ function getClassSpells(){
 const S = {
   build:null, targets:[], focusIdx:0, calcMode:'dmg', position:'normal', critMode:false, range:'distance',
   remainingAP:null, playerName:null, detectedName:null,
-  overrides:{}, bonuses:{guilde:true, monture:false},
+  overrides:{}, bonuses:{guilde:false, monture:false},
   combat:{ mechanics:{} },
   situationalBuffs:{}, // sorts actifs ponctuels : assassinat, surineur
   pfConsumedThisTurn:false, // Châtiment/Effroi bonus
@@ -91,7 +91,7 @@ function load(){
     Object.assign(S,d);
     if(!S.combat)    S.combat={mechanics:{}};
     if(!S.overrides) S.overrides={};
-    if(!S.bonuses)   S.bonuses={guilde:true,monture:false};
+    if(!S.bonuses)   S.bonuses={guilde:false,monture:false};
     if(!Array.isArray(S.targets)) S.targets=[];
     if(!S.calcMode) S.calcMode='dmg';
     if(!S.situationalBuffs) S.situationalBuffs={};

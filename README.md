@@ -20,8 +20,9 @@ Fonctionne sans installation — un simple double-clic sur `index.html` suffit (
 - **Détection automatique du personnage** et des cibles touchées
 - **Barres de PV** pour le joueur et chaque cible, mises à jour en direct
 - **Restauration d'état** : cliquer sur n'importe quelle ligne du flux d'événements restaure l'état du combat à cet instant
-- **Positions** Face / Côté / Dos et mode Coup Critique dans l'en-tête
-- Jusqu'à **8 cibles simultanées** avec priorité réorderable
+- **Contexte de combat** dans le panneau Conseiller : Mêlée / Distance, position Face / Côté / Dos, mode Coup Critique, et les toggles spécifiques à la classe (Tir précis, Dé six, Point Faible consommé…)
+- Jusqu'à **8 cibles simultanées** avec priorité réorderable (un même monstre peut être ajouté plusieurs fois ; clic n'importe où sur la carte pour viser)
+- **Icônes officielles** (sorts, éléments, stats, classes) chargées depuis [WakfuAssets](https://github.com/Tmktahu/WakfuAssets), avec repli automatique sur des emojis hors-ligne
 
 ### Gestion du build
 - **Import Wakfuli / Zénith** : coller le JSON extrait depuis la console du navigateur
@@ -70,9 +71,10 @@ Après import, un résumé s'affiche (classe, niveau, nombre de sorts / stats / 
 
 ## Données
 
-- **874 monstres** avec PV, niveau et résistances élémentaires
+- **885 monstres** avec PV, niveau, famille, rang et résistances élémentaires (résistances issues de l'extraction directe des fichiers du jeu via [wakfu-autobuilder](https://github.com/CharlyRien/wakfu-autobuilder))
 - **8 passifs généraux** + **3 sorts communs** partagés par toutes les classes
 - **18 classes** intégrées : sorts (dégâts niv. 245, portée, type, ligne de vue) et passifs
+- **Limites de lancers par tour** pour chaque sort : usages/tour, max par cible (`mcc`) et cooldown (`cd`), respectées par le séquenceur auto **et** la séquence personnalisée (helper `castCap`). Source : cast-limits de l'autobuilder, appariés par Id officiel Ankama (284/292 ; les sorts utilitaires non présents dans la source retombent sur 3/tour par défaut)
 - **Mécaniques modélisées en profondeur** (jauge suivie + dégâts ajustés) :
   - **Sram** — Point Faible (génération/consommation, finisseurs) + Hémorragie, calibré en jeu
   - **Iop** — Concentration (0→100, palier ×1.10 + bonus Égaré sur Fulgur/Colère à 100)
@@ -108,6 +110,10 @@ Les données de jeu viennent de l'encyclopédie Wakfu, scrapées puis générée
 
 > ⚠ Ne pas éditer `data-game.js` ni `data-commun.js` à la main — ils sont générés. Modifier les CSV puis relancer `build-data.js`.
 
+### Enrichissement autobuilder
+
+Les CSV par classe portent aussi des colonnes issues de l'extraction directe des fichiers du jeu ([wakfu-autobuilder](https://github.com/CharlyRien/wakfu-autobuilder)), appariées par **Id officiel Ankama** : `Id`, `Usages` (usages/tour), `MaxParCible`, `Cooldown` et `iconId`. On en prend les **cast-limits, IDs et icônes** — pas les dégâts (autobuilder = niv. 1, nous = niv. 245), ni la portée, ni les descriptions (gardées en FR). `build-data.js` lit ces colonnes et les expose dans `data-game.js` (`u`, `mcc`, `cd`, `icon`, `id`). Les monstres (`data-monsters.js`) reprennent leurs résistances, familles et rangs de la même source.
+
 ---
 
 ## Structure des fichiers
@@ -119,8 +125,8 @@ wca.js                  Logique applicative
 mechanics.js            Mécaniques de classe (jauge, génération, bonus de dégâts) — window.WCA_MECHANICS
 data-game.js            [GÉNÉRÉ] Sorts et passifs des 18 classes (window.WCA_SPELLS)
 data-commun.js          [GÉNÉRÉ] Sorts communs + passifs généraux (window.WCA_COMMON_SPELLS / _GENERAL_PASSIVES)
-data-monsters.js        Base de données monstres — 874 entrées (window.WCA_MONSTERS)
-data-raw/               CSV sources (Sorts_*.csv, Passifs_*.csv) — source de vérité
+data-monsters.js        Base de données monstres — 885 entrées (window.WCA_MONSTERS)
+data-raw/               CSV sources (Sorts_*.csv, Passifs_*.csv, Monstres.csv) — source de vérité
 build-data.js           Générateur : data-raw/*.csv → data-game.js + data-commun.js
 extract-spells-encyclo.js   Bookmarklet : scrape les sorts d'une classe → CSV
 extract-passives-encyclo.js Bookmarklet : scrape les passifs d'une classe → CSV
