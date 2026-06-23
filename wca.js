@@ -941,16 +941,19 @@ function resetMonHP(){
   S.monster._currentHp=S.monster._maxHp||S.monster.hp||0;
   renderHPBars();
 }
+// Un log de combat est-il connecté ? Si oui, l'état réel des PV (suivi par le parsing du
+// log) PRIME : les séquences de planification ne doivent PAS toucher aux PV du monstre.
+function logActive(){ return !!logHandle; }
 // Quelle séquence « possède » la barre de PV du monstre ('csq' = perso, 'opt' = optimale).
-// Quand une séquence prend le focus (premier sort interagi), on remet le monstre à plein
-// et on réinitialise les DONNÉES de l'autre séquence. Volontairement SANS re-render : les
-// handlers appelants (addToCSQ / clic optimale) gèrent leur propre rendu ensuite, pour
-// éviter une réentrance (re-render au milieu d'un gestionnaire de clic).
+// HORS LOG uniquement : prendre le focus d'une séquence remet le monstre à plein et vide
+// les données de l'autre séquence. En mode log, on ne réinitialise jamais les PV réels —
+// on se contente de marquer l'owner et de vider l'autre séquence (sans toucher la cible).
+// Volontairement SANS re-render (les handlers appelants gèrent leur propre rendu).
 let _seqOwner=null;
 function claimSeqFocus(owner){
-  if(_seqOwner===owner) return;        // déjà la séquence active : on continue à l'entamer
+  if(_seqOwner===owner) return;        // déjà la séquence active : on continue
   _seqOwner=owner;
-  resetMonHP();                         // nouvelle séquence active → cible à pleine vie
+  if(!logActive()) resetMonHP();        // hors log : nouvelle séquence active → cible pleine
   if(owner==='opt'){                    // l'optimale prend la main → vide les données perso
     CSQ.steps=[]; const st=getEffStats(), sc=sitBuffsCost();
     CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
@@ -1004,12 +1007,14 @@ function initCSQ(){
   CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
   CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
   CSQ.pfCur=showsRes()?resVal():0;
-  if(_seqOwner==='csq'){ _seqOwner=null; resetMonHP(); }
+  // Hors log : rendre les PV si la perso les possédait. En log : ne jamais écraser l'état réel.
+  if(_seqOwner==='csq'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
   renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
-  // Changement de cible / difficulté : on relâche le focus de séquence (la nouvelle cible
-  // repart pleine vie) et on recalcule les dégâts de chaque étape pour la cible focusée.
+  // Changement de cible / difficulté : on relâche le focus de séquence et on recalcule les
+  // dégâts de chaque étape pour la cible focusée. Hors log, la cible repart pleine vie ;
+  // en log, ses PV réels (suivis par le parsing) sont conservés.
   _seqOwner=null;
   let pf=showsRes()?resVal():0;
   CSQ.steps.forEach(s=>{ s.dmg=spellDmgAt(s.sp,pf); pf=nextPF(pf,s.sp,false); });
@@ -1044,13 +1049,14 @@ function addToCSQ(sp){
     return;
   }
   // La séquence perso prend le focus de la barre de PV : remet le monstre à plein et
-  // réinitialise la séquence optimale (si on n'était pas déjà sur la perso).
+  // réinitialise la séquence optimale (si on n'était pas déjà sur la perso). Hors log.
   claimSeqFocus('csq');
   const dmg=spellDmgAt(sp,CSQ.pfCur);
   CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
-  if(dmg>0) applyDmgToMon(dmg); // entame réellement la barre de PV partagée
+  // Hors log : la planification entame la barre. En log : les PV réels priment, on n'y touche pas.
+  if(dmg>0 && !logActive()) applyDmgToMon(dmg);
   renderCSQ(); renderAdvisor();
 }
 function removeFromCSQ(idx){
@@ -1369,8 +1375,11 @@ function renderDmgSeq(){
     const mech=getMech(), showRes=showsRes(), resMax=mech?.res?.max||100;
     const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
-    if(!_optUsed) _optUsed=new Set();
-    // Borne les indices cochés à la séquence courante (elle peut changer entre deux renders).
+    // En mode log, la séquence optimale est purement informative : elle se recalcule à chaque
+    // ligne de log avec l'état réel (PV/jauge), sans cochage manuel. Hors log, le cochage sert
+    // à simuler son tour. On borne les indices cochés à la séquence courante (qui peut changer).
+    if(logActive()) _optUsed=new Set();
+    else if(!_optUsed) _optUsed=new Set();
     _optUsed=new Set([..._optUsed].filter(i=>i>=0&&i<seq.chosen.length));
     // Recalcule PA/PM/PW restants et la jauge à partir des sorts cochés.
     const recompute=()=>{
@@ -1433,19 +1442,20 @@ function renderDmgSeq(){
           document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
           renderCSQ(); // la séquence perso vient d'être vidée → rafraîchir son affichage
         }
+        // Hors log : cocher/décocher entame ou rend les PV. En log : on n'y touche pas (PV réels).
         if(_optUsed.has(i)){
-          _optUsed.delete(i); el.classList.remove('used'); if(dmg>0) undoDmgToMon(dmg);
+          _optUsed.delete(i); el.classList.remove('used'); if(dmg>0 && !logActive()) undoDmgToMon(dmg);
         } else {
           const {remAP,remMP,remWP}=recompute();
           if(ap>remAP||mp>remMP||wp>remWP) return;
-          _optUsed.add(i); el.classList.add('used'); if(dmg>0) applyDmgToMon(dmg);
+          _optUsed.add(i); el.classList.add('used'); if(dmg>0 && !logActive()) applyDmgToMon(dmg);
         }
         updBars(); updPF();
       });
     });
     document.getElementById('seqreset').onclick=()=>{
       _optUsed=new Set();
-      if(_seqOwner==='opt'){ _seqOwner=null; resetMonHP(); }
+      if(_seqOwner==='opt'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
       updBars();updPF();
     };
