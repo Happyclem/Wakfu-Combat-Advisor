@@ -487,7 +487,9 @@ function calcDmg({base,mastery,di,pos,resBrut,isCrit,cb=1}){
   if(!base) return 0;
   // %résis = 1−0,8^(R/100), par paliers de 1 % (arrondi inférieur). Pas de cap 90 % :
   // les monstres ne sont pas soumis au plafond de résistance des joueurs.
-  const rp = Math.floor((1-Math.pow(.8,(resBrut||0)/100))*100)/100;
+  // +1e-9 avant le floor : absorbe l'erreur de flottant (0.8^1 = 0.7999…96 ferait
+  // floor(19.99)=19 au lieu de 20 → ~1 % de dégâts en trop). Cf. Resistances Ankama.
+  const rp = Math.floor((1-Math.pow(.8,(resBrut||0)/100))*100+1e-9)/100;
   const st=getEffStats();
   const bonusCC=(st.dmgCC||0)/100;
   // Multiplicateur de position : bonus de base du jeu (+25 % dos, +10 % côté) + les
@@ -917,19 +919,12 @@ function computeKills(){
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
-function applyDmgToMon(amount){
-  if(!S.monster) return;
-  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
-  if(S.monster._currentHp===undefined) S.monster._currentHp=max;
-  S.monster._currentHp=Math.max(0,S.monster._currentHp-amount);
-  renderHPBars();
-}
-function undoDmgToMon(amount){
-  if(!S.monster) return;
-  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
-  S.monster._currentHp=Math.min(max,(S.monster._currentHp||0)+amount);
-  renderHPBars();
-}
+// ⚠ Ces helpers modifient l'état RÉEL du monstre (S.monster._currentHp), partagé par
+// tous les calculs sensibles aux PV (Attaque mortelle < 50 % PV, mode kills). Les
+// séquences (perso + optimale interactive) simulent désormais leurs PV LOCALEMENT pour
+// ne pas se polluer mutuellement — elles n'appellent plus ces fonctions. Réservées à un
+// éventuel suivi d'état réel (ex. reset de combat) ; le tracker de log écrit _currentHp
+// directement de son côté.
 function resetMonHP(){
   if(!S.monster) return;
   S.monster._currentHp=S.monster._maxHp||S.monster.hp||0;
@@ -965,26 +960,33 @@ function renderPlayerStatus(){
 }
 
 // ── CUSTOM SEQUENCE ──────────────────────────────────────────────
-const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0};
+// La séquence perso est une SIMULATION isolée : elle ne modifie PAS l'état réel du
+// monstre (S.monster._currentHp). Elle suit ses propres PV simulés (CSQ.monHp) pour
+// afficher la progression, sans polluer le ranking / la séquence optimale (qui
+// raisonnent sur la cible telle quelle, ex. Attaque mortelle < 50 % PV).
+const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0,monHp:0,monMax:0};
+function csqTargetMaxHp(){ const t=focusTgt(); return t?(t._maxHp||t.hp||0):0; }
 function initCSQ(){
-  // Reset complet : vide les étapes, remet les ressources, reset les PV du monstre.
+  // Reset complet : vide les étapes, remet les ressources et les PV simulés.
   const st=getEffStats(), sc=sitBuffsCost();
   CSQ.steps=[];
   CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
   CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
   CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
   CSQ.pfCur=showsRes()?resVal():0;
-  resetMonHP(); renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
+  CSQ.monMax=csqTargetMaxHp(); CSQ.monHp=CSQ.monMax;
+  renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
   // Changement de cible seulement : ne touche pas aux étapes ni aux ressources.
-  // On recalcule juste les dégâts de chaque étape vis-à-vis de la nouvelle cible focusée,
-  // et on met à jour la barre PV (sans reset les PV de la cible précédente).
-  let pf=showsRes()?resVal():0;
+  // On recalcule les dégâts de chaque étape vis-à-vis de la nouvelle cible focusée et
+  // on rebase les PV simulés (CSQ.monHp) sur cette cible — sans toucher au monstre réel.
+  let pf=showsRes()?resVal():0, dealt=0;
   CSQ.steps.forEach(s=>{
-    s.dmg=spellDmgAt(s.sp,pf);
+    s.dmg=spellDmgAt(s.sp,pf); dealt+=s.dmg;
     pf=nextPF(pf,s.sp,false);
   });
+  CSQ.monMax=csqTargetMaxHp(); CSQ.monHp=Math.max(0,CSQ.monMax-dealt);
   renderCSQ();
 }
 function rbar(v,max,col,lbl){
@@ -1019,8 +1021,10 @@ function addToCSQ(sp){
   CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
-  if(dmg>0) applyDmgToMon(dmg);
-  renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
+  if(dmg>0) CSQ.monHp=Math.max(0,CSQ.monHp-dmg); // simulation locale (n'altère pas le monstre réel)
+  // renderAdvisor reste sûr : la séquence perso ne modifie plus les PV réels, donc le
+  // ranking / la séquence optimale ne bougent pas ; seul le compteur d'usages se met à jour.
+  renderCSQ(); renderAdvisor();
 }
 function removeFromCSQ(idx){
   const keep=CSQ.steps.filter((_,i)=>i!==idx).map(s=>s.sp);
@@ -1045,7 +1049,12 @@ function renderCSQ(){
   }
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
   const sm=document.getElementById('csqsum');
-  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
+  // PV simulés restants de la cible visée (vue locale de la séquence perso ; n'affecte
+  // pas l'état réel du monstre ni la séquence optimale).
+  const hpTxt=(CSQ.monMax>0)
+    ? `<span style="font-family:var(--mono);font-size:var(--fs-11);color:${CSQ.monHp<=0?'var(--red)':'var(--muted)'}">${CSQ.monHp<=0?'💀 cible tuée':`cible ${CSQ.monHp.toLocaleString('fr')}/${CSQ.monMax.toLocaleString('fr')} PV`}</span>`
+    : '';
+  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>${hpTxt}`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
   const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
     // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
@@ -1333,6 +1342,10 @@ function renderDmgSeq(){
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
     let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP;
     let pfSim=seq.initPF??(showRes?resVal():0);
+    // PV de cible SIMULÉS localement (cocher un sort n'altère pas le monstre réel,
+    // pour ne pas recalculer le ranking / la séquence perso — état partagé isolé).
+    const seqMonMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
+    let seqMonHp=seqMonMax;
     const used=new Set();
     const updBars=()=>{
       document.getElementById('seqres').innerHTML=
@@ -1378,14 +1391,14 @@ function renderDmgSeq(){
         const pfg=parseInt(el.dataset.pfgen)||0, consumes=el.dataset.consume==='1';
         if(used.has(i)){
           used.delete(i);remAP=Math.min(maxAP,remAP+ap);remMP=Math.min(maxMP,remMP+mp);remWP=Math.min(maxWP,remWP+wp);
-          el.classList.remove('used');if(dmg>0)undoDmgToMon(dmg);
+          el.classList.remove('used');if(dmg>0)seqMonHp=Math.min(seqMonMax,seqMonHp+dmg);
           // recalc pfSim from scratch
           pfSim=seq.initPF??(showRes?resVal():0);
           seq.chosen.forEach((r,j)=>{ if(used.has(j)) pfSim=nextPF(pfSim,r.spell,false); });
         } else {
           if(ap>remAP||mp>remMP||wp>remWP)return;
           used.add(i);remAP-=ap;remMP-=mp;remWP-=wp;el.classList.add('used');
-          if(dmg>0)applyDmgToMon(dmg);
+          if(dmg>0)seqMonHp=Math.max(0,seqMonHp-dmg);
           pfSim=nextPF(pfSim,el._spell||seq.chosen[i].spell,false);
         }
         updBars(); updPF();
@@ -1394,8 +1407,9 @@ function renderDmgSeq(){
     document.getElementById('seqreset').onclick=()=>{
       used.clear();remAP=seq.maxAP;remMP=maxMP;remWP=maxWP;
       pfSim=seq.initPF??(showRes?resVal():0);
+      seqMonHp=seqMonMax;
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
-      resetMonHP();updBars();updPF();
+      updBars();updPF();
     };
   } else sc.style.display='none';
 }
