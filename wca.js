@@ -52,6 +52,7 @@ function spellFull(s){ return {
   cooldown:s.cd||0,   // tours de recharge (0 = aucun) — limite à 1 lancer/tour dans le séquenceur
   icon:s.icon, id:s.id, // icône WakfuAssets (spells/<icon>.png) + Id Ankama
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
+  damage1:s.dm1||0, damageCrit1:s.dc1||0, // dégâts niv.1 (ancrage bas de l'interpolation par niveau)
   pfGen:s.pf||0, pfDosGen:s.pfDos||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
@@ -448,7 +449,8 @@ function mechFlatBonus(sp,val){
     const b=mech.egareBonus(sp); if(b>0) bonus+=b;
   }
   if(mech?.flatBonus){ bonus+=mech.flatBonus(sp,modeAndCounterMap())||0; }
-  return bonus>0 ? scale(bonus,bonus,sp.spellLevel||S.build?.level||200) : 0;
+  // Bonus plat = valeur encyclopédie niv.245 ; on l'interpole depuis 0 (pas de point niv.1 propre).
+  return bonus>0 ? lerpDmg(0,bonus,sp.spellLevel||S.build?.level||200) : 0;
 }
 function pmObj(){ if(!S.combat.mechanics['__p']) S.combat.mechanics['__p']={}; return S.combat.mechanics['__p']; }
 function playerMaxHp(){ return getEffStats().hp||0; }
@@ -476,14 +478,33 @@ function calcDmg({base,mastery,di,pos,resBrut,isCrit,cb=1}){
   const diEff = Math.max(-50, di||0);
   return Math.round(base*(1+mTot/100)*(1+diEff/100)*pm*cm*(1-rp)*cb);
 }
-function scale(dMin,dMax,lvl){
+// Interpolation LINÉAIRE du dégât d'un sort entre ses deux points connus de
+// l'encyclopédie : `d1` (niv.1) et `d245` (niv.245). C'est la formule d'Ankama
+// (base(l) ≈ d1 + (d245−d1)·(l−1)/244) — exacte aux deux bornes. Si la valeur niv.1
+// est absente (≈0), on interpole depuis 0, comme le fallback de l'autobuilder
+// (exact à 245, gracieux en dessous). `lvl` borné à [1,245].
+function lerpDmg(d1,d245,lvl){
   const l=Math.max(1,Math.min(245,lvl||200));
-  // dm = valeur encyclopédie ≈ infobulle niv.245. La base de calcul réelle vaut
-  // dm × g(l), facteur calibré en jeu (mannequin 0 %, Sram lvl20 & lvl125, écart ~1-2 %).
-  // g(1)≈0.11, g(125)=0.76, g(245)≈1.39. L'ancien dm×l/245 sous-estimait ~30-48 %.
-  const dm=(dMax||dMin||0);
-  const g=0.11 + 1.28*(l-1)/244;
-  return Math.round(dm*g);
+  const lo=d1||0, hi=d245||lo;
+  return Math.round(lo + (hi-lo)*(l-1)/244);
+}
+// Compat : ancienne signature scale(dMin,dMax,lvl) où dMin = dégât niv.1 (ancrage bas)
+// et dMax = dégât niv.245. Les appels historiques passaient dMin=0 → interpolation
+// depuis 0 ; ceux qui veulent l'ancrage exact passent la vraie valeur niv.1.
+function scale(dMin,dMax,lvl){ return lerpDmg(dMin,dMax,lvl); }
+// Met à l'échelle au niveau `lvl` une valeur de dégât niv.245 `d245` APPARTENANT à `sp`,
+// en réutilisant le profil de pente du sort (ratio niv.1/niv.245 de son dégât principal).
+// Couvre les dégâts « alternatifs » (Tir précis, Exalté…) qui n'ont pas de point niv.1
+// propre : ils scalent au même rythme que le dégât de base du sort.
+function scaleSpell(sp,d245,lvl){
+  if(!d245) return 0;
+  const main245=sp.damageMax||sp.damageMin||0;
+  // Point niv.1 effectif pour cette valeur : exact si c'est le dégât principal,
+  // sinon proportionnel (alt1 = d245 × dm1/dm245). Pas de dm1 → 0 (interp depuis 0).
+  const d1 = (main245>0 && (sp.damage1||0)>0)
+    ? (d245===main245 ? sp.damage1 : d245*(sp.damage1/main245))
+    : 0;
+  return lerpDmg(d1,d245,lvl);
 }
 function assassinatDebuff(){ return sitActive('assassinat')?-100:0; }
 function elRes(el){
@@ -501,7 +522,7 @@ function resVs(el,t){
 // Dégâts d'un sort contre une cible précise, à une valeur de jauge `pf` donnée.
 function dmgVs(sp,t,pf,crit){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
-  const base=scale(0,mechBaseDmg(sp,t),lvl);
+  const base=scaleSpell(sp,mechBaseDmg(sp,t),lvl);
   if(!base) return 0;
   // Pour les sorts qui scalent avec la jauge on passe cb=1 (spellDmgMult corrige)
   const isPFScaler=isPFScaling(sp);
@@ -657,7 +678,7 @@ function rankSpells(crit){
   const st=getEffStats(), di=st.degatsInfliges||0, lvl=S.build?.level||200;
   const mech=getMech(), pm=getPlayerMech(), dispPF=currentPF();
   return spells.map(sp=>{
-    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
+    const base=scaleSpell(sp,mechBaseDmg(sp),sp.spellLevel||lvl);
     const mastery=elMastery(sp.element,st,sp);
     const isPFScaler=isPFScaling(sp);
     const cbAdj=isPFScaler?1:mechBonus(dispPF);
@@ -705,7 +726,7 @@ function computeSeq(){
   const initPF=trackRes?(resVal()):0, di=st.degatsInfliges||0, lvl=S.build?.level||200;
 
   function dmgAt(sp,pf){
-    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
+    const base=scaleSpell(sp,mechBaseDmg(sp),sp.spellLevel||lvl);
     const cb=isPFScaling(sp)?1:mechBonus(pf);
     const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,resBrut:elRes(sp.element),isCrit:S.critMode,cb});
     return Math.round(d*spellDmgMult(sp,pf,S.monster)*mechSpellScale(sp,pf))+mechFlatBonus(sp,pf);
@@ -751,7 +772,7 @@ function computeSeq(){
   const total=wd.reduce((s,r)=>s+r.damage,0);
   const ccPF=trackRes?resVal():0;
   const totalCC=chosen.reduce((s,sp)=>{
-    const base=scale(0,mechBaseDmg(sp),sp.spellLevel||lvl);
+    const base=scaleSpell(sp,mechBaseDmg(sp),sp.spellLevel||lvl);
     const cb=isPFScaling(sp)?1:mechBonus(ccPF);
     return s+calcDmg({base,mastery:elMastery(sp.element,st,sp),di,pos:S.position,
       resBrut:elRes(sp.element),isCrit:true,cb})+mechFlatBonus(sp,ccPF);
@@ -939,7 +960,7 @@ function rbar(v,max,col,lbl){
 }
 function spellDmgAt(sp,pf){
   const st=getEffStats(), lvl=sp.spellLevel||S.build?.level||200;
-  const base=scale(0,mechBaseDmg(sp),lvl);
+  const base=scaleSpell(sp,mechBaseDmg(sp),lvl);
   if(!(base>0)) return 0;
   const cb=isPFScaling(sp)?1:mechBonus(pf);
   const d=calcDmg({base,mastery:elMastery(sp.element,st,sp),di:st.degatsInfliges||0,
@@ -1421,7 +1442,7 @@ function renderSpellsTab(){
   if(!deck.length){ de.innerHTML='<div class="muted-sm">Aucun sort dans le deck.</div>'; }
   else{
     de.innerHTML=deck.map(sp=>{
-      const spL=sp.spellLevel||lvl, dS=sp.damageMax>0?scale(sp.damageMin||0,sp.damageMax,spL):0;
+      const spL=sp.spellLevel||lvl, dS=sp.damageMax>0?scaleSpell(sp,sp.damageMax,spL):0;
       const co=[sp.apCost?`${sp.apCost}PA`:'',sp.mpCost?`${sp.mpCost}PM`:'',sp.wpCost?`${sp.wpCost}PW`:''].filter(Boolean).join(' ');
       return `<div class="sc dk" data-n="${sp.name}" data-el="${sp.element||'Neutre'}">
         ${spellIcon(sp)}

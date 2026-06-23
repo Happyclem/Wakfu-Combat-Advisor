@@ -328,6 +328,10 @@ function buildSpells(classDisplay) {
       icon: num(r['iconId']) || undefined,             // iconId Ankama (affichage)
       dm: num(r['Dommage lvl245']),
       dc: num(r['Dommage lvl245 critique']),
+      // Dégâts au niveau 1 (ancrage bas pour l'interpolation par niveau du sort).
+      // Vide/absent → 0 (interpolation depuis 0, exacte à 245, comme le fallback Ankama).
+      dm1: num(r['Dommage lvl1']) || undefined,
+      dc1: num(r['Dommage lvl1 critique']) || undefined,
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
       pfDos: isSram ? (parsePFDos(eff) || undefined) : undefined, // PF bonus « de dos » (Kleptosram)
       fin: isSram ? isFinisher(eff, descRaw) : false,
