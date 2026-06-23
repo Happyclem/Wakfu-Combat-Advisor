@@ -44,7 +44,7 @@ function loadData(){
   GPD  = window.WCA_GENERAL_PASSIVES || [];
   CSP  = window.WCA_COMMON_SPELLS || [];
 }
-// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,fin,gen,tp,tpCost,lvl,rng,type,los,desc
+// Spell helpers - data uses short keys: n,el,ap,mp,wp,dm,dc,pf,pfDos,fin,gen,tp,tpCost,lvl,rng,type,los,desc
 function spellFull(s){ return {
   name:s.n, element:s.el||'Neutre', apCost:s.ap||0, mpCost:s.mp||0, wpCost:s.wp||0,
   uses:s.u||3, // usages par tour (défaut 3)
@@ -52,7 +52,7 @@ function spellFull(s){ return {
   cooldown:s.cd||0,   // tours de recharge (0 = aucun) — limite à 1 lancer/tour dans le séquenceur
   icon:s.icon, id:s.id, // icône WakfuAssets (spells/<icon>.png) + Id Ankama
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
-  pfGen:s.pf||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
+  pfGen:s.pf||0, pfDosGen:s.pfDos||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
   exaltedDmg:s.exaltedDmg||0, portalDmg:s.portalDmg||0, portalBonus:s.portalBonus||0, // Eliotrope
@@ -547,14 +547,18 @@ function hemoBonus(dd, t, sp){
   const hLvl=(t._hemo||0)+(sp?hemoApplied(sp,t._hemo||0):0);
   return hLvl>0 ? Math.round(dd*hLvl*HEMO_PCT_PER_LVL) : 0;
 }
-// PF généré effectivement par un sort (Assaut Brutal supprime le gain des sorts visés).
-function effPfGen(sp){ return abApplies(sp)?0:(sp.pfGen||0); }
+// PF bonus « de dos » d'un sort, actif uniquement quand la position choisie est dos
+// (ex. Kleptosram : +5 supplémentaires de dos). Clause conditionnelle non comptée dans pfGen.
+function pfDosBonus(sp){ return S.position==='back' ? (sp.pfDosGen||0) : 0; }
+// PF généré effectivement par un sort (Assaut Brutal supprime le gain des sorts visés ;
+// le bonus de dos s'ajoute quand la position est « dos »).
+function effPfGen(sp){ return abApplies(sp)?0:((sp.pfGen||0)+pfDosBonus(sp)); }
 // Nouvelle valeur de jauge après lancer de `sp` depuis `pf`. Générique : délègue à
 // la mécanique de classe (resNext). Côté Sram, on transmet les règles spécifiques
 // (Assaut Brutal supprime le gain, Assassin = pas de gain sur le coup létal).
 function nextPF(pf,sp,lethal){
   return resNext(pf,sp,{ lethal, assassin:assassinActive(), suppressGen:abApplies(sp),
-    tirPrecis:isModeOn('tir_precis') });
+    posBonus:pfDosBonus(sp), tirPrecis:isModeOn('tir_precis') });
 }
 // spRange : 'melee' | 'distance' — à passer depuis chaque spell (futur).
 // Pour l'instant on infère depuis la portée string si disponible.
@@ -913,7 +917,7 @@ function addToCSQ(sp){
     return;
   }
   const dmg=spellDmgAt(sp,CSQ.pfCur);
-  CSQ.steps.push({sp,dmg,pfGen:sp.pfGen||0,ap,mp,wp});
+  CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
   if(dmg>0) applyDmgToMon(dmg);
@@ -1158,7 +1162,7 @@ function renderAdvisor(){
         // Coût PA effectif (Ecaflip Dé six réduit) — affiché barré si différent du coût de base.
         const apc=r.apEff??r.spell.apCost, apTxt=apc!==r.spell.apCost?`<s style="color:var(--dim)">${r.spell.apCost}</s>${apc}PA`:(r.spell.apCost?`${r.spell.apCost}PA`:'');
         const co=[apTxt,r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ');
-        const pf=r.spell.pfGen>0?`<span class="badge badge-pf">+${r.spell.pfGen}PF</span>`:'';
+        const pfG=effPfGen(r.spell), pf=pfG>0?`<span class="badge badge-pf">+${pfG}PF</span>`:'';
         const scLbl=getMech()?.res?.label||'jauge';
         const sc=r.pfScaler?`<span style="font-size:var(--fs-9);color:var(--purple)" title="Dégâts variables selon ${scLbl}">⤢${scLbl}</span>`:'';
         const hm=buildsHemo(r.spell)?`<span style="font-size:var(--fs-9);color:var(--red)" title="Applique de l'Hémorragie (DoT Feu)">🩸+${hemoApplied(r.spell,focusTgt()?._hemo||0)}</span>`:'';
@@ -1379,7 +1383,7 @@ function renderSpellsTab(){
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${dS>0?`<span class="scdmg">~${dS}</span>`:''}
-            ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
+            ${(()=>{const g=effPfGen(sp);return g>0?`<span class="badge badge-pf">+${g}PF</span>`:'';})()}
             ${sp.isFinisher?`<span style="font-size:var(--fs-9);color:var(--gold)">★fin</span>`:''}
           </div>
           ${sp.desc?`<div class="scdf">${sp.desc}</div>`:''}
@@ -1414,7 +1418,7 @@ function renderSpellsTab(){
             <span class="scn">${sp.name}</span><span class="scap">${co||'passif'}</span>
             ${sp.damageMax>0?`<span class="scdmg">${sp.damageMin}-${sp.damageMax}</span>`:''}
             ${sp.damageCrit>0?`<span style="font-size:var(--fs-9);color:#c0c060">CC:${sp.damageCrit}</span>`:''}
-            ${sp.pfGen>0?`<span class="badge badge-pf">+${sp.pfGen}PF</span>`:''}
+            ${(()=>{const g=effPfGen(sp);return g>0?`<span class="badge badge-pf">+${g}PF</span>`:'';})()}
             ${sp.isFinisher?`<span style="font-size:var(--fs-9);color:var(--gold)">★</span>`:''}
           </div>
           ${meta?`<div class="meta" style="margin-top:1px">${meta}</div>`:''}
@@ -1719,7 +1723,7 @@ function processLine(raw){
       if(dk){
         const id=mech.res.id;
         const pm=pmObj();
-        pm[id]=resNext(pm[id]||0,dk,{lethal:false,assassin:assassinActive(),suppressGen:abApplies(dk)});
+        pm[id]=resNext(pm[id]||0,dk,{lethal:false,assassin:assassinActive(),suppressGen:abApplies(dk),posBonus:pfDosBonus(dk)});
         renderAdvisor();
       }
     }

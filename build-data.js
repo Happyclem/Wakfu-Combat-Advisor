@@ -90,6 +90,15 @@ function parsePF(effects, desc, ap) {
   }
   return pf;
 }
+// Point Faible conditionnel « si la cible est de dos » (ex. Kleptosram +5). Ce gain
+// est exclu de parsePF (clause « Si … . » strippée) car non garanti ; on le récupère
+// ici pour l'ajouter au runtime quand la position choisie est « dos ».
+function parsePFDos(effects) {
+  let pf = 0, m;
+  const re = /Si\s+la\s+cible\s+est\s+de\s+dos\b[^.]*?Point\s*Faible\s*\(\+?\s*(\d+)\s*Niv\.?\)/gi;
+  while ((m = re.exec(effects)) !== null) pf += num(m[1]);
+  return pf;
+}
 
 // Sort « finisseur » : consomme le Point Faible pour des dégâts supplémentaires.
 // On exige la phrase « Consomme Point Faible » ou « N % dommages … par Point Faible »
@@ -320,6 +329,7 @@ function buildSpells(classDisplay) {
       dm: num(r['Dommage lvl245']),
       dc: num(r['Dommage lvl245 critique']),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
+      pfDos: isSram ? (parsePFDos(eff) || undefined) : undefined, // PF bonus « de dos » (Kleptosram)
       fin: isSram ? isFinisher(eff, descRaw) : false,
       gen: gen || undefined, // ressource générée (Concentration Iop, Affûtage Crâ…) ; omis si 0
       tp: tp.tp,             // Crâ : dégâts en Tir précis (omis si inchangé)

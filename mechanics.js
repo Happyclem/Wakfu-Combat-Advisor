@@ -46,7 +46,9 @@
       if (this.consumes(sp)) return 0;
       // Assassin : le coup qui tue ne génère pas de Point Faible.
       if (ctx && ctx.lethal && ctx.assassin) return val;
-      const g = ctx && ctx.suppressGen ? 0 : this.gen(sp);
+      // posBonus : PF conditionnel « de dos » (Kleptosram +5), ajouté par le runtime
+      // selon la position choisie. Supprimé aussi par Assaut Brutal (suppressGen).
+      const g = ctx && ctx.suppressGen ? 0 : this.gen(sp) + (ctx && ctx.posBonus || 0);
       return Math.min(SRAM_PF_MAX, val + g);
     },
     bonus(m) { return 1 + (m.pf || 0) * SRAM_PF_PER; }, // ×1 → ×2.0 (PF 0→200)
