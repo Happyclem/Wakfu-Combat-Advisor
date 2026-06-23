@@ -283,12 +283,22 @@ function getClassPassives(){
 function getGeneralPassives(){ return (GPD||[]).map(p=>mkPassive(p,true)); }
 function getAllPassives(){ return [...getClassPassives(), ...getGeneralPassives()]; }
 function getActivePassives(){ return S.build?.activePassives||[]; }
+// Emplacements de passifs débloqués selon le niveau (règle Wakfu).
+const PASSIVE_SLOT_LEVELS = [10, 30, 50, 80, 120, 170];
+function maxPassiveSlots(level){
+  const lvl = level ?? S.build?.level ?? 0;
+  return PASSIVE_SLOT_LEVELS.filter(l => lvl >= l).length;
+}
 function togglePassive(id){
   if(!S.build) return;
   if(!S.build.activePassives) S.build.activePassives=[];
   const i = S.build.activePassives.findIndex(p=>p.id===id);
   if(i>=0) S.build.activePassives.splice(i,1);
-  else { if(S.build.activePassives.length>=6){ toast('⚠ Maximum 6 passifs actifs'); return; } S.build.activePassives.push({id}); }
+  else {
+    const max=maxPassiveSlots();
+    if(S.build.activePassives.length>=max){ toast(`⚠ ${max} emplacement${max>1?'s':''} de passif au niveau ${S.build.level||0}`); return; }
+    S.build.activePassives.push({id});
+  }
   save(); renderPassivesTab(); renderPerso(); renderAdvisor();
 }
 function getOnKillRes(){
@@ -1502,12 +1512,16 @@ function renderPassivesTab(){
   if(!le) return;
   const all=getAllPassives();
   // Drop stale active-passive ids that no longer resolve (legacy hard-coded ids → JSON ids)
+  // puis tronque au nombre d'emplacements débloqués par le niveau (un build importé
+  // ou un changement de niveau peut dépasser la limite).
   if(all.length && S.build?.activePassives?.length){
     const valid=new Set(all.map(p=>p.id));
-    const kept=S.build.activePassives.filter(a=>valid.has(a.id));
+    let kept=S.build.activePassives.filter(a=>valid.has(a.id));
+    const max=maxPassiveSlots();
+    if(kept.length>max) kept=kept.slice(0,max);
     if(kept.length!==S.build.activePassives.length){ S.build.activePassives=kept; save(); }
   }
-  const active=getActivePassives(); if(ce) ce.textContent=active.length;
+  const active=getActivePassives(); if(ce) ce.textContent=`${active.length}/${maxPassiveSlots()}`;
   if(!all.length){le.innerHTML='<div class="muted-sm">Choisis ta classe dans Build.</div>';return;}
   const clsP=all.filter(p=>!p.isGeneral), genP=all.filter(p=>p.isGeneral);
   const card=p=>{
