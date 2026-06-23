@@ -106,6 +106,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
    brillant (gloss) par-dessus pour un rendu en relief, indépendant de cette couleur. */
 .hpf{height:100%;border-radius:3px;transition:width .3s,background .3s;
   background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 45%,rgba(0,0,0,.18))}
+/* Jauge de ressource (Point Faible / Concentration…) sous chaque séquence. */
+.gr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.gl{font-size:var(--fs-10);color:var(--muted);width:90px;flex-shrink:0}
+.gb{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.gf{height:100%;border-radius:3px;transition:width .3s;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,0) 50%,rgba(0,0,0,.15))}
+.gv{font-family:var(--mono);font-size:var(--fs-10);color:var(--muted);width:45px;text-align:right}
 /* Res bars */
 .rb{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .rl2{font-size:var(--fs-10);font-weight:700;width:20px;flex-shrink:0}
@@ -133,7 +140,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 /* Description : zone de hauteur fixe avec défilement vertical → on voit plus de texte
    sans casser l'uniformité des cartes en grille. Texte complet au survol + Ctrl. */
 .scdf{font-size:var(--fs-11);color:#9099bb;line-height:1.45;margin-top:3px;
-  max-height:5.6em;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
+  max-height:11.2em;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
 /* Barre de défilement discrète, dans le thème sombre. */
 .scdf::-webkit-scrollbar{width:6px}
 .scdf::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}

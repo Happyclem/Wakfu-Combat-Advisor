@@ -919,10 +919,12 @@ function computeKills(){
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
-// `S.monster._currentHp` est l'état RÉEL du combat : il n'est écrit QUE par le parsing du
-// log (combat en direct). Les séquences (perso + optimale) ne le modifient JAMAIS — elles
-// simulent localement à partir de simStartHp() (l'état réel courant, ou plein hors combat).
-// Le panneau « Combat live » lit cet état réel en lecture seule.
+// Deux régimes pour les PV du monstre (S.monster._currentHp) :
+//  • EN LOG (combat live) : l'état réel est écrit UNIQUEMENT par le parsing du log. Les
+//    séquences ne touchent à rien — elles simulent localement à partir de simStartHp().
+//  • HORS LOG (planification) : la barre de PV du panneau Cibles EST le terrain de jeu —
+//    cliquer un sort d'une séquence l'entame réellement (applyDmgToMon). Une seule séquence
+//    « possède » la barre à la fois (_seqOwner) ; prendre le focus remet la cible à plein.
 function logActive(){ return !!logHandle; }
 // PV de départ d'une simulation de séquence sur la cible visée : les PV RÉELS courants si
 // connus (suivi du log), sinon les PV pleins. La simulation part « d'ici, maintenant ».
@@ -930,6 +932,37 @@ function simStartHp(){
   const t=focusTgt(); if(!t) return 0;
   const mx=t._maxHp||t.hp||0;
   return Math.max(0,Math.min(mx, t._currentHp??mx));
+}
+function applyDmgToMon(amount){
+  if(!S.monster||!(amount>0)) return;
+  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
+  if(S.monster._currentHp===undefined) S.monster._currentHp=max;
+  S.monster._currentHp=Math.max(0,S.monster._currentHp-amount);
+  renderHPBars();
+}
+function resetMonHP(){
+  if(!S.monster) return;
+  S.monster._currentHp=S.monster._maxHp||S.monster.hp||0;
+  renderHPBars();
+}
+// Séquence qui « possède » la barre de PV réelle HORS log ('csq' perso / 'opt' optimale).
+// Changer d'owner remet la cible à plein et vide l'autre séquence (pas de double comptage).
+let _seqOwner=null;
+function claimSeqFocus(owner){
+  if(logActive()||_seqOwner===owner) return;
+  _seqOwner=owner;
+  resetMonHP();
+  if(owner==='opt'){ initCSQdata(); }   // l'optimale prend la main → vide la séquence perso
+  else { _optUsed=null; }                // la perso prend la main → décoche l'optimale
+}
+// Réinitialise SEULEMENT les données de la séquence perso (sans toucher les PV ni rendre).
+function initCSQdata(){
+  const st=getEffStats(), sc=sitBuffsCost();
+  CSQ.steps=[];
+  CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
+  CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
+  CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
+  CSQ.pfCur=showsRes()?resVal():0;
 }
 function renderHPBars(){
   // Barres de vie par cible dans le panneau Cibles (la barre de la cible visée dans le
@@ -967,19 +1000,18 @@ function renderPlayerStatus(){
 const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0,simHp:0,simMax:0};
 function csqResyncHp(){ CSQ.simMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0); CSQ.simHp=simStartHp(); }
 function initCSQ(){
-  // Reset complet : vide les étapes, remet les ressources et rebase les PV simulés.
-  const st=getEffStats(), sc=sitBuffsCost();
-  CSQ.steps=[];
-  CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
-  CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
-  CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
-  CSQ.pfCur=showsRes()?resVal():0;
+  // Reset complet de la séquence perso. Hors log, si elle possédait la barre réelle, on la
+  // rend (cible à plein). En log, on ne touche jamais l'état réel.
+  initCSQdata();
+  if(_seqOwner==='csq'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
   csqResyncHp();
   renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
   // Changement de cible / difficulté / mise à jour du log : on recalcule les dégâts de
   // chaque étape pour la cible focusée et on rebase les PV simulés sur l'état réel courant.
+  // Hors log, un changement de cible relâche le focus (la nouvelle cible repart pleine).
+  if(!logActive()) _seqOwner=null;
   let pf=showsRes()?resVal():0, dealt=0;
   CSQ.steps.forEach(s=>{ s.dmg=spellDmgAt(s.sp,pf); dealt+=s.dmg; pf=nextPF(pf,s.sp,false); });
   CSQ.simMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
@@ -1014,13 +1046,19 @@ function addToCSQ(sp){
     if(el){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);}
     return;
   }
+  // Hors log : la perso prend la barre réelle (remet à plein + vide l'optimale au 1er sort).
+  // En log : pas de focus, simulation locale.
+  claimSeqFocus('csq');
   // Au 1er sort d'une séquence perso vide, on rebase les PV simulés sur l'état réel courant.
   if(!CSQ.steps.length) csqResyncHp();
   const dmg=spellDmgAt(sp,CSQ.pfCur);
   CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
-  if(dmg>0) CSQ.simHp=Math.max(0,CSQ.simHp-dmg); // simulation locale (n'altère pas le monstre réel)
+  if(dmg>0){
+    CSQ.simHp=Math.max(0,CSQ.simHp-dmg);    // vue simulée (résumé séquence)
+    if(!logActive()) applyDmgToMon(dmg);    // hors log : la vraie barre de PV descend aussi
+  }
   renderCSQ(); renderAdvisor();
 }
 function removeFromCSQ(idx){
@@ -1351,9 +1389,12 @@ function renderDmgSeq(){
     else if(!_optUsed) _optUsed=new Set();
     _optUsed=new Set([..._optUsed].filter(i=>i>=0&&i<seq.chosen.length));
     const seqSimMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
-    // Recalcule PA/PM/PW + jauge + PV simulés à partir des sorts cochés (base = état réel courant).
+    // Recalcule PA/PM/PW + jauge + PV simulés à partir des sorts cochés.
+    // Base des PV : en log, l'état réel courant (simStartHp) ; hors log, la cible PLEINE
+    // (le focus a remis à plein et la vraie barre porte déjà l'entame → pas de double comptage).
     const recompute=()=>{
-      let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP, pfSim=seq.initPF??(showRes?resVal():0), simHp=simStartHp();
+      let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP, pfSim=seq.initPF??(showRes?resVal():0);
+      let simHp=logActive()?simStartHp():seqSimMax;
       seq.chosen.forEach((r,j)=>{ if(_optUsed.has(j)){
         remAP-=(r.spell.apCost||0); remMP-=(r.spell.mpCost||0); remWP-=(r.spell.wpCost||0);
         pfSim=nextPF(pfSim,r.spell,false); simHp=Math.max(0,simHp-(r.damage||0));
@@ -1405,22 +1446,27 @@ function renderDmgSeq(){
     document.getElementById('seqsteps').querySelectorAll('.ss').forEach(el=>{
       bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'',(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.name);
       el.addEventListener('click',()=>{
-        const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0;
-        // Simulation pure : cocher/décocher un sort « joué ». N'écrit jamais l'état réel ;
-        // les PV simulés sont recalculés (base = état réel courant) par recompute().
+        const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0,dmg=parseInt(el.dataset.dmg)||0;
+        // Hors log : l'optimale prend la barre réelle (focus → cible pleine + vide la perso) ;
+        // cocher/décocher entame/rend les vrais PV. En log : pas de focus, simulation seule.
+        claimSeqFocus('opt');
         if(!_optUsed) _optUsed=new Set();
         if(_optUsed.has(i)){
           _optUsed.delete(i); el.classList.remove('used');
+          if(dmg>0&&!logActive()){ resetMonHP(); replayOptDmg(); } // rebase la vraie barre
         } else {
           const {remAP,remMP,remWP}=recompute();
           if(ap>remAP||mp>remMP||wp>remWP) return;
-          _optUsed.add(i); el.classList.add('used');
+          _optUsed.add(i); el.classList.add('used'); if(dmg>0&&!logActive()) applyDmgToMon(dmg);
         }
-        updBars(); updPF(); renderSeqSum();
+        updBars(); updPF(); renderSeqSum(); renderCSQ();
       });
     });
+    // Recalcule la vraie barre (cible pleine − tous les dégâts cochés) après un décochage.
+    function replayOptDmg(){ let d=0; seq.chosen.forEach((r,j)=>{ if(_optUsed.has(j)) d+=(r.damage||0); }); if(d>0) applyDmgToMon(d); }
     document.getElementById('seqreset').onclick=()=>{
       _optUsed=new Set();
+      if(_seqOwner==='opt'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
       updBars();updPF();renderSeqSum();
     };
