@@ -919,50 +919,17 @@ function computeKills(){
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
-// Une SEULE barre de PV du monstre (S.monster._currentHp), partagée. Les deux séquences
-// (perso + optimale interactive) l'entament réellement, mais une seule « possède » la
-// barre à la fois : prendre le focus d'une séquence (cf. claimSeqFocus) remet le monstre
-// à pleine vie et réinitialise l'AUTRE séquence — pas de duplication de cible.
-function applyDmgToMon(amount){
-  if(!S.monster||!(amount>0)) return;
-  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
-  if(S.monster._currentHp===undefined) S.monster._currentHp=max;
-  S.monster._currentHp=Math.max(0,S.monster._currentHp-amount);
-  renderHPBars();
-}
-function undoDmgToMon(amount){
-  if(!S.monster||!(amount>0)) return;
-  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
-  S.monster._currentHp=Math.min(max,(S.monster._currentHp||0)+amount);
-  renderHPBars();
-}
-function resetMonHP(){
-  if(!S.monster) return;
-  S.monster._currentHp=S.monster._maxHp||S.monster.hp||0;
-  renderHPBars();
-}
-// Un log de combat est-il connecté ? Si oui, l'état réel des PV (suivi par le parsing du
-// log) PRIME : les séquences de planification ne doivent PAS toucher aux PV du monstre.
+// `S.monster._currentHp` est l'état RÉEL du combat : il n'est écrit QUE par le parsing du
+// log (combat en direct). Les séquences (perso + optimale) ne le modifient JAMAIS — elles
+// simulent localement à partir de simStartHp() (l'état réel courant, ou plein hors combat).
+// Le panneau « Combat live » lit cet état réel en lecture seule.
 function logActive(){ return !!logHandle; }
-// Quelle séquence « possède » la barre de PV du monstre ('csq' = perso, 'opt' = optimale).
-// HORS LOG uniquement : prendre le focus d'une séquence remet le monstre à plein et vide
-// les données de l'autre séquence. En mode log, on ne réinitialise jamais les PV réels —
-// on se contente de marquer l'owner et de vider l'autre séquence (sans toucher la cible).
-// Volontairement SANS re-render (les handlers appelants gèrent leur propre rendu).
-let _seqOwner=null;
-function claimSeqFocus(owner){
-  if(_seqOwner===owner) return;        // déjà la séquence active : on continue
-  _seqOwner=owner;
-  if(!logActive()) resetMonHP();        // hors log : nouvelle séquence active → cible pleine
-  if(owner==='opt'){                    // l'optimale prend la main → vide les données perso
-    CSQ.steps=[]; const st=getEffStats(), sc=sitBuffsCost();
-    CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
-    CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
-    CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
-    CSQ.pfCur=showsRes()?resVal():0;
-  } else {                              // la perso prend la main → décoche l'optimale
-    _optUsed=null;
-  }
+// PV de départ d'une simulation de séquence sur la cible visée : les PV RÉELS courants si
+// connus (suivi du log), sinon les PV pleins. La simulation part « d'ici, maintenant ».
+function simStartHp(){
+  const t=focusTgt(); if(!t) return 0;
+  const mx=t._maxHp||t.hp||0;
+  return Math.max(0,Math.min(mx, t._currentHp??mx));
 }
 function renderHPBars(){
   // Barres de vie par cible dans le panneau Cibles (la barre de la cible visée dans le
@@ -994,30 +961,29 @@ function renderPlayerStatus(){
 }
 
 // ── CUSTOM SEQUENCE ──────────────────────────────────────────────
-// La séquence perso entame la barre de PV PARTAGÉE du monstre (S.monster._currentHp) via
-// applyDmgToMon, après avoir pris le focus (claimSeqFocus('csq') → cible à plein + vide
-// la séquence optimale). Une seule séquence possède la barre à la fois (cf. _seqOwner).
-const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0};
+// SIMULATION pure : la séquence perso ne modifie JAMAIS l'état réel du monstre. Elle suit
+// ses propres PV simulés (CSQ.simHp), partant de simStartHp() (PV réels courants du log,
+// ou pleins hors combat). La barre du panneau Cibles reste l'état réel.
+const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0,simHp:0,simMax:0};
+function csqResyncHp(){ CSQ.simMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0); CSQ.simHp=simStartHp(); }
 function initCSQ(){
-  // Reset complet : vide les étapes et remet les ressources. Si la séquence perso
-  // possédait la barre de PV, on la rend (le monstre repasse à pleine vie).
+  // Reset complet : vide les étapes, remet les ressources et rebase les PV simulés.
   const st=getEffStats(), sc=sitBuffsCost();
   CSQ.steps=[];
   CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
   CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
   CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
   CSQ.pfCur=showsRes()?resVal():0;
-  // Hors log : rendre les PV si la perso les possédait. En log : ne jamais écraser l'état réel.
-  if(_seqOwner==='csq'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
+  csqResyncHp();
   renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
-  // Changement de cible / difficulté : on relâche le focus de séquence et on recalcule les
-  // dégâts de chaque étape pour la cible focusée. Hors log, la cible repart pleine vie ;
-  // en log, ses PV réels (suivis par le parsing) sont conservés.
-  _seqOwner=null;
-  let pf=showsRes()?resVal():0;
-  CSQ.steps.forEach(s=>{ s.dmg=spellDmgAt(s.sp,pf); pf=nextPF(pf,s.sp,false); });
+  // Changement de cible / difficulté / mise à jour du log : on recalcule les dégâts de
+  // chaque étape pour la cible focusée et on rebase les PV simulés sur l'état réel courant.
+  let pf=showsRes()?resVal():0, dealt=0;
+  CSQ.steps.forEach(s=>{ s.dmg=spellDmgAt(s.sp,pf); dealt+=s.dmg; pf=nextPF(pf,s.sp,false); });
+  CSQ.simMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
+  CSQ.simHp=Math.max(0,simStartHp()-dealt);
   renderCSQ();
 }
 function rbar(v,max,col,lbl){
@@ -1048,15 +1014,13 @@ function addToCSQ(sp){
     if(el){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);}
     return;
   }
-  // La séquence perso prend le focus de la barre de PV : remet le monstre à plein et
-  // réinitialise la séquence optimale (si on n'était pas déjà sur la perso). Hors log.
-  claimSeqFocus('csq');
+  // Au 1er sort d'une séquence perso vide, on rebase les PV simulés sur l'état réel courant.
+  if(!CSQ.steps.length) csqResyncHp();
   const dmg=spellDmgAt(sp,CSQ.pfCur);
   CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
-  // Hors log : la planification entame la barre. En log : les PV réels priment, on n'y touche pas.
-  if(dmg>0 && !logActive()) applyDmgToMon(dmg);
+  if(dmg>0) CSQ.simHp=Math.max(0,CSQ.simHp-dmg); // simulation locale (n'altère pas le monstre réel)
   renderCSQ(); renderAdvisor();
 }
 function removeFromCSQ(idx){
@@ -1082,8 +1046,11 @@ function renderCSQ(){
   }
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
   const sm=document.getElementById('csqsum');
-  // La progression des PV de la cible est visible sur la barre partagée (panneau Cibles).
-  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
+  // PV simulés restants de la cible (vue locale ; n'affecte pas l'état réel du combat).
+  const hpTxt=(CSQ.steps.length&&CSQ.simMax>0)
+    ? `<span style="font-family:var(--mono);font-size:var(--fs-11);color:${CSQ.simHp<=0?'var(--red)':'var(--muted)'}">${CSQ.simHp<=0?'💀 cible tuée':`cible ${CSQ.simHp.toLocaleString('fr')}/${CSQ.simMax.toLocaleString('fr')} PV`}</span>`
+    : '';
+  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>${hpTxt}`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
   const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
     // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
@@ -1364,9 +1331,11 @@ function renderAdvisor(){
     document.getElementById('killscard').style.display='none';
     renderDmgSeq();
   }
+  renderLive(); // panneau Combat live (lecture seule) — suit le log en continu
 }
-// État « coché » (sorts joués) de la séquence optimale, persistant entre re-renders
-// (module, pas closure) pour que claimSeqFocus puisse le réinitialiser de l'extérieur.
+// État « coché » (sorts joués) de la séquence optimale, persistant entre re-renders.
+// La séquence optimale est une SIMULATION : cocher un sort le marque « joué » et entame des
+// PV SIMULÉS (partant de l'état réel courant), sans jamais écrire S.monster._currentHp.
 let _optUsed=null; // Set d'indices, ou null = rien de coché
 function renderDmgSeq(){
   const seq=computeSeq(), sc=document.getElementById('seqcard');
@@ -1375,20 +1344,21 @@ function renderDmgSeq(){
     const mech=getMech(), showRes=showsRes(), resMax=mech?.res?.max||100;
     const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
-    // En mode log, la séquence optimale est purement informative : elle se recalcule à chaque
-    // ligne de log avec l'état réel (PV/jauge), sans cochage manuel. Hors log, le cochage sert
-    // à simuler son tour. On borne les indices cochés à la séquence courante (qui peut changer).
+    // En mode log, l'optimale est informative : recalculée à chaque ligne avec l'état réel,
+    // sans cochage manuel. Hors log, le cochage simule le tour. On borne les indices cochés
+    // à la séquence courante (qui peut changer entre deux renders).
     if(logActive()) _optUsed=new Set();
     else if(!_optUsed) _optUsed=new Set();
     _optUsed=new Set([..._optUsed].filter(i=>i>=0&&i<seq.chosen.length));
-    // Recalcule PA/PM/PW restants et la jauge à partir des sorts cochés.
+    const seqSimMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
+    // Recalcule PA/PM/PW + jauge + PV simulés à partir des sorts cochés (base = état réel courant).
     const recompute=()=>{
-      let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP, pfSim=seq.initPF??(showRes?resVal():0);
+      let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP, pfSim=seq.initPF??(showRes?resVal():0), simHp=simStartHp();
       seq.chosen.forEach((r,j)=>{ if(_optUsed.has(j)){
         remAP-=(r.spell.apCost||0); remMP-=(r.spell.mpCost||0); remWP-=(r.spell.wpCost||0);
-        pfSim=nextPF(pfSim,r.spell,false);
+        pfSim=nextPF(pfSim,r.spell,false); simHp=Math.max(0,simHp-(r.damage||0));
       }});
-      return {remAP,remMP,remWP,pfSim};
+      return {remAP,remMP,remWP,pfSim,simHp};
     };
     const updBars=()=>{
       const {remAP,remMP,remWP}=recompute();
@@ -1424,42 +1394,77 @@ function renderDmgSeq(){
         ${consumesPF(r.spell)?`<span style="font-size:var(--fs-9);color:var(--gold)">✦PF</span>`:''}
       </div>`
     ).join('');
-    document.getElementById('seqsum').innerHTML=
+    const seqSimHtml=()=>{ if(!(_optUsed.size&&seqSimMax>0)) return ''; const {simHp}=recompute();
+      return `<span style="font-family:var(--mono);font-size:var(--fs-11);color:${simHp<=0?'var(--red)':'var(--muted)'}">${simHp<=0?'💀 cible tuée':`cible ${simHp.toLocaleString('fr')}/${seqSimMax.toLocaleString('fr')} PV`}</span>`; };
+    const renderSeqSum=()=>{ document.getElementById('seqsum').innerHTML=
       `<span class="stot">${seq.total.toLocaleString('fr')}</span>
        <span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${seq.apUsed}/${seq.maxAP} PA</span>
        <span style="font-size:var(--fs-10);color:var(--gold)">CC: ${seq.totalCC.toLocaleString('fr')}</span>
-       ${seq.killRefund?`<span style="font-size:var(--fs-10);color:var(--blue)">+${seq.killRefund.ap}PA ${seq.killRefund.mp}PM ${seq.killRefund.wp}PW sur kill${seq.lethal?' ✓ létal':''}${seq.refund&&seq.refund.seq.length?` → ${seq.refund.seq.map(r=>r.spell.name).join(' + ')} (+${seq.refund.total.toLocaleString('fr')})`:''}</span>`:''}`;
+       ${seq.killRefund?`<span style="font-size:var(--fs-10);color:var(--blue)">+${seq.killRefund.ap}PA ${seq.killRefund.mp}PM ${seq.killRefund.wp}PW sur kill${seq.lethal?' ✓ létal':''}${seq.refund&&seq.refund.seq.length?` → ${seq.refund.seq.map(r=>r.spell.name).join(' + ')} (+${seq.refund.total.toLocaleString('fr')})`:''}</span>`:''}${seqSimHtml()}`; };
+    renderSeqSum();
     document.getElementById('seqsteps').querySelectorAll('.ss').forEach(el=>{
       bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'',(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.name);
       el.addEventListener('click',()=>{
-        const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0,dmg=parseInt(el.dataset.dmg)||0;
-        // Prise de focus de l'optimale : remet le monstre à plein + vide la séquence perso
-        // (claimSeqFocus ne re-render pas). 1er clic après prise de focus → on repart de zéro.
-        const wasOwner=_seqOwner==='opt'; claimSeqFocus('opt');
+        const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0;
+        // Simulation pure : cocher/décocher un sort « joué ». N'écrit jamais l'état réel ;
+        // les PV simulés sont recalculés (base = état réel courant) par recompute().
         if(!_optUsed) _optUsed=new Set();
-        if(!wasOwner){
-          _optUsed.clear();
-          document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
-          renderCSQ(); // la séquence perso vient d'être vidée → rafraîchir son affichage
-        }
-        // Hors log : cocher/décocher entame ou rend les PV. En log : on n'y touche pas (PV réels).
         if(_optUsed.has(i)){
-          _optUsed.delete(i); el.classList.remove('used'); if(dmg>0 && !logActive()) undoDmgToMon(dmg);
+          _optUsed.delete(i); el.classList.remove('used');
         } else {
           const {remAP,remMP,remWP}=recompute();
           if(ap>remAP||mp>remMP||wp>remWP) return;
-          _optUsed.add(i); el.classList.add('used'); if(dmg>0 && !logActive()) applyDmgToMon(dmg);
+          _optUsed.add(i); el.classList.add('used');
         }
-        updBars(); updPF();
+        updBars(); updPF(); renderSeqSum();
       });
     });
     document.getElementById('seqreset').onclick=()=>{
       _optUsed=new Set();
-      if(_seqOwner==='opt'){ _seqOwner=null; if(!logActive()) resetMonHP(); }
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
-      updBars();updPF();
+      updBars();updPF();renderSeqSum();
     };
   } else sc.style.display='none';
+}
+// ── PANNEAU COMBAT LIVE (lecture seule) ──────────────────────────
+// Suit le combat en direct : séquence optimale du tour + cibles tuables, recalculées en
+// continu depuis l'état réel (PV/jauge/PA suivis par le log). Aucune interaction.
+function renderLive(){
+  const disco=document.getElementById('livedisco'), body=document.getElementById('livebody');
+  if(!disco||!body) return;
+  if(!logActive()||!S.build||!S.monster){ disco.style.display=''; body.style.display='none'; return; }
+  disco.style.display='none'; body.style.display='';
+  // Séquence optimale du tour (lecture seule), même moteur que le Conseiller.
+  const seq=computeSeq();
+  const seqEl=document.getElementById('liveseq'), strat=document.getElementById('livestrat');
+  if(seq?.chosen?.length){
+    strat.textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
+    seqEl.innerHTML=seq.chosen.map(r=>
+      `<div class="ss" data-el="${r.spell.element||'Neutre'}">
+        ${spellIcon(r.spell,'icn-sm')}<span>${r.spell.name}</span>
+        <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
+        <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
+        ${consumesPF(r.spell)?`<span style="font-size:var(--fs-9);color:var(--gold)">✦PF</span>`:''}
+      </div>`).join('');
+    document.getElementById('liveseqsum').innerHTML=
+      `<span class="stot">${seq.total.toLocaleString('fr')}</span>
+       <span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${seq.apUsed}/${seq.maxAP} PA</span>
+       <span style="font-size:var(--fs-10);color:var(--gold)">CC: ${seq.totalCC.toLocaleString('fr')}</span>`;
+  } else { strat.textContent=''; seqEl.innerHTML='<span class="muted-sm">Aucune séquence (PA épuisés ou pas de sort jouable).</span>'; document.getElementById('liveseqsum').innerHTML=''; }
+  // Plan de kills (lecture seule).
+  const plan=computeKills(), kc=document.getElementById('livekillscard');
+  if(plan&&plan.kills.length){
+    kc.style.display='';
+    document.getElementById('livekillsum').textContent=`${plan.killCount}/${plan.aliveCount} kills · ${plan.totalAP} PA`+(plan.refundAP?` (+${plan.refundAP}/kill)`:'');
+    document.getElementById('livekills').innerHTML=plan.kills.map((k,n)=>
+      `<div style="border:1px solid var(--border);border-left:3px solid var(--red);border-radius:5px;padding:5px 8px;margin-bottom:5px">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:var(--fs-10);color:var(--red)">#${n+1} 💀 ${k.target.name}</span>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${k.ap} PA · ${k.dmg.toLocaleString('fr')} dmg</span>
+        </div>
+        <div style="margin-top:3px;font-size:var(--fs-11)">${k.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ')}</div>
+      </div>`).join('');
+  } else kc.style.display='none';
 }
 function renderKillsPlan(){
   const kc=document.getElementById('killscard'); if(!kc) return;
@@ -1598,6 +1603,15 @@ function renderSpellsTab(){
       </div>`;
     }).join('')
   ).join('');
+  bindSpellCardTips();
+}
+// Ctrl + survol d'une carte de sort (deck ou bibliothèque) → description complète, comme
+// dans le Conseiller. Résout le sort par son nom (data-n) et lie nom + description.
+function bindSpellCardTips(){
+  const all=getClassSpells();
+  document.querySelectorAll('#decklist .sc, #allspells .sc').forEach(el=>{
+    const sp=all.find(s=>s.name===el.dataset.n); if(sp) bindSpTip(el,sp.desc||'',sp.name);
+  });
 }
 // Délégation (conteneurs stables) — re-fetch des sorts dans le handler (pas de capture de locals).
 document.getElementById('decklist')?.addEventListener('input',e=>{
@@ -1922,10 +1936,11 @@ function processLine(raw){
     }
     else {
       const t=findTargetByName(target);
-      if(t){ // cible déjà suivie → on décrémente ses PV
+      if(t){ // cible déjà suivie → on décrémente ses PV (état réel du combat)
         const mx=t._maxHp||t.hp||0;
         if(mx>0){ t._currentHp=Math.max(0,(t._currentHp??mx)-amount); if(t._currentHp<=0) t.dead=true; }
-        ensureFocusAlive(); save(); renderMonPanel(); renderAdvisor();
+        // La simulation perso se réaligne sur le nouvel état réel (rebase ses PV simulés).
+        ensureFocusAlive(); save(); renderMonPanel(); renderAdvisor(); refreshCSQTarget();
       } else if(pN&&S.combat.lastActor===pN&&target!==pN&&!isIndirect){
         // nouvelle cible touchée DIRECTEMENT par le joueur → ajout auto
         // (les ticks Hémorragie/pièges n'ajoutent pas de cible)

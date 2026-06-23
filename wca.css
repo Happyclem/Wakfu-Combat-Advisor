@@ -130,10 +130,15 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 .scn{font-size:var(--fs-13);font-weight:700;color:var(--text)}
 .scap{font-family:var(--mono);font-size:var(--fs-11);color:var(--gold);font-weight:600}
 .scdmg{font-family:var(--mono);font-size:var(--fs-11);color:#8bc34a;font-weight:600}
-/* Description : tronquée à 3 lignes pour des cartes de hauteur homogène en grille
-   (texte complet disponible au survol avec Ctrl). */
+/* Description : zone de hauteur fixe avec défilement vertical → on voit plus de texte
+   sans casser l'uniformité des cartes en grille. Texte complet au survol + Ctrl. */
 .scdf{font-size:var(--fs-11);color:#9099bb;line-height:1.45;margin-top:3px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  max-height:5.6em;overflow-y:auto;padding-right:4px;overscroll-behavior:contain}
+/* Barre de défilement discrète, dans le thème sombre. */
+.scdf::-webkit-scrollbar{width:6px}
+.scdf::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.scdf::-webkit-scrollbar-thumb:hover{background:var(--hl)}
+.scdf{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 /* Séquence perso en 2 colonnes : sorts cliquables (gauche) | séquence (droite, collante).
    Container query → repli en 1 colonne quand le panneau Conseiller lui-même est étroit
    (et pas seulement la fenêtre), car il vit dans une zone de docking redimensionnable. */
