@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>🔴 Wakfu Combat Live</title>
+<link rel="stylesheet" href="wca.css">
+</head>
+<body>
+<div id="app">
+
+<div id="hd">
+  <h1>🔴 WAKFU COMBAT LIVE</h1>
+  <div id="cw"><div class="led" id="led"></div><span id="clbl">Aucun log</span></div>
+  <a class="appswitch" href="theory.html" title="Revenir au theorycraft (build, simulation)">🧪 Theorycraft →</a>
+</div>
+
+<!-- ZONES DE DOCKING — voir wca.js (moteur de docking).
+     Page COMBAT LIVE : Log + suivi du tour optimal en direct (lecture seule).
+     Le build et les cibles se configurent dans la page Theorycraft ; ils sont affichés ici
+     en lecture seule (état partagé via localStorage). -->
+<div id="dockroot">
+  <div class="dz" data-zone="left"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+  <div class="dz-resizer" data-res="left"></div>
+  <div class="dz" data-zone="center"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+  <div class="dz-resizer" data-res="right"></div>
+  <div class="dz" data-zone="right"><div class="dz-tabs"></div><div class="dz-body"></div></div>
+</div>
+
+<!-- Réservoir caché : contient les panneaux tels quels (IDs/contenu inchangés) jusqu'à leur placement dans les zones. -->
+<div id="dockpool" style="display:none">
+
+  <div id="lb">
+
+    <!-- LOG -->
+    <div class="lp on" id="lp-log" data-dock="log" data-title="📡 Log" data-zone="left">
+      <div class="sec">
+        <input type="file" id="lfi" style="display:none"/>
+        <div id="dz" onclick="document.getElementById('lfi').click()">
+          📂 Glisse le log ici<br><span style="font-size:10px;opacity:.7">ou clique pour parcourir</span>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:6px">
+          <input type="checkbox" id="fromstart" style="accent-color:var(--gold)"/> Lire depuis le début
+        </label>
+        <button class="btn danger full sml" id="discbtn" style="display:none">✖ Déconnecter</button>
+      </div>
+      <div class="sec">
+        <div class="sh">Chemin du log</div>
+        <code id="logpath" style="font-size:9px;word-break:break-all;line-height:1.7;display:block"></code>
+        <div style="font-size:9px;color:var(--dim);margin-top:5px">Launcher Ankama (hors Steam) : dossier d'installation de Wakfu → <b>/preferences/logs/</b></div>
+      </div>
+    </div>
+
+    <!-- CONTEXTE (lecture seule) : build + cibles, configurés dans Theorycraft.
+         La classe readonly désactive les contrôles d'édition (réordonner / retirer). -->
+    <div class="lp readonly" id="lp-context" data-dock="contexte" data-title="📋 Contexte" data-zone="left">
+      <div class="card" id="plrcard" style="display:none;padding:8px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:var(--sky)">👤 <span id="plrname"></span></span>
+          <span id="plrhptxt" style="font-family:var(--mono);font-size:11px"></span>
+        </div>
+        <div class="hpt" id="plrhpt"><div id="plrhpbar" class="hpf" style="width:100%;background-color:var(--green)"></div></div>
+        <div id="plrres" style="margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--muted)"></div>
+      </div>
+      <div id="namedbanner" class="dbanner" style="display:none;margin:6px 0"></div>
+      <div class="sec" id="monsec" style="display:none">
+        <div class="sh">Cibles (<span id="tgtcount">0</span>)</div>
+        <p style="font-size:9px;color:var(--dim);margin-bottom:6px">● = cible visée · clic pour viser</p>
+        <div id="tgtlist"></div>
+      </div>
+      <div class="sec" id="ctxempty">
+        <p style="font-size:11px;color:var(--dim);line-height:1.7">
+          Aucun build ni cible. Configure-les dans la page
+          <a class="hplink" href="theory.html">🧪 Theorycraft</a> :
+          ils apparaîtront ici automatiquement (état partagé).
+        </p>
+      </div>
+    </div>
+  </div><!-- /#lb -->
+
+    <!-- Combat live : vue LECTURE SEULE qui suit le log (séquence optimale + kills),
+         recalculée en continu par renderLive() dans wca.js. -->
+    <div class="cp on" id="cp-live" data-dock="live" data-title="🔴 Combat live" data-zone="center">
+      <div id="livedisco" class="muted-sm" style="padding:8px">Connecte un log de combat (onglet Log) pour suivre le combat en direct.</div>
+      <div id="livebody" style="display:none">
+        <div class="card">
+          <div class="sh">⚔ Tour optimal <span id="livestrat" style="font-weight:400;color:var(--muted);font-size:var(--fs-10)"></span></div>
+          <div id="liveseq"></div>
+          <div id="liveseqsum" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--border)"></div>
+        </div>
+        <div class="card" id="livekillscard" style="display:none">
+          <div class="sh">💀 Cibles tuables ce tour <span id="livekillsum" style="font-weight:400;color:var(--muted);font-size:var(--fs-10)"></span></div>
+          <div id="livekills"></div>
+        </div>
+      </div>
+    </div><!-- /#cp-live -->
+
+    <!-- ÉVÉNEMENTS du log -->
+    <div class="rp on" id="rp-events" data-dock="events" data-title="📡 Événements" data-zone="right">
+      <div id="feedhd" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="sh" style="margin:0">Événements</span>
+        <button class="btn sml" id="clrfeed" title="Vider les événements">✕</button>
+      </div>
+      <div id="feed"></div>
+    </div>
+
+</div><!-- /#dockpool -->
+
+<div id="dov">📂 Dépose le fichier ici</div>
+<div id="toast"></div>
+</div>
+
+<script src="data-monsters.js"></script>
+<script src="data-game.js"></script>
+<script src="data-commun.js"></script>
+<script src="mechanics.js"></script>
+<script src="wca.js"></script>
+</html>

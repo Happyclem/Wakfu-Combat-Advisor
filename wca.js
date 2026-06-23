@@ -2,6 +2,11 @@
 // ── UTILS ────────────────────────────────────────────────────────
 // Regroupe les appels rapprochés : n'exécute `fn` qu'après `ms` sans nouvel appel.
 function debounce(fn,ms){ let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
+// Binding sûr : attache `fn` à l'élément #id s'il existe, sinon no-op. Indispensable
+// car wca.js est partagé entre plusieurs pages (theory.html / live.html) qui n'ont pas
+// toutes les mêmes panneaux : un getElementById(...).addEventListener sur un id absent
+// jetterait et stopperait tout le script. Renvoie l'élément (ou null).
+function on(id,evt,fn,opts){ const el=document.getElementById(id); if(el) el.addEventListener(evt,fn,opts); return el; }
 // ── ICÔNES (WakfuAssets en remote, fallback emoji/texte si indispo/offline) ──
 // https://github.com/Tmktahu/WakfuAssets — fichiers nommés par ID (sorts) ou par nom (stats).
 const ICON_BASE='https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main';
@@ -1103,7 +1108,7 @@ function renderCSQ(){
     }
   }
 }
-document.getElementById('csqreset').addEventListener('click',initCSQ);
+on('csqreset','click',initCSQ);
 // Délégation (conteneur #csqsteps stable) : retirer une étape de la séquence perso.
 document.getElementById('csqsteps')?.addEventListener('click',e=>{
   const b=e.target.closest('[data-d]'); if(!b) return;
@@ -1122,6 +1127,7 @@ function renderMonPanel(){
   if(!S.targets.length){ if(sec) sec.style.display='none'; if(list) list.innerHTML=''; return; }
   if(sec) sec.style.display='';
   if(cnt) cnt.textContent=S.targets.length;
+  if(!list) return; // page sans liste de cibles
   list.innerHTML=S.targets.map((t,i)=>{
     const focused=i===S.focusIdx, dead=isDead(t);
     // Résistances en grille colorée par élément : repérage de l'élément le plus/moins résisté.
@@ -1166,7 +1172,7 @@ document.getElementById('tgtlist')?.addEventListener('click',e=>{
 const moninp=document.getElementById('moninp'), monres=document.getElementById('monres');
 // Normalise pour une recherche insensible à la casse ET aux accents ("meryde" → "Méryde").
 function normTxt(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
-moninp.addEventListener('input',debounce(()=>{
+moninp&&moninp.addEventListener('input',debounce(()=>{
   const q=normTxt(moninp.value.trim());
   if(q.length<2){ monres.style.display='none'; return; }
   // Classe par pertinence : noms qui COMMENCENT par la requête d'abord, puis les autres.
@@ -1189,15 +1195,15 @@ moninp.addEventListener('input',debounce(()=>{
   monres.style.display='block';
 },120));
 // Délégation : un seul listener sur le conteneur de résultats (réécrit à chaque frappe).
-monres.addEventListener('click',e=>{
+monres&&monres.addEventListener('click',e=>{
   const row=e.target.closest('.mr'); if(!row) return;
   const m=MONS.find(m=>m.id===parseInt(row.dataset.id));
   if(m){ addTarget({id:m.id, name:m.n||m.name, level:m.lv||m.level||0,
     hp:m.hp||0, rf:m.rf||0, re:m.re||0, rt:m.rt||0, ra:m.ra||0});
     moninp.value=''; monres.style.display='none'; }
 });
-document.getElementById('monclear').addEventListener('click',clearTargets);
-document.getElementById('cmadd').addEventListener('click',()=>{
+on('monclear','click',clearTargets);
+on('cmadd','click',()=>{
   addTarget({id:0,name:document.getElementById('cmn').value.trim()||'Custom',level:0,
     hp:parseInt(document.getElementById('cmhp').value)||0,
     rf:parseInt(document.getElementById('cmrf').value)||0,
@@ -1233,11 +1239,20 @@ function renderIdle(){
 }
 // ── ADVISOR ───────────────────────────────────────────────────────
 function renderAdvisor(){
+  // Page sans panneau Conseiller (ex. live.html) : on saute le rendu interactif mais on
+  // garde à jour le panneau Combat live + le contexte lecture seule (build/cibles).
+  const ac=document.getElementById('advcontent');
+  if(!ac){
+    renderPlayerStatus(); renderMonPanel(); // contexte lecture seule (cartes présentes sur Live)
+    const ctxEmpty=document.getElementById('ctxempty');
+    if(ctxEmpty) ctxEmpty.style.display=(S.build||S.targets.length)?'none':'';
+    renderLive();
+    return;
+  }
   const hasBuild=!!S.build, hasMon=!!S.monster;
   const showIdle=!(hasBuild||hasMon);
   document.getElementById('idle').style.display=showIdle?'flex':'none';
   if(showIdle) renderIdle();
-  const ac=document.getElementById('advcontent');
   ac.style.display=(hasBuild||hasMon)?'flex':'none';
   if(!hasBuild&&!hasMon) return;
   renderHPBars();
@@ -1586,10 +1601,12 @@ function renderSitBuffs(){
     }).join('');
 }
 function renderSpellsTab(){
+  // Page sans onglet Sorts & Passifs (ex. live.html) : rien à rendre.
+  const dc=document.getElementById('deckcount'); if(!dc) return;
   // Migration : les anciens decks pouvaient dépasser la limite de 12 sorts actifs
   if(S.build?.spells?.length>MAX_DECK){ S.build.spells=S.build.spells.slice(0,MAX_DECK); save(); }
   const deck=getDeck(), all=getClassSpells(), lvl=S.build?.level||200;
-  document.getElementById('deckcount').textContent=`${deck.length}/${MAX_DECK}`;
+  dc.textContent=`${deck.length}/${MAX_DECK}`;
   renderSitBuffs(); // toggles situationnels (header) — extrait pour rafraîchissement isolé
   // Deck
   const de=document.getElementById('decklist');
@@ -1674,7 +1691,7 @@ document.getElementById('allspells')?.addEventListener('click',e=>{
   const el=e.target.closest('.sc'); if(!el) return;
   const sp=getClassSpells().find(s=>s.name===el.dataset.n); if(sp) toggleSpell(sp);
 });
-document.getElementById('imptclsbtn').addEventListener('click',()=>{
+on('imptclsbtn','click',()=>{
   const st=document.getElementById('imptclsstatus');
   if(!S.build){st.textContent="⚠ Choisis ta classe d'abord.";return;}
   const all=getClassSpells().filter(s=>s.damageMax>0);
@@ -1839,8 +1856,8 @@ function syncCls(){
   if(s&&S.build?.class) s.value=S.build.class;
   if(l&&S.build?.level) l.value=S.build.level;
 }
-document.getElementById('applycls').addEventListener('click',applyClass);
-document.getElementById('lvlinp').addEventListener('keydown',e=>{if(e.key==='Enter') applyClass();});
+on('applycls','click',applyClass);
+on('lvlinp','keydown',e=>{if(e.key==='Enter') applyClass();});
 // Import d'un build : accepte un objet déjà parsé ou une chaîne JSON.
 // Renvoie true si importé. Affiche un résumé de ce qui a été reconnu.
 function importBuildJSON(input, silentIfInvalid){
@@ -1863,7 +1880,7 @@ function importBuildJSON(input, silentIfInvalid){
   else    status.innerHTML=`<span style="color:var(--gold)">⚠ Build importé (${detail}) — classe non détectée, choisis-la ci-dessus</span>`;
   return true;
 }
-document.getElementById('imptbtn').addEventListener('click',()=>{
+on('imptbtn','click',()=>{
   const val=document.getElementById('impta').value.trim();
   if(!val){ document.getElementById('imptstatus').innerHTML=`<span style="color:var(--dim)">Colle d'abord le JSON du build.</span>`; return; }
   importBuildJSON(val,false);
@@ -1892,8 +1909,8 @@ function tryAutoImportBuild(){
   if(!raw||typeof raw!=='object'||(!raw.character&&!raw.stats&&!raw.spells)) return;
   importBuildJSON(raw,true);
 }
-document.getElementById('impta').addEventListener('paste',()=>setTimeout(tryAutoImportBuild,0));
-document.getElementById('pnsave').addEventListener('click',()=>{
+on('impta','paste',()=>setTimeout(tryAutoImportBuild,0));
+on('pnsave','click',()=>{
   S.playerName=document.getElementById('pninp').value.trim()||null;
   save(); renderNameBanner();
 });
@@ -2077,18 +2094,23 @@ async function attachFile(f,fromStart){
   if(logTimer) clearInterval(logTimer);
   logTimer=setInterval(poll,500); setConn(f.name);
 }
-document.getElementById('lfi').addEventListener('change',async function(){const f=this.files[0];if(!f)return;await attachFile(f,document.getElementById('fromstart').checked);this.value='';});
+on('lfi','change',async function(){const f=this.files[0];if(!f)return;await attachFile(f,document.getElementById('fromstart').checked);this.value='';});
 const dz=document.getElementById('dz');
-dz.addEventListener('dragover',e=>{e.preventDefault();e.stopPropagation();dz.classList.add('ov');});
-dz.addEventListener('dragleave',e=>{e.stopPropagation();dz.classList.remove('ov');});
-dz.addEventListener('drop',async e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('ov');const f=e.dataTransfer.files[0];if(f)await attachFile(f,document.getElementById('fromstart').checked);});
-document.getElementById('discbtn').addEventListener('click',setDisconn);
-document.getElementById('clrfeed').addEventListener('click',()=>{feedLines=[];renderFeed();});
+if(dz){
+  dz.addEventListener('dragover',e=>{e.preventDefault();e.stopPropagation();dz.classList.add('ov');});
+  dz.addEventListener('dragleave',e=>{e.stopPropagation();dz.classList.remove('ov');});
+  dz.addEventListener('drop',async e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('ov');const f=e.dataTransfer.files[0];if(f)await attachFile(f,document.getElementById('fromstart').checked);});
+}
+on('discbtn','click',setDisconn);
+on('clrfeed','click',()=>{feedLines=[];renderFeed();});
+// Overlay de dépôt plein écran : actif seulement sur les pages qui hébergent le log (#dov présent).
 const dov=document.getElementById('dov');let dc=0;
-document.addEventListener('dragenter',e=>{if(!e.dataTransfer?.types.includes('Files'))return;dc++;dov.classList.add('on');});
-document.addEventListener('dragleave',()=>{dc=Math.max(0,dc-1);if(!dc)dov.classList.remove('on');});
-document.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('Files'))e.preventDefault();});
-document.addEventListener('drop',async e=>{e.preventDefault();dc=0;dov.classList.remove('on');if(e.target.closest('#dz'))return;const fi=Array.from(e.dataTransfer?.items||[]).find(i=>i.kind==='file');if(fi)await attachFile(fi.getAsFile(),document.getElementById('fromstart').checked);});
+if(dov){
+  document.addEventListener('dragenter',e=>{if(!e.dataTransfer?.types.includes('Files'))return;dc++;dov.classList.add('on');});
+  document.addEventListener('dragleave',()=>{dc=Math.max(0,dc-1);if(!dc)dov.classList.remove('on');});
+  document.addEventListener('dragover',e=>{if(e.dataTransfer?.types.includes('Files'))e.preventDefault();});
+  document.addEventListener('drop',async e=>{e.preventDefault();dc=0;dov.classList.remove('on');if(e.target.closest('#dz'))return;const fi=Array.from(e.dataTransfer?.items||[]).find(i=>i.kind==='file');if(fi)await attachFile(fi.getAsFile(),document.getElementById('fromstart').checked);});
+}
 
 // ── DOCKING : zones (gauche/centre/droite) à onglets déplaçables ──────────────
 // Chaque panneau (.lp/.cp/.rp tagué data-dock) est déplaçable entre les 3 zones.
@@ -2197,11 +2219,11 @@ function setRange(rng){
 }
 function toggleCrit(){
   S.critMode=!S.critMode;
-  document.getElementById('crit-btn').classList.toggle('on',S.critMode); renderAdvisor();
+  document.getElementById('crit-btn')?.classList.toggle('on',S.critMode); renderAdvisor();
 }
 document.querySelectorAll('[data-pos]').forEach(b=>b.addEventListener('click',()=>setPosition(b.dataset.pos)));
 document.querySelectorAll('[data-rng]').forEach(b=>b.addEventListener('click',()=>setRange(b.dataset.rng)));
-document.getElementById('crit-btn').addEventListener('click',toggleCrit);
+on('crit-btn','click',toggleCrit);
 // ── RACCOURCIS CLAVIER COMBAT (ignorés dans les champs de saisie) ──
 function setupShortcuts(){
   document.addEventListener('keydown',e=>{
@@ -2350,4 +2372,4 @@ document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dat
 document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dataset.rng===S.range));
 document.getElementById('crit-btn')?.classList.toggle('on',!!S.critMode);
 syncHpMult(); // reflète la difficulté de donjon sauvegardée
-if(S.playerName) document.getElementById('pninp').value=S.playerName;
+if(S.playerName){ const pn=document.getElementById('pninp'); if(pn) pn.value=S.playerName; }

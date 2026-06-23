@@ -328,3 +328,20 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   .dz,.dz[data-zone="left"],.dz[data-zone="center"],.dz[data-zone="right"]{flex:0 0 auto;max-height:60vh;border-left:none;border-top:1px solid var(--border)}
   /* #ranklist/#allspells/#passlist/#perstats-cols se replient déjà seuls (auto-fit). */
 }
+
+/* ── Lien de bascule entre apps (header Theorycraft ⇄ Combat live) ── */
+.appswitch{margin-left:auto;font-size:var(--fs-11);font-weight:600;color:var(--muted);
+  text-decoration:none;border:1px solid var(--border);border-radius:var(--r);
+  padding:3px 9px;white-space:nowrap;transition:all .12s}
+.appswitch:hover{color:var(--gold);border-color:var(--gold);background:var(--gdim)}
+/* #cw + .appswitch ensemble : on garde la LED collée à gauche, le lien à droite. */
+#hd #cw{margin-left:auto}
+#hd #cw + .appswitch{margin-left:8px}
+
+/* ── Contexte LECTURE SEULE (page Combat live) ──
+   Les cibles s'affichent mais les contrôles d'édition (réordonner / retirer) sont neutralisés.
+   Le ciblage (clic sur la carte / ●) reste actif pour suivre la cible visée. */
+.lp.readonly .tgtmove,
+.lp.readonly .trm{display:none}
+.lp.readonly .tgtrow{cursor:default}
+.lp.readonly .tgtrow:hover{transform:none;box-shadow:none}

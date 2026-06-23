@@ -4,310 +4,55 @@
 <meta charset="UTF-8"/>
 <title>⚔ Wakfu Combat Advisor</title>
 <link rel="stylesheet" href="wca.css">
+<style>
+  /* Page d'accueil : choix entre les deux applications. Autonome (ne charge pas wca.js).
+     Les deux apps ne s'ouvrent jamais ensemble — on choisit ici l'usage du moment. */
+  body{overflow:auto}
+  .home{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:28px;padding:40px 20px;text-align:center}
+  .home h1{font-size:var(--fs-30);font-weight:800;letter-spacing:.08em;color:var(--gold)}
+  .home .tag{color:var(--muted);font-size:var(--fs-13);max-width:560px;line-height:1.6;margin-top:-12px}
+  .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;width:100%;max-width:820px}
+  .home-card{flex:1 1 320px;max-width:380px;text-decoration:none;color:var(--text);
+    background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:26px 24px;
+    display:flex;flex-direction:column;gap:10px;transition:transform .12s,border-color .12s,box-shadow .12s}
+  .home-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 8px 28px rgba(0,0,0,.45)}
+  .home-card .ic{font-size:46px;line-height:1}
+  .home-card .ti{font-size:var(--fs-15);font-weight:700;letter-spacing:.04em}
+  .home-card.theory .ti{color:var(--sky)}
+  .home-card.live .ti{color:var(--red)}
+  .home-card .de{font-size:var(--fs-12);color:var(--muted);line-height:1.6}
+  .home-card .go{margin-top:6px;font-size:var(--fs-11);font-weight:600;color:var(--gold);opacity:.85}
+  .home .foot{color:var(--dim);font-size:var(--fs-10);margin-top:8px}
+  .home .foot a{color:var(--muted);text-decoration:none}
+  .home .foot a:hover{color:var(--gold)}
+</style>
 </head>
 <body>
-<div id="app">
-
-<div id="hd">
+<div class="home">
   <h1>⚔ WAKFU COMBAT ADVISOR</h1>
-  <div id="cw"><div class="led" id="led"></div><span id="clbl">Aucun log</span></div>
+  <p class="tag">Deux outils, deux usages. Prépare tes tours à froid dans le Theorycraft,
+     puis suis ta séquence optimale en direct pendant le combat.</p>
+
+  <div class="cards">
+    <a class="home-card theory" href="theory.html">
+      <div class="ic">🧪</div>
+      <div class="ti">THEORYCRAFT</div>
+      <div class="de">Configure ton build et tes cibles, puis simule et optimise tes tours.
+        Classement des sorts, séquence personnalisée, plan max kills — sans aucun log.</div>
+      <div class="go">Ouvrir le Theorycraft →</div>
+    </a>
+
+    <a class="home-card live" href="live.html">
+      <div class="ic">🔴</div>
+      <div class="ti">COMBAT LIVE</div>
+      <div class="de">Connecte le log de combat et suis ta séquence optimale qui se met à jour
+        en direct, tour par tour. Vue lecture seule, build &amp; cibles partagés avec le Theorycraft.</div>
+      <div class="go">Ouvrir le Combat live →</div>
+    </a>
+  </div>
+
+  <div class="foot">🔗 <a href="https://github.com/Happyclem/Wakfu-Combat-Advisor" target="_blank" rel="noopener">Projet sur GitHub</a></div>
 </div>
-
-<!-- ZONES DE DOCKING — les barres d'onglets et le placement des panneaux sont gérés par le moteur de docking (wca.js).
-     Les panneaux (.lp/.cp/.rp, tagués data-dock) vivent dans #dockpool et sont déplacés dans les zones au démarrage. -->
-<div id="dockroot">
-  <div class="dz" data-zone="left"><div class="dz-tabs"></div><div class="dz-body"></div></div>
-  <div class="dz-resizer" data-res="left"></div>
-  <div class="dz" data-zone="center"><div class="dz-tabs"></div><div class="dz-body"></div></div>
-  <div class="dz-resizer" data-res="right"></div>
-  <div class="dz" data-zone="right"><div class="dz-tabs"></div><div class="dz-body"></div></div>
-</div>
-
-<!-- Réservoir caché : contient les panneaux tels quels (IDs/contenu inchangés) jusqu'à leur placement dans les zones. -->
-<div id="dockpool" style="display:none">
-
-  <div id="lb">
-
-    <!-- LOG -->
-    <div class="lp on" id="lp-log" data-dock="log" data-title="📡 Log" data-zone="left">
-      <div class="sec">
-        <input type="file" id="lfi" style="display:none"/>
-        <div id="dz" onclick="document.getElementById('lfi').click()">
-          📂 Glisse le log ici<br><span style="font-size:10px;opacity:.7">ou clique pour parcourir</span>
-        </div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:6px">
-          <input type="checkbox" id="fromstart" style="accent-color:var(--gold)"/> Lire depuis le début
-        </label>
-        <button class="btn danger full sml" id="discbtn" style="display:none">✖ Déconnecter</button>
-      </div>
-      <div class="sec">
-        <div class="sh">Chemin du log</div>
-        <code id="logpath" style="font-size:9px;word-break:break-all;line-height:1.7;display:block"></code>
-        <div style="font-size:9px;color:var(--dim);margin-top:5px">Launcher Ankama (hors Steam) : dossier d'installation de Wakfu → <b>/preferences/logs/</b></div>
-      </div>
-    </div>
-
-    <!-- BUILD -->
-    <div class="lp" id="lp-build" data-dock="build" data-title="📥 Build" data-zone="left">
-      <div class="sec">
-        <div class="sh">Classe &amp; Niveau</div>
-        <div class="fr"><label>Classe</label>
-          <select class="inp" id="clssel">
-            <option value="">— Choisir —</option>
-            <option value="cra">Crâ</option><option value="ecaflip">Ecaflip</option>
-            <option value="eliotrope">Eliotrope</option><option value="eniripsa">Eniripsa</option>
-            <option value="enutrof">Enutrof</option><option value="feca">Féca</option>
-            <option value="huppermage">Huppermage</option><option value="iop">Iop</option>
-            <option value="osamodas">Osamodas</option>
-            <option value="ouginak">Ouginak</option><option value="pandawa">Pandawa</option>
-            <option value="rogue">Roublard</option><option value="sacrier">Sacrieur</option>
-            <option value="sadida">Sadida</option><option value="sram">Sram</option>
-            <option value="foggernaut">Steamer</option><option value="xelor">Xélor</option>
-            <option value="masqueraider">Zobal</option>
-          </select>
-        </div>
-        <div class="fr"><label>Niveau</label>
-          <input class="inp" id="lvlinp" type="number" min="1" max="230" placeholder="200" style="width:80px"/>
-        </div>
-        <button class="btn pri full" id="applycls">✅ Appliquer</button>
-      </div>
-      <div class="sec">
-        <div class="sh">Importer un build (Wakfuli / Zenith)</div>
-        <!-- Méthode recommandée : marque-page 1 clic (extrait + copie le build). -->
-        <p style="font-size:10px;color:var(--dim);line-height:1.6;margin-bottom:6px">
-          <b style="color:var(--gold)">1.</b> Installe le marque-page (une seule fois) ·
-          <b style="color:var(--gold)">2.</b> sur ta page de build, clique-le ·
-          <b style="color:var(--gold)">3.</b> reviens ici et colle.
-        </p>
-        <button class="btn pri full" id="openbm" style="margin-bottom:6px">🔖 Obtenir le marque-page d'import</button>
-        <button class="btn full" id="pastebuild" style="margin-bottom:8px">📋 Coller mon build (presse-papier)</button>
-        <div id="imptstatus" style="font-size:11px;min-height:16px;margin:4px 0"></div>
-        <!-- Méthode avancée : collage manuel / console. Repliée par défaut. -->
-        <details style="margin-top:2px">
-          <summary style="font-size:10px;color:var(--dim);cursor:pointer">Coller le JSON manuellement (avancé)</summary>
-          <textarea class="inp" id="impta" rows="4" style="font-family:var(--mono);font-size:10px;resize:vertical;margin-top:6px"
-            placeholder='{"source":"zenith","character":{"class":"sram","level":200},...}'></textarea>
-          <button class="btn full" id="imptbtn" style="margin-top:4px">⚡ Importer le JSON collé</button>
-        </details>
-      </div>
-      <div class="sec">
-        <div class="sh">Nom du personnage</div>
-        <div class="fr"><label>Nom</label><input class="inp" id="pninp" placeholder=""/></div>
-        <button class="btn full" id="pnsave">💾 Enregistrer</button>
-        <div id="namedbanner" class="dbanner" style="display:none;margin-top:6px"></div>
-      </div>
-    </div>
-
-    <!-- TARGET -->
-    <div class="lp" id="lp-target" data-dock="cible" data-title="👹 Cible" data-zone="left">
-      <div class="sec" id="monsec" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div class="sh" style="margin:0">Cibles (<span id="tgtcount">0</span>/8)</div>
-          <button class="btn danger sml" id="monclear">✕ Tout retirer</button>
-        </div>
-        <p style="font-size:9px;color:var(--dim);margin-bottom:6px">● = cible visée &nbsp;·&nbsp; ▲▼ = priorité</p>
-        <div id="tgtlist"></div>
-      </div>
-      <div class="sec">
-        <div class="sh">Rechercher</div>
-        <input class="inp" id="moninp" placeholder="Nom du monstre..." autocomplete="off"/>
-        <div id="monres"></div>
-      </div>
-      <div class="sec">
-        <div class="sh">Difficulté de donjon</div>
-        <div class="fr" style="align-items:center">
-          <label style="flex:1">PV des cibles ×</label>
-          <button class="btn sml" id="hpmdec" style="padding:0 8px">−</button>
-          <input class="inp" id="hpmult" type="number" min="1" max="50" step="1" value="1"
-                 style="width:54px;text-align:center;margin:0 4px"/>
-          <button class="btn sml" id="hpminc" style="padding:0 8px">+</button>
-        </div>
-        <p style="font-size:9px;color:var(--dim);margin-top:4px">Ne change que les PV (et « tours pour tuer »). Les résistances sont constantes selon la difficulté.</p>
-      </div>
-      <div class="sec">
-        <div class="sh">Custom</div>
-        <div class="fr"><label>Nom</label><input class="inp" id="cmn" placeholder="Boss"/></div>
-        <div class="fr"><label>PV</label><input class="inp" id="cmhp" type="number" placeholder="10000"/></div>
-        <div class="fr"><label>Rés. Feu</label><input class="inp" id="cmrf" type="number" placeholder="0"/></div>
-        <div class="fr"><label>Rés. Eau</label><input class="inp" id="cmre" type="number" placeholder="0"/></div>
-        <div class="fr"><label>Rés. Terre</label><input class="inp" id="cmt" type="number" placeholder="0"/></div>
-        <div class="fr"><label>Rés. Air</label><input class="inp" id="cma" type="number" placeholder="0"/></div>
-        <button class="btn pri full" id="cmadd">➕ Ajouter la cible</button>
-      </div>
-    </div>
-  </div><!-- /#lb -->
-
-    <div class="cp on" id="cp-advisor" data-dock="advisor" data-title="⚔ Conseiller" data-zone="center">
-      <div id="idle"><div style="font-size:32px">⚔</div><div>Configure un build et une cible<br>pour voir les conseils</div></div>
-      <div id="advcontent" style="display:none;flex-direction:column;gap:10px">
-        <!-- Player status -->
-        <div id="plrcard" class="card" style="display:none;padding:8px 12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-            <span style="font-size:12px;font-weight:700;color:var(--sky)">👤 <span id="plrname"></span></span>
-            <span id="plrhptxt" style="font-family:var(--mono);font-size:11px"></span>
-          </div>
-          <div class="hpt" id="plrhpt"><div id="plrhpbar" class="hpf" style="width:100%;background-color:var(--green)"></div></div>
-          <div id="plrres" style="margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--muted)"></div>
-        </div>
-        <!-- Toggles de combat (boîte propre, toujours visible) -->
-        <div id="combatcard" class="card" style="display:none;padding:8px">
-          <div id="hdc">
-            <div class="pbgrp">
-              <div class="pb" data-rng="melee" title="Maîtrise mêlée (cible au contact)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/melee_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🗡"> Mêlée</div>
-              <div class="pb on" data-rng="distance" title="Maîtrise distance (cible à 2 cases ou plus)"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/distance_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🏹"> Distance</div>
-            </div>
-            <div class="pbgrp">
-              <div class="pb on" data-pos="normal">⬛ Face</div>
-              <div class="pb" data-pos="side">↔ Côté</div>
-              <div class="pb" data-pos="back"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/rear_mastery.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="🔙"> Dos</div>
-            </div>
-            <div class="pbgrp">
-              <div class="pb" id="crit-btn"><img class="icn-sm" src="https://raw.githubusercontent.com/Tmktahu/WakfuAssets/main/statistics/critical_hit.png" alt="" onerror="this.outerHTML=this.dataset.fb" data-fb="⚡"> CC</div>
-            </div>
-            <!-- Toggles/compteurs spécifiques à la classe (Sram PF consommé, Crâ Tir précis, Ecaflip Dé six…) -->
-            <div id="sitbuffs"></div>
-          </div>
-        </div>
-        <!-- Conseils (repliable) -->
-        <div id="tipscard" class="card" style="display:none">
-          <div class="sh collapsible" id="tipstoggle"><span class="collarrow">▸</span> Conseils</div>
-          <div id="tipscontent" style="display:none"></div>
-        </div>
-        <!-- Calc mode -->
-        <div id="modecard" class="card" style="display:none;padding:6px">
-          <div style="display:flex;gap:6px">
-            <button class="btn sml" id="modedmg" style="flex:1">⚔ Max dégâts</button>
-            <button class="btn sml" id="modekills" style="flex:1">💀 Max kills</button>
-          </div>
-        </div>
-        <!-- Optimal seq -->
-        <div id="seqcard" class="card" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div id="seqstrat" style="font-size:10px;color:var(--sky);font-weight:600"></div>
-            <button class="btn sml" id="seqreset">↺ Reset</button>
-          </div>
-          <div id="seqres" style="margin-bottom:6px"></div>
-          <div id="seqsteps" style="margin-bottom:6px"></div>
-          <div id="seqpfrow" style="display:none;margin-bottom:6px">
-            <div class="gr" style="margin:0">
-              <span class="gl" id="seqpfl">Jauge</span>
-              <div class="gb"><div class="gf" id="seqpff" style="background:var(--red)"></div></div>
-              <span class="gv" id="seqpfv">—</span>
-            </div>
-          </div>
-          <div id="seqsum" style="display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid var(--border)"></div>
-        </div>
-        <!-- Max kills plan -->
-        <div id="killscard" class="card" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div class="sh" style="margin:0">💀 Plan — Max kills</div>
-            <span id="killsum" style="font-family:var(--mono);font-size:11px;color:var(--gold)"></span>
-          </div>
-          <div id="killsteps"></div>
-        </div>
-        <!-- Sorts (ranking) + Séquence personnalisée, côte à côte -->
-        <div id="seqcols">
-          <!-- Colonne gauche : sorts cliquables -->
-          <div class="card seqcol-left">
-            <div class="sh" id="ranktitle">⚡ Sorts — Dégâts/PA</div>
-            <p style="font-size:var(--fs-10);color:var(--dim);margin-bottom:6px">Clic → ajoute à la séquence</p>
-            <div id="ranklist"></div>
-            <div id="rankempty" style="font-size:var(--fs-11);color:var(--dim)"></div>
-          </div>
-          <!-- Colonne droite : séquence en construction (collante) -->
-          <div class="card seqcol-right">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <div class="sh" style="margin:0">🖊 Séquence personnalisée</div>
-              <button class="btn sml" id="csqreset">✕ Vider</button>
-            </div>
-            <div id="csqres" style="margin-bottom:6px"></div>
-            <div id="csqsteps" style="margin-bottom:6px"></div>
-            <div id="csqsum" style="padding-top:6px;border-top:1px solid var(--border);font-size:var(--fs-11)"></div>
-            <div id="csqpfrow" style="display:none;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
-              <div class="gr" style="margin:0">
-                <span class="gl" id="csqpfl">Jauge</span>
-                <div class="gb"><div class="gf" id="csqpff" style="background-color:var(--red)"></div></div>
-                <span class="gv" id="csqpfv">—</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="cp" id="cp-perso" data-dock="perso" data-title="👤 Personnage" data-zone="center">
-      <div class="card">
-        <div class="sh">Bonus actifs</div>
-        <div class="brow on" id="brow-guilde" data-bk="guilde">
-          <div class="bchk"></div><span>Bonus de Guilde</span>
-          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+10PV +2%DI +5Tacle +5Esquive</span>
-        </div>
-        <div class="brow" id="brow-monture" data-bk="monture">
-          <div class="bchk"></div><span>Bonus de Monture</span>
-          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+40 maîtrises élémentaires</span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="sh">Statistiques</div>
-        <div id="perstats"></div>
-      </div>
-    </div>
-
-    <div class="rp on" id="rp-events" data-dock="events" data-title="📡 Événements" data-zone="right">
-      <div id="feedhd" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span class="sh" style="margin:0">Événements</span>
-        <button class="btn sml" id="clrfeed" title="Vider les événements">✕</button>
-      </div>
-      <div id="feed"></div>
-    </div>
-    <div class="rp" id="rp-spells" data-dock="spells" data-title="✨ Sorts &amp; Passifs" data-zone="right">
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div class="sh" style="margin:0">Deck actif (<span id="deckcount">0</span>)</div>
-          <button class="btn sml" id="imptclsbtn">+ Importer classe</button>
-        </div>
-        <div id="imptclsstatus" style="font-size:10px;min-height:14px;margin-bottom:4px"></div>
-        <div id="decklist"></div>
-      </div>
-      <div class="card">
-        <div class="sh">Sorts disponibles</div>
-        <div id="allspells"></div>
-      </div>
-      <div class="card">
-        <div class="sh">Passifs actifs (<span id="passcnt">0/0</span>)</div>
-        <div id="passlist"></div>
-      </div>
-      <div class="card" id="passeffsec" style="display:none">
-        <div class="sh">Effets passifs</div>
-        <div id="passefflist"></div>
-      </div>
-    </div><!-- /#rp-spells -->
-
-    <!-- Combat live : vue LECTURE SEULE qui suit le log (séquence optimale + kills),
-         recalculée en continu. Le Conseiller reste la vue interactive (simulation). -->
-    <div class="rp" id="rp-live" data-dock="live" data-title="🔴 Combat live" data-zone="right">
-      <div id="livedisco" class="muted-sm" style="padding:8px">Connecte un log de combat (onglet Log) pour suivre le combat en direct.</div>
-      <div id="livebody" style="display:none">
-        <div class="card">
-          <div class="sh">⚔ Tour optimal <span id="livestrat" style="font-weight:400;color:var(--muted);font-size:var(--fs-10)"></span></div>
-          <div id="liveseq"></div>
-          <div id="liveseqsum" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--border)"></div>
-        </div>
-        <div class="card" id="livekillscard" style="display:none">
-          <div class="sh">💀 Cibles tuables ce tour <span id="livekillsum" style="font-weight:400;color:var(--muted);font-size:var(--fs-10)"></span></div>
-          <div id="livekills"></div>
-        </div>
-      </div>
-    </div><!-- /#rp-live -->
-
-</div><!-- /#dockpool -->
-
-<div id="dov">📂 Dépose le fichier ici</div>
-<div id="toast"></div>
-</div>
-
-<script src="data-monsters.js"></script>
-<script src="data-game.js"></script>
-<script src="data-commun.js"></script>
-<script src="mechanics.js"></script>
-<script src="wca.js"></script>
+</body>
 </html>
