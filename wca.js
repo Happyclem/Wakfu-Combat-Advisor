@@ -1868,6 +1868,22 @@ document.getElementById('imptbtn').addEventListener('click',()=>{
   if(!val){ document.getElementById('imptstatus').innerHTML=`<span style="color:var(--dim)">Colle d'abord le JSON du build.</span>`; return; }
   importBuildJSON(val,false);
 });
+// « Obtenir le marque-page » : ouvre la page d'installation des bookmarklets (à côté de l'app).
+document.getElementById('openbm')?.addEventListener('click',()=>{ window.open('bookmarklets.html','_blank','noopener'); });
+// « Coller mon build » : lit le presse-papier (rempli par le marque-page) et importe en 1 clic.
+document.getElementById('pastebuild')?.addEventListener('click',async()=>{
+  const status=document.getElementById('imptstatus');
+  try{
+    const txt=(await navigator.clipboard.readText()||'').trim();
+    if(!txt){ status.innerHTML=`<span style="color:var(--gold)">Presse-papier vide — clique d'abord le marque-page sur ta page de build.</span>`; return; }
+    if(!importBuildJSON(txt,false)){
+      // importBuildJSON affiche déjà l'erreur ; on aide si ce n'est pas du JSON de build.
+      if(!/[{[]/.test(txt)) status.innerHTML=`<span style="color:var(--red)">Le presse-papier ne contient pas un build (relance le marque-page).</span>`;
+    }
+  }catch(e){
+    status.innerHTML=`<span style="color:var(--gold)">Accès au presse-papier refusé — utilise « Coller le JSON manuellement ».</span>`;
+  }
+});
 // Auto-import au collage : si le presse-papier contient un build JSON valide,
 // on importe sans clic. Silencieux si ce n'est pas (encore) du JSON exploitable.
 function tryAutoImportBuild(){
@@ -2283,6 +2299,7 @@ function setupHelp(){
     <div class="hpr">🖱 <b>Clic</b> sur un événement du log → restaure l'état à cet instant</div>
     <div class="hpr">⌨ <b>Ctrl + survol</b> d'un sort → affiche sa description</div>
     <div class="hpr">📂 <b>Glisse</b> ton fichier log dans la fenêtre pour le connecter</div>
+    <div class="hpr">🔴 <b>Combat live</b> → quand un log est connecté, suit le tour optimal en direct (lecture seule)</div>
     <div class="hph" style="margin-top:8px">Disposition (docking)</div>
     <div class="hpr">🪟 <b>Glisse un onglet</b> vers une autre zone (gauche / centre / droite) pour le déplacer</div>
     <div class="hpr">↔ <b>Glisse les séparateurs</b> pour redimensionner les zones</div>

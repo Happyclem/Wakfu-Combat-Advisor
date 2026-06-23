@@ -72,14 +72,23 @@
         <button class="btn pri full" id="applycls">✅ Appliquer</button>
       </div>
       <div class="sec">
-        <div class="sh">Import Wakfuli / Zenith</div>
+        <div class="sh">Importer un build (Wakfuli / Zenith)</div>
+        <!-- Méthode recommandée : marque-page 1 clic (extrait + copie le build). -->
         <p style="font-size:10px;color:var(--dim);line-height:1.6;margin-bottom:6px">
-          Sur wakfuli.com ou zenithwakfu.com → F12 Console → script d'extraction → colle le JSON ci-dessous (<b>import automatique</b>)
+          <b style="color:var(--gold)">1.</b> Installe le marque-page (une seule fois) ·
+          <b style="color:var(--gold)">2.</b> sur ta page de build, clique-le ·
+          <b style="color:var(--gold)">3.</b> reviens ici et colle.
         </p>
-        <textarea class="inp" id="impta" rows="5" style="font-family:var(--mono);font-size:10px;resize:vertical"
-          placeholder='{"source":"wakfuli","character":{"class":"sram","level":200},...}'></textarea>
+        <button class="btn pri full" id="openbm" style="margin-bottom:6px">🔖 Obtenir le marque-page d'import</button>
+        <button class="btn full" id="pastebuild" style="margin-bottom:8px">📋 Coller mon build (presse-papier)</button>
         <div id="imptstatus" style="font-size:11px;min-height:16px;margin:4px 0"></div>
-        <button class="btn pri full" id="imptbtn">⚡ Importer le build</button>
+        <!-- Méthode avancée : collage manuel / console. Repliée par défaut. -->
+        <details style="margin-top:2px">
+          <summary style="font-size:10px;color:var(--dim);cursor:pointer">Coller le JSON manuellement (avancé)</summary>
+          <textarea class="inp" id="impta" rows="4" style="font-family:var(--mono);font-size:10px;resize:vertical;margin-top:6px"
+            placeholder='{"source":"zenith","character":{"class":"sram","level":200},...}'></textarea>
+          <button class="btn full" id="imptbtn" style="margin-top:4px">⚡ Importer le JSON collé</button>
+        </details>
       </div>
       <div class="sec">
         <div class="sh">Nom du personnage</div>
