@@ -85,6 +85,8 @@ const S = {
   situationalBuffs:{}, // sorts actifs ponctuels : assassinat, surineur
   pfConsumedThisTurn:false, // Châtiment/Effroi bonus
   previewMaxPF:false, // aperçu dégâts à PF=100
+  hpMultiplier:1, // difficulté de donjon : multiplie SEULEMENT les PV des cibles
+                  // (devblog Ankama : les résistances sont constantes selon la difficulté).
 };
 function save(){ try{localStorage.setItem('wca',JSON.stringify(S));}catch(e){} }
 function load(){
@@ -100,6 +102,7 @@ function load(){
     if(!S.situationalBuffs) S.situationalBuffs={};
     if(S.pfConsumedThisTurn===undefined) S.pfConsumedThisTurn=false;
     if(S.previewMaxPF===undefined) S.previewMaxPF=false;
+    if(!(S.hpMultiplier>0)) S.hpMultiplier=1;
     // Les tailles de base sont désormais confortables (+2px) → défaut 100 %.
     // Migration : les anciens états à 1.1 (zoom de layout) sont ramenés à 1.0.
     if(S.zoom===undefined || S.zoom===1.1) S.zoom=1;
@@ -110,7 +113,9 @@ function load(){
       if(m.hp&&m._maxHp===undefined){m._maxHp=m.hp;m._currentHp=m.hp;}
       if(!S.targets.length) S.targets=[{...m,uid:Date.now()}];
     }
-    S.targets.forEach((t,i)=>{ if(t.hp&&t._maxHp===undefined){t._maxHp=t.hp;t._currentHp=t.hp;} if(!t.uid)t.uid=Date.now()+i; if(t._hemo===undefined)t._hemo=0; });
+    S.targets.forEach((t,i)=>{ if(t.hp&&t._maxHp===undefined){t._maxHp=t.hp;t._currentHp=t.hp;} if(!t.uid)t.uid=Date.now()+i; if(t._hemo===undefined)t._hemo=0;
+      // baseHp (PV nominal hors difficulté) : déduit du PV effectif courant / multiplicateur.
+      if(t.baseHp===undefined) t.baseHp=Math.round((t._maxHp||t.hp||0)/(S.hpMultiplier||1)); });
     S.focusIdx=Math.min(S.focusIdx||0,Math.max(0,S.targets.length-1));
   }catch(e){}
 }
@@ -135,13 +140,33 @@ Object.defineProperty(S,'monster',{ get:focusTgt, configurable:true });
 // Compteur monotone pour garantir des uid de cible uniques (plusieurs ajouts/ms).
 let uidSeq=0;
 // Normalise une cible : résistances canoniques rf/re/rt/ra (lues par elRes).
+// `baseHp` = PV nominal du bestiaire ; `_maxHp` = PV effectif (× difficulté de donjon).
 function normTarget(m){
   const rf=m.rf??m.resFeu??0, re=m.re??m.resEau??0, rt=m.rt??m.resTerre??0, ra=m.ra??m.resAir??0;
-  const hp=m.hp||0;
+  const baseHp=m.baseHp||m.hp||0;
+  const hp=Math.round(baseHp*(S.hpMultiplier||1));
   return { uid:m.uid||(++uidSeq, Date.now()*1000+uidSeq%1000),
     id:m.id||0, name:m.name||m.n||'Cible', level:m.level||m.lv||0,
-    hp, _maxHp:hp, _currentHp:hp, dead:false, _hemo:0,
+    baseHp, hp, _maxHp:hp, _currentHp:hp, dead:false, _hemo:0,
     rf,re,rt,ra };
+}
+// Réapplique la difficulté (× PV) à toutes les cibles. Conserve la fraction de PV
+// courante (une cible à 50 % reste à 50 % après changement de multiplicateur).
+function applyHpMultiplier(){
+  const k=S.hpMultiplier||1;
+  S.targets.forEach(t=>{
+    const base=t.baseHp||t.hp||0;
+    const frac=(t._maxHp>0)?Math.max(0,Math.min(1,(t._currentHp??t._maxHp)/t._maxHp)):1;
+    t.baseHp=base; t.hp=Math.round(base*k); t._maxHp=t.hp;
+    t._currentHp=Math.round(t._maxHp*frac);
+    t.dead=t._maxHp>0 && t._currentHp<=0;
+  });
+}
+function setHpMultiplier(k){
+  k=Math.max(1,Math.min(50,k||1));
+  S.hpMultiplier=k; applyHpMultiplier();
+  const el=document.getElementById('hpmult'); if(el) el.value=k;
+  save(); renderMonPanel(); renderHPBars(); renderAdvisor(); refreshCSQTarget();
 }
 function addTarget(m){
   // En combat, un même monstre peut apparaître en plusieurs exemplaires : on ajoute
@@ -1137,6 +1162,12 @@ document.getElementById('cmadd').addEventListener('click',()=>{
     rt:parseInt(document.getElementById('cmt').value)||0,
     ra:parseInt(document.getElementById('cma').value)||0});
 });
+// Difficulté de donjon : multiplicateur de PV (× sur les cibles).
+const hpmultEl=document.getElementById('hpmult');
+function syncHpMult(){ if(hpmultEl) hpmultEl.value=S.hpMultiplier||1; }
+hpmultEl?.addEventListener('change',()=>setHpMultiplier(parseInt(hpmultEl.value)||1));
+document.getElementById('hpminc')?.addEventListener('click',()=>setHpMultiplier((S.hpMultiplier||1)+1));
+document.getElementById('hpmdec')?.addEventListener('click',()=>setHpMultiplier((S.hpMultiplier||1)-1));
 
 function renderIdle(){
   const el=document.getElementById('idle'); if(!el) return;
@@ -2174,4 +2205,5 @@ syncCls(); renderAll(); initCSQ();
 document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===S.position));
 document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dataset.rng===S.range));
 document.getElementById('crit-btn')?.classList.toggle('on',!!S.critMode);
+syncHpMult(); // reflète la difficulté de donjon sauvegardée
 if(S.playerName) document.getElementById('pninp').value=S.playerName;

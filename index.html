@@ -105,6 +105,17 @@
         <div id="monres"></div>
       </div>
       <div class="sec">
+        <div class="sh">Difficulté de donjon</div>
+        <div class="fr" style="align-items:center">
+          <label style="flex:1">PV des cibles ×</label>
+          <button class="btn sml" id="hpmdec" style="padding:0 8px">−</button>
+          <input class="inp" id="hpmult" type="number" min="1" max="50" step="1" value="1"
+                 style="width:54px;text-align:center;margin:0 4px"/>
+          <button class="btn sml" id="hpminc" style="padding:0 8px">+</button>
+        </div>
+        <p style="font-size:9px;color:var(--dim);margin-top:4px">Ne change que les PV (et « tours pour tuer »). Les résistances sont constantes selon la difficulté.</p>
+      </div>
+      <div class="sec">
         <div class="sh">Custom</div>
         <div class="fr"><label>Nom</label><input class="inp" id="cmn" placeholder="Boss"/></div>
         <div class="fr"><label>PV</label><input class="inp" id="cmhp" type="number" placeholder="10000"/></div>
