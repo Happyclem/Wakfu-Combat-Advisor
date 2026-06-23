@@ -244,9 +244,14 @@ const PASSIVE_FX = {
   cyanose:                            { sb:{ degatsInfliges:15 } },     // +15 % DI (-50 Rés)
   cocktail:                           { sb:{ degatsInfliges:-10 } },    // -10 % DI (+20 % soins)
   // Zobal — passifs à % Dommages infligés PERMANENT (Au contact +15 % est conditionnel
-  // au corps-à-corps → géré par le mode ; Virevolte est positionnel).
+  // au corps-à-corps → géré par le mode).
   brute:                              { sb:{ degatsInfliges:25 } },     // +25 % DI (-40 % Armure)
   _rosion:                            { sb:{ degatsInfliges:-25 } },    // -25 % DI (retire Rés)
+  // ── Passifs POSITIONNELS : les bonus dmgDos/dmgSide/dmgFace ne s'appliquent qu'à
+  // la position correspondante (cf. calcDmg). Ils sont injectés en permanence quand le
+  // passif est actif ; c'est calcDmg qui les filtre selon S.position.
+  pistage:                            { sb:{ dmgDos:20 } },             // Ouginak : +20 % Dommages de dos
+  virevolte:                          { sb:{ dmgSide:25, dmgFace:-25 } }, // Zobal : +25 % côté, -25 % face
 };
 function mkPassive(p, isGeneral){
   const id=(p.n||'').toLowerCase().replace(/[^a-z0-9]/g,'_');
@@ -353,7 +358,10 @@ function playerHpFrac(){
 function mechBonus(val){
   const mech=getMech(); if(!mech?.bonus) return 1;
   const id=resId()||'pf';
-  return mech.bonus({[id]:val, hpFrac:playerHpFrac(), ...modeAndCounterMap()});
+  // `position` et `passives` permettent aux mécaniques sensibles à l'orientation /
+  // aux passifs de moduler leur bonus (Eliotrope Traquenard : Don céleste → +60 % de dos).
+  return mech.bonus({[id]:val, hpFrac:playerHpFrac(), position:S.position,
+    passives:getActivePassives().map(p=>p.id), ...modeAndCounterMap()});
 }
 // Multiplicateur de dégâts d'UN sort selon la valeur de jauge (Huppermage : Rayon
 // crépusculaire ×(1+0.5%·BQ)). 1 si la mécanique n'a pas de scaling par sort.
@@ -429,8 +437,15 @@ function calcDmg({base,mastery,di,pos,resBrut,isCrit,cb=1}){
   // les monstres ne sont pas soumis au plafond de résistance des joueurs.
   const rp = Math.floor((1-Math.pow(.8,(resBrut||0)/100))*100)/100;
   const st=getEffStats();
-  const bonusDos=(st.dmgDos||0)/100, bonusCC=(st.dmgCC||0)/100;
-  const pm = pos==='back'?(1.25+bonusDos):pos==='side'?1.10:1;
+  const bonusCC=(st.dmgCC||0)/100;
+  // Multiplicateur de position : bonus de base du jeu (+25 % dos, +10 % côté) + les
+  // bonus % Dommages infligés conditionnels à l'orientation (build + passifs/buffs).
+  //  • dos  : +25 % base + dmgDos
+  //  • côté : +10 % base + dmgSide
+  //  • face : pas de bonus base, mais un malus de face possible (Zobal Virevolte −25 %)
+  const pm = pos==='back'?(1.25+(st.dmgDos||0)/100)
+           : pos==='side'?(1.10+(st.dmgSide||0)/100)
+           : (1+(st.dmgFace||0)/100);
   const cm = isCrit?(1.25+bonusCC):1;
   // Sur un critique, la Maîtrise Critique s'ajoute au pool de maîtrise (confirmé en jeu).
   const mTot = mastery + (isCrit?(st.critMastery||0):0);

@@ -246,9 +246,10 @@
   //  • Portail : si le sort passe par / est lancé sur un portail, dégât majoré
   //    (remplace `portalDmg`, ou s'ajoute `portalBonus`).
   //  • Don céleste : +40 % Dommages infligés au prochain sort (valeur du passif de
-  //    base ; mode toggle). ⚠ Le +40 % est documenté ; les variantes de passif
-  //    (Traquenard +60 % de dos, Quiétude PA à la place…) ne sont pas modélisées.
-  const ELIO_DON_DI = 0.40; // +40 % Dommages infligés (Don céleste, prochain sort)
+  //    base ; mode toggle). Variante Traquenard : remplace le +40 % de base par +60 %
+  //    Dommages infligés UNIQUEMENT de dos (donc 0 hors position dos).
+  const ELIO_DON_DI = 0.40;          // +40 % DI de base (Don céleste, prochain sort)
+  const ELIO_TRAQUENARD_DI = 0.60;   // Traquenard : +60 % DI, seulement de dos
   const eliotrope = {
     res: null, // pas de jauge chiffrée ; les leviers sont des toggles
     // Dégât de base effectif selon les modes Exalté / Portail.
@@ -262,7 +263,13 @@
       return d;
     },
     // Don céleste : +40 % Dommages infligés sur le prochain sort (toggle global).
-    bonus(m) { return m && m.don_celeste ? 1 + ELIO_DON_DI : 1; },
+    // Traquenard (passif) : remplace ce +40 % par +60 % DI applicable seulement de dos.
+    bonus(m) {
+      if (!m || !m.don_celeste) return 1;
+      const traquenard = m.passives && m.passives.includes('traquenard');
+      if (traquenard) return m.position === 'back' ? 1 + ELIO_TRAQUENARD_DI : 1;
+      return 1 + ELIO_DON_DI;
+    },
     modes: [
       { id: 'exalte',      label: 'Exalté',       desc: 'Mode Exalté : dégâts modifiés sur certains sorts (sinon mode Serein)' },
       { id: 'portail',     label: 'Via Portail',  desc: 'Le sort passe par / est lancé sur un portail : dégâts majorés' },
@@ -272,7 +279,7 @@
       return [
         { p: 'L', msg: `🌀 Serein / Exalté : change de mode selon le sort (active « Exalté » pour voir ses dégâts)` },
         { p: 'L', msg: `🌀 Portails : lance tes sorts à travers/sur un portail pour majorer les dégâts` },
-        { p: 'L', msg: `✨ Don céleste : +40 % Dommages infligés sur le prochain sort (active le toggle)` },
+        { p: 'L', msg: `✨ Don céleste : +40 % Dommages infligés sur le prochain sort (active le toggle ; avec Traquenard : +60 % uniquement de dos)` },
         { p: 'L', msg: `🚪 Exode (1.92) : utilisable à travers les portails, 2 usages/tour (placement non simulé ici)` },
       ];
     },
@@ -373,10 +380,11 @@
   // Classe des Runes élémentaires. Levier de dégâts CHIFFRÉ : la jauge de BQ
   // (Brise Quadramentale, 0→100) fait scaler Rayon crépusculaire : +`bqScale` %
   // de dégâts par % de BQ restante (0.5 → +50 % à 100 BQ). On suit la BQ comme une
-  // jauge réglable. Les bonus de Runes (1.92 : Disque luminescent +20 % Dommages
-  // subis sur la cible à 3 runes, Vestige/Incan'Rune +20 % DI allié, Lueur de
-  // l'aube +20 % Dommages subis…) restent trop conditionnels (suivi des runes/états
-  // non simulé) → en conseil. La régen BQ de fin de tour (≥200 hors Cœur de Lumière,
+  // jauge réglable. Les bonus de Runes (1.92 : Vestige/Incan'Rune +20 % DI allié,
+  // Lueur de l'aube +20 % Dommages subis, Disque luminescent +10 % Dommages subis
+  // DE DOS sur la cible à exactement 3 runes, 1 tour…) restent trop conditionnels
+  // (suivi des runes/états non simulé) → en conseil.
+  // La régen BQ de fin de tour (≥200 hors Cœur de Lumière,
   // 1.92) ne change pas l'aperçu : on part de la BQ pleine (initial:100).
   const huppermage = {
     res: { id: 'bq', label: 'BQ', max: 100, color: '#9b6dff' },
@@ -395,7 +403,7 @@
       const bq = m.bq != null ? m.bq : 100;
       return [
         { p: 'L', msg: `🔮 BQ ${bq}/100 : Rayon crépusculaire gagne +0,5 % de dégâts par % de BQ (×${(1 + 0.5 * bq / 100).toFixed(2)})` },
-        { p: 'L', msg: `🌈 Runes (1.92) : à 3 runes Disque luminescent applique +20 % Dommages subis sur la cible (2 tours) ; Vestige/Incan'Rune donne +20 % DI aux alliés` },
+        { p: 'L', msg: `🌈 Runes (1.92) : à exactement 3 runes Disque luminescent applique +10 % Dommages subis DE DOS sur la cible (1 tour, consomme les runes) ; Vestige/Incan'Rune donne +20 % DI aux alliés` },
         { p: 'L', msg: `🌅 Lueur de l'aube (Incan'Rune) : +20 % Dommages subis dans l'élément de la dernière rune (2 tours) — combo avant ton burst` },
         { p: 'L', msg: `✨ Feu-Follet : relais pour propager tes sorts et sauvegarder des runes (effets de runes non chiffrés ici)` },
       ];
