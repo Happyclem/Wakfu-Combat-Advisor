@@ -53,6 +53,8 @@ function spellFull(s){ return {
   icon:s.icon, id:s.id, // icône WakfuAssets (spells/<icon>.png) + Id Ankama
   damageMin:s.dm||0, damageMax:s.dm||0, damageCrit:s.dc||0,
   damage1:s.dm1||0, damageCrit1:s.dc1||0, // dégâts niv.1 (ancrage bas de l'interpolation par niveau)
+  // Coefficients de scaling exact Ankama : hit(l)=floor(base+inc·l) (normal + crit).
+  scaleBase:s.sb, scaleInc:s.si, scaleCritBase:s.scb, scaleCritInc:s.sci,
   pfGen:s.pf||0, pfDosGen:s.pfDos||0, isFinisher:s.fin||false, resGen:s.gen||0, desc:s.desc||'',
   tp:s.tp||0, tpCost:s.tpCost||0, // Crâ : dégâts/coût Tir précis
   altDmg:s.altDmg||0, altCond:s.altCond||'', // Sacrieur : dégât conditionnel + sa condition
@@ -492,15 +494,23 @@ function lerpDmg(d1,d245,lvl){
 // et dMax = dégât niv.245. Les appels historiques passaient dMin=0 → interpolation
 // depuis 0 ; ceux qui veulent l'ancrage exact passent la vraie valeur niv.1.
 function scale(dMin,dMax,lvl){ return lerpDmg(dMin,dMax,lvl); }
-// Met à l'échelle au niveau `lvl` une valeur de dégât niv.245 `d245` APPARTENANT à `sp`,
-// en réutilisant le profil de pente du sort (ratio niv.1/niv.245 de son dégât principal).
-// Couvre les dégâts « alternatifs » (Tir précis, Exalté…) qui n'ont pas de point niv.1
-// propre : ils scalent au même rythme que le dégât de base du sort.
+// Met à l'échelle au niveau `lvl` une valeur de dégât niv.245 `d245` APPARTENANT à `sp`.
+// Priorité 1 : coefficients EXACTS d'Ankama (hit(l)=floor(base+inc·l)) quand le sort en a
+//   et que `d245` est bien son dégât principal. C'est la vraie courbe du jeu.
+// Priorité 2 (fallback) : interpolation linéaire 2 points niv.1↔niv.245, en réutilisant
+//   le profil de pente du sort pour les dégâts « alternatifs » (Tir précis, Exalté…) qui
+//   n'ont pas de point niv.1 propre — ils scalent au même rythme que le dégât de base.
 function scaleSpell(sp,d245,lvl){
   if(!d245) return 0;
   const main245=sp.damageMax||sp.damageMin||0;
-  // Point niv.1 effectif pour cette valeur : exact si c'est le dégât principal,
-  // sinon proportionnel (alt1 = d245 × dm1/dm245). Pas de dm1 → 0 (interp depuis 0).
+  const l=Math.max(1,Math.min(245,lvl||200));
+  // Coefficients exacts : valides pour le dégât principal ; un dégât alternatif les
+  // applique au prorata (d245/main245) pour garder la bonne pente relative.
+  if(sp.scaleInc!=null && sp.scaleBase!=null && main245>0){
+    const k = d245===main245 ? 1 : d245/main245;
+    return Math.round(Math.floor(sp.scaleBase + sp.scaleInc*l + 1e-9) * k);
+  }
+  // Fallback : interpolation 2 points (ancrage niv.1 exact ou proportionnel, sinon 0).
   const d1 = (main245>0 && (sp.damage1||0)>0)
     ? (d245===main245 ? sp.damage1 : d245*(sp.damage1/main245))
     : 0;

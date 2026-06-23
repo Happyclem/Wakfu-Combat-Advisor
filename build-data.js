@@ -17,6 +17,48 @@ const path = require('path');
 
 const RAW = path.join(__dirname, 'data-raw');
 
+// ── Dégâts officiels Ankama (extraits du jeu via wakfu-autobuilder de Chosante) ──
+// `spells-ankama.json`  : valeur encyclopédie niv.245 (baseDamage/critDamage) par id.
+// `spell-damage.json`   : formule de scaling par sort, hit(lvl)=floor(base + inc·lvl)
+//                         (et critBase/critInc), exacte à tout niveau. `matched=false`
+//                         = formule approchée (base 0, inc=val/levelCap) quand l'effet
+//                         bdata exact n'a pas été retrouvé (DoT, aléatoire…).
+// Ces valeurs corrigent les dégâts scrapés de l'encyclopédie (qui sur-évaluaient le
+// Sram de ~10 %, cf. data-formula-audit) ET donnent le scaling exact par niveau.
+// On les apparie par `id` Ankama (colonne Id des CSV).
+function loadJSON(name) {
+  const p = path.join(RAW, name);
+  return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
+}
+const ANKAMA_SPELLS = loadJSON('spells-ankama.json'); // [{id, baseDamage, critDamage, element, …}]
+const ANKAMA_SCALING = loadJSON('spell-damage.json'); // [{spellId, base, inc, critBase, critInc, levelCap, matched}]
+const ankamaById = new Map((ANKAMA_SPELLS || []).map(s => [s.id, s]));
+const scalingById = new Map((ANKAMA_SCALING || []).map(s => [s.spellId, s]));
+// Sorts où NOTRE valeur encyclopédie (CSV) est juste et celle d'Ankama mal ancrée :
+// Saccade / Perforation — l'extraction Ankama a ancré sur le dégât « sur l'Armure »
+// (effet conditionnel) au lieu du dégât normal. On garde donc le CSV pour ces id.
+const ANKAMA_DMG_BLACKLIST = new Set([6264 /* Saccade */, 6467 /* Perforation */]);
+// Dégât niv.1 / niv.245 (normal + crit) d'un sort selon Ankama, ou null si non apparié
+// ou blacklisté. Renvoie aussi base/inc pour exposer le scaling exact côté runtime.
+function ankamaDamage(id) {
+  if (!id || ANKAMA_DMG_BLACKLIST.has(id)) return null;
+  const enc = ankamaById.get(id), sc = scalingById.get(id);
+  if (!enc || enc.baseDamage == null) return null;
+  // On n'expose les coefficients de scaling que si l'effet bdata exact a été retrouvé
+  // (`matched`). Sinon la formule est une approximation (base 0) qui ne reproduit même
+  // pas la valeur niv.245 au floor près → on laisse le runtime interpoler sur dm1↔dm.
+  const exact = sc && sc.matched;
+  const fl = (b, i) => Math.floor(b + i * 1 + 1e-9); // hit au niveau 1
+  return {
+    dm: enc.baseDamage,
+    dc: enc.critDamage != null ? enc.critDamage : enc.baseDamage,
+    dm1: exact ? fl(sc.base, sc.inc) : (sc ? Math.round(sc.inc * 1) : 0),
+    dc1: exact ? fl(sc.critBase, sc.critInc) : 0,
+    base: exact ? sc.base : undefined, inc: exact ? sc.inc : undefined,
+    critBase: exact ? sc.critBase : undefined, critInc: exact ? sc.critInc : undefined,
+  };
+}
+
 // ── Mapping nom de fichier CSV → clé de classe canonique ───────────────────
 // (mêmes clés que les extracteurs de build zenith/wakfuli et le <select> HTML)
 const CLASS_KEY = {
@@ -315,6 +357,9 @@ function buildSpells(classDisplay) {
     const eni = (classDisplay === 'Eniripsa') ? parseEniripsa(eff, num(r['Dommage lvl245'])) : {};
     // Huppermage — scaling sur la jauge de BQ.
     const hup = (classDisplay === 'Huppermage') ? parseHuppermage(eff) : {};
+    // Dégâts officiels Ankama (si le sort est apparié par id et non blacklisté).
+    // Source de vérité pour dm/dc/dm1/dc1 + coefficients de scaling exact ; sinon CSV.
+    const adm = ankamaDamage(num(r['Id']));
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
@@ -326,12 +371,18 @@ function buildSpells(classDisplay) {
       mcc: num(r['MaxParCible']) || undefined,         // max lancers par cible (0/absent = illimité)
       cd: num(r['Cooldown']) || undefined,             // cooldown en tours (0/absent = aucun)
       icon: num(r['iconId']) || undefined,             // iconId Ankama (affichage)
-      dm: num(r['Dommage lvl245']),
-      dc: num(r['Dommage lvl245 critique']),
-      // Dégâts au niveau 1 (ancrage bas pour l'interpolation par niveau du sort).
-      // Vide/absent → 0 (interpolation depuis 0, exacte à 245, comme le fallback Ankama).
-      dm1: num(r['Dommage lvl1']) || undefined,
-      dc1: num(r['Dommage lvl1 critique']) || undefined,
+      // Dégâts : valeurs officielles Ankama si appariées, sinon valeurs CSV (encyclopédie).
+      dm: adm ? adm.dm : num(r['Dommage lvl245']),
+      dc: adm ? adm.dc : num(r['Dommage lvl245 critique']),
+      // Scaling par niveau : coefficients exacts d'Ankama (hit(l)=floor(base+inc·l)).
+      // Absents → le runtime retombe sur l'interpolation 2 points dm1↔dm.
+      sb: adm && adm.base !== undefined ? +adm.base.toFixed(4) : undefined,
+      si: adm && adm.inc !== undefined ? +adm.inc.toFixed(6) : undefined,
+      scb: adm && adm.critBase !== undefined ? +adm.critBase.toFixed(4) : undefined,
+      sci: adm && adm.critInc !== undefined ? +adm.critInc.toFixed(6) : undefined,
+      // Dégâts au niveau 1 (ancrage bas, fallback si pas de coefficients de scaling).
+      dm1: adm ? (adm.dm1 || undefined) : (num(r['Dommage lvl1']) || undefined),
+      dc1: adm ? (adm.dc1 || undefined) : (num(r['Dommage lvl1 critique']) || undefined),
       pf: isSram ? parsePF(eff, descRaw, ap) : 0,
       pfDos: isSram ? (parsePFDos(eff) || undefined) : undefined, // PF bonus « de dos » (Kleptosram)
       fin: isSram ? isFinisher(eff, descRaw) : false,
