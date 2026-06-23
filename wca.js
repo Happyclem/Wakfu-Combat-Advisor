@@ -1299,18 +1299,28 @@ function renderAdvisor(){
           :r.spell.maxPerTgt>0?`Max ${r.spell.maxPerTgt}/cible/tour`:'Usages par tour';
         const useTxt=`<span class="srus${exhausted?' exhausted':''}" title="${capTip}">${usedU}/${maxU}</span>`;
         const ecol=elemCol(r.spell.element);
+        const badges=`${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}`;
+        // Carte sur 2 lignes (largeur uniforme dans la grille) :
+        //  • haut : étoile + icône + nom (tronqué) + coût
+        //  • bas  : badges (à gauche) + usages + dégâts + dpa (à droite)
         return `<div class="sr ${isBest?'best':''}${exhausted?' exhausted':''}" data-sn="${r.spell.name}" data-el="${r.spell.element||'Neutre'}" style="border-left-color:${ecol}">
-          <span class="srstar">${isBest?'★':''}</span>
-          ${spellIcon(r.spell)}<span class="srn">${r.spell.name}</span>
-          <span class="scap">${co}</span>${pf}${sc}${hm}${tp}${alt}${elioEx}${elioP}${eniHp}${useTxt}
-          <span class="srd">${r.damage.toLocaleString('fr')}</span>
-          <span class="srdpa">${r.dpa}/PA</span></div>`;
+          <div class="srtop">
+            <span class="srstar">${isBest?'★':''}</span>
+            ${spellIcon(r.spell)}<span class="srn">${r.spell.name}</span>
+            <span class="scap">${co}</span>
+          </div>
+          <div class="srbot">
+            <span class="srbadges">${badges}${useTxt}</span>
+            <span class="srd">${r.damage.toLocaleString('fr')}</span>
+            <span class="srdpa">${r.dpa}/PA</span>
+          </div>
+        </div>`;
       }).join('')
     ).join('');
     // Tooltip au survol : reste par ligne (hover). Le clic est délégué (cf. plus bas).
     rl.querySelectorAll('.sr').forEach(row=>{
       const r=ranked.find(r=>r.spell.name===row.dataset.sn);
-      if(r) bindSpTip(row,r.spell.desc||'');
+      if(r) bindSpTip(row,r.spell.desc||'',r.spell.name);
     });
   }
   // Mode de calcul
@@ -1385,7 +1395,7 @@ function renderDmgSeq(){
        <span style="font-size:var(--fs-10);color:var(--gold)">CC: ${seq.totalCC.toLocaleString('fr')}</span>
        ${seq.killRefund?`<span style="font-size:var(--fs-10);color:var(--blue)">+${seq.killRefund.ap}PA ${seq.killRefund.mp}PM ${seq.killRefund.wp}PW sur kill${seq.lethal?' ✓ létal':''}${seq.refund&&seq.refund.seq.length?` → ${seq.refund.seq.map(r=>r.spell.name).join(' + ')} (+${seq.refund.total.toLocaleString('fr')})`:''}</span>`:''}`;
     document.getElementById('seqsteps').querySelectorAll('.ss').forEach(el=>{
-      bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'');
+      bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'',(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.name);
       el.addEventListener('click',()=>{
         const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0,dmg=parseInt(el.dataset.dmg)||0;
         const pfg=parseInt(el.dataset.pfgen)||0, consumes=el.dataset.consume==='1';
@@ -2138,9 +2148,13 @@ function setupTipsToggle(){
 // ── TOOLTIP DESCRIPTION SORTS (Ctrl + survol) ────────────────────
 let _ctrlDown=false;
 const _spTip=(()=>{ const d=document.createElement('div'); d.id='sptip'; document.body.appendChild(d); return d; })();
-function showSpTip(txt,x,y){
-  if(!txt){ hideSpTip(); return; }
-  _spTip.textContent=txt; _spTip.classList.add('on');
+// Échappe le texte pour une insertion HTML sûre (le tooltip rend du HTML pour le nom en gras).
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showSpTip(name,desc,x,y){
+  if(!name&&!desc){ hideSpTip(); return; }
+  // Nom du sort en gras, puis la description en dessous (les deux échappés).
+  _spTip.innerHTML=(name?`<div class="sptn">${escHtml(name)}</div>`:'')+(desc?escHtml(desc):'');
+  _spTip.classList.add('on');
   const w=_spTip.offsetWidth,h=_spTip.offsetHeight;
   let nx=x+14,ny=y+18;
   if(nx+w>window.innerWidth-8) nx=x-w-14;
@@ -2148,9 +2162,9 @@ function showSpTip(txt,x,y){
   _spTip.style.left=Math.max(8,nx)+'px'; _spTip.style.top=Math.max(8,ny)+'px';
 }
 function hideSpTip(){ _spTip.classList.remove('on'); }
-function bindSpTip(el,desc){
-  if(!desc) return; el._desc=desc;
-  el.addEventListener('mousemove',e=>{ if(_ctrlDown) showSpTip(el._desc,e.clientX,e.clientY); else hideSpTip(); });
+function bindSpTip(el,desc,name){
+  if(!desc&&!name) return; el._desc=desc; el._name=name||'';
+  el.addEventListener('mousemove',e=>{ if(_ctrlDown) showSpTip(el._name,el._desc,e.clientX,e.clientY); else hideSpTip(); });
   el.addEventListener('mouseleave',hideSpTip);
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Control') _ctrlDown=true; });

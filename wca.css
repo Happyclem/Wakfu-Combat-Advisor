@@ -150,19 +150,25 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 /* Ranking */
 .elhdr{display:flex;align-items:center;gap:4px;font-size:var(--fs-10);color:var(--muted);
   margin:8px 0 4px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.sr{display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--inp);
+/* Carte de sort (ranking) : 2 lignes (haut = nom+coût, bas = badges+dégâts) pour rester
+   lisible et de largeur uniforme dans la grille #ranklist, quelle que soit la colonne. */
+.sr{display:flex;flex-direction:column;gap:3px;padding:6px 9px;background:var(--inp);
   border:1px solid var(--border);border-left:3px solid var(--el-col,var(--border));border-radius:var(--r);
-  margin-bottom:4px;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;font-size:var(--fs-11)}
+  margin-bottom:0;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;font-size:var(--fs-11);min-width:0}
 .sr:hover{border-color:var(--hl);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.4)}
 .sr.best{border-color:var(--gold);background:var(--gdim)}
-/* Étoile « meilleur sort » : largeur fixe TOUJOURS présente (vide sinon) → toutes les
-   colonnes icône/nom restent parfaitement alignées d'une ligne à l'autre. */
+.srtop{display:flex;align-items:center;gap:6px;min-width:0}
+.srbot{display:flex;align-items:center;gap:6px;min-width:0}
+/* Étoile « meilleur sort » : largeur fixe TOUJOURS présente (vide sinon) → alignement constant. */
 .srstar{width:12px;flex-shrink:0;text-align:center;color:var(--gold);font-size:var(--fs-10)}
 .sr.best .srn{color:var(--gold)}
 .srk{color:var(--dim);font-size:var(--fs-10);width:16px;text-align:center;flex-shrink:0}
 .srn{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srd{font-family:var(--mono);color:var(--green);font-size:var(--fs-11);font-weight:600}
-.srdpa{font-family:var(--mono);color:var(--muted);font-size:var(--fs-10)}
+/* Badges (PF, scaling, hémo…) sur la ligne du bas : prennent la place restante à gauche,
+   passent à la ligne si besoin ; dégâts/dpa restent calés à droite. */
+.srbadges{flex:1;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:3px}
+.srd{font-family:var(--mono);color:var(--green);font-size:var(--fs-11);font-weight:600;flex-shrink:0;margin-left:auto}
+.srdpa{font-family:var(--mono);color:var(--muted);font-size:var(--fs-10);flex-shrink:0}
 /* Icônes WakfuAssets (remote, fallback emoji) — taille en em → suit l'échelle du texte. */
 .icn{width:1.45em;height:1.45em;object-fit:contain;vertical-align:middle;flex-shrink:0}
 .icn-sm{width:1.15em;height:1.15em;object-fit:contain;vertical-align:middle;flex-shrink:0;margin-right:2px}
@@ -275,9 +281,12 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
   background:var(--inp);border:1px solid var(--gold);color:var(--text);font-size:var(--fs-11);line-height:1.5;
   box-shadow:0 4px 18px rgba(0,0,0,.6);pointer-events:none;opacity:0;transition:opacity .1s;white-space:pre-wrap}
 #sptip.on{opacity:1}
-/* Ranking conseiller : 2 colonnes si la place le permet, sinon 1 (auto-fit sur largeur réelle). */
-#ranklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 8px;align-items:start}
-#ranklist .elhdr{grid-column:1/-1}
+#sptip .sptn{font-weight:700;color:var(--gold);margin-bottom:3px}
+/* Ranking conseiller : grille fluide ~3 colonnes à largeur normale, qui retombe à 2 puis
+   1 quand la colonne rétrécit (auto-fill sur la largeur réelle). Cartes compactes (2 lignes)
+   → minmax plus étroit ; gap uniforme (les cartes n'ont plus de margin-bottom). */
+#ranklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;align-items:start}
+#ranklist .elhdr{grid-column:1/-1;margin:8px 0 0}
 /* ── Checklist état vide guidé ── */
 .ckl{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-top:8px}
 .cki{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--inp);
