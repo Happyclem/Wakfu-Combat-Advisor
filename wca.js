@@ -919,16 +919,47 @@ function computeKills(){
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
-// ⚠ Ces helpers modifient l'état RÉEL du monstre (S.monster._currentHp), partagé par
-// tous les calculs sensibles aux PV (Attaque mortelle < 50 % PV, mode kills). Les
-// séquences (perso + optimale interactive) simulent désormais leurs PV LOCALEMENT pour
-// ne pas se polluer mutuellement — elles n'appellent plus ces fonctions. Réservées à un
-// éventuel suivi d'état réel (ex. reset de combat) ; le tracker de log écrit _currentHp
-// directement de son côté.
+// Une SEULE barre de PV du monstre (S.monster._currentHp), partagée. Les deux séquences
+// (perso + optimale interactive) l'entament réellement, mais une seule « possède » la
+// barre à la fois : prendre le focus d'une séquence (cf. claimSeqFocus) remet le monstre
+// à pleine vie et réinitialise l'AUTRE séquence — pas de duplication de cible.
+function applyDmgToMon(amount){
+  if(!S.monster||!(amount>0)) return;
+  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
+  if(S.monster._currentHp===undefined) S.monster._currentHp=max;
+  S.monster._currentHp=Math.max(0,S.monster._currentHp-amount);
+  renderHPBars();
+}
+function undoDmgToMon(amount){
+  if(!S.monster||!(amount>0)) return;
+  const max=S.monster._maxHp||S.monster.hp||0; if(!max) return;
+  S.monster._currentHp=Math.min(max,(S.monster._currentHp||0)+amount);
+  renderHPBars();
+}
 function resetMonHP(){
   if(!S.monster) return;
   S.monster._currentHp=S.monster._maxHp||S.monster.hp||0;
   renderHPBars();
+}
+// Quelle séquence « possède » la barre de PV du monstre ('csq' = perso, 'opt' = optimale).
+// Quand une séquence prend le focus (premier sort interagi), on remet le monstre à plein
+// et on réinitialise les DONNÉES de l'autre séquence. Volontairement SANS re-render : les
+// handlers appelants (addToCSQ / clic optimale) gèrent leur propre rendu ensuite, pour
+// éviter une réentrance (re-render au milieu d'un gestionnaire de clic).
+let _seqOwner=null;
+function claimSeqFocus(owner){
+  if(_seqOwner===owner) return;        // déjà la séquence active : on continue à l'entamer
+  _seqOwner=owner;
+  resetMonHP();                         // nouvelle séquence active → cible à pleine vie
+  if(owner==='opt'){                    // l'optimale prend la main → vide les données perso
+    CSQ.steps=[]; const st=getEffStats(), sc=sitBuffsCost();
+    CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
+    CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
+    CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
+    CSQ.pfCur=showsRes()?resVal():0;
+  } else {                              // la perso prend la main → décoche l'optimale
+    _optUsed=null;
+  }
 }
 function renderHPBars(){
   // Barres de vie par cible dans le panneau Cibles (la barre de la cible visée dans le
@@ -960,33 +991,28 @@ function renderPlayerStatus(){
 }
 
 // ── CUSTOM SEQUENCE ──────────────────────────────────────────────
-// La séquence perso est une SIMULATION isolée : elle ne modifie PAS l'état réel du
-// monstre (S.monster._currentHp). Elle suit ses propres PV simulés (CSQ.monHp) pour
-// afficher la progression, sans polluer le ranking / la séquence optimale (qui
-// raisonnent sur la cible telle quelle, ex. Attaque mortelle < 50 % PV).
-const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0,monHp:0,monMax:0};
-function csqTargetMaxHp(){ const t=focusTgt(); return t?(t._maxHp||t.hp||0):0; }
+// La séquence perso entame la barre de PV PARTAGÉE du monstre (S.monster._currentHp) via
+// applyDmgToMon, après avoir pris le focus (claimSeqFocus('csq') → cible à plein + vide
+// la séquence optimale). Une seule séquence possède la barre à la fois (cf. _seqOwner).
+const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0};
 function initCSQ(){
-  // Reset complet : vide les étapes, remet les ressources et les PV simulés.
+  // Reset complet : vide les étapes et remet les ressources. Si la séquence perso
+  // possédait la barre de PV, on la rend (le monstre repasse à pleine vie).
   const st=getEffStats(), sc=sitBuffsCost();
   CSQ.steps=[];
   CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
   CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
   CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
   CSQ.pfCur=showsRes()?resVal():0;
-  CSQ.monMax=csqTargetMaxHp(); CSQ.monHp=CSQ.monMax;
+  if(_seqOwner==='csq'){ _seqOwner=null; resetMonHP(); }
   renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
 function refreshCSQTarget(){
-  // Changement de cible seulement : ne touche pas aux étapes ni aux ressources.
-  // On recalcule les dégâts de chaque étape vis-à-vis de la nouvelle cible focusée et
-  // on rebase les PV simulés (CSQ.monHp) sur cette cible — sans toucher au monstre réel.
-  let pf=showsRes()?resVal():0, dealt=0;
-  CSQ.steps.forEach(s=>{
-    s.dmg=spellDmgAt(s.sp,pf); dealt+=s.dmg;
-    pf=nextPF(pf,s.sp,false);
-  });
-  CSQ.monMax=csqTargetMaxHp(); CSQ.monHp=Math.max(0,CSQ.monMax-dealt);
+  // Changement de cible / difficulté : on relâche le focus de séquence (la nouvelle cible
+  // repart pleine vie) et on recalcule les dégâts de chaque étape pour la cible focusée.
+  _seqOwner=null;
+  let pf=showsRes()?resVal():0;
+  CSQ.steps.forEach(s=>{ s.dmg=spellDmgAt(s.sp,pf); pf=nextPF(pf,s.sp,false); });
   renderCSQ();
 }
 function rbar(v,max,col,lbl){
@@ -1017,13 +1043,14 @@ function addToCSQ(sp){
     if(el){el.style.outline='2px solid var(--red)';setTimeout(()=>el.style.outline='',600);}
     return;
   }
+  // La séquence perso prend le focus de la barre de PV : remet le monstre à plein et
+  // réinitialise la séquence optimale (si on n'était pas déjà sur la perso).
+  claimSeqFocus('csq');
   const dmg=spellDmgAt(sp,CSQ.pfCur);
   CSQ.steps.push({sp,dmg,pfGen:effPfGen(sp),ap,mp,wp});
   CSQ.remAP=Math.max(0,CSQ.remAP-ap); CSQ.remMP=Math.max(0,CSQ.remMP-mp); CSQ.remWP=Math.max(0,CSQ.remWP-wp);
   CSQ.pfCur=nextPF(CSQ.pfCur,sp,false);
-  if(dmg>0) CSQ.monHp=Math.max(0,CSQ.monHp-dmg); // simulation locale (n'altère pas le monstre réel)
-  // renderAdvisor reste sûr : la séquence perso ne modifie plus les PV réels, donc le
-  // ranking / la séquence optimale ne bougent pas ; seul le compteur d'usages se met à jour.
+  if(dmg>0) applyDmgToMon(dmg); // entame réellement la barre de PV partagée
   renderCSQ(); renderAdvisor();
 }
 function removeFromCSQ(idx){
@@ -1049,12 +1076,8 @@ function renderCSQ(){
   }
   const tot=CSQ.steps.reduce((s,r)=>s+r.dmg,0), apU=maxAP-CSQ.remAP;
   const sm=document.getElementById('csqsum');
-  // PV simulés restants de la cible visée (vue locale de la séquence perso ; n'affecte
-  // pas l'état réel du monstre ni la séquence optimale).
-  const hpTxt=(CSQ.monMax>0)
-    ? `<span style="font-family:var(--mono);font-size:var(--fs-11);color:${CSQ.monHp<=0?'var(--red)':'var(--muted)'}">${CSQ.monHp<=0?'💀 cible tuée':`cible ${CSQ.monHp.toLocaleString('fr')}/${CSQ.monMax.toLocaleString('fr')} PV`}</span>`
-    : '';
-  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>${hpTxt}`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
+  // La progression des PV de la cible est visible sur la barre partagée (panneau Cibles).
+  if(sm) sm.innerHTML=CSQ.steps.length?`<span class="stot">${tot.toLocaleString('fr')} dmg</span><span style="font-family:var(--mono);font-size:var(--fs-11);color:var(--muted)">${apU}/${maxAP} PA</span>`:'<span style="color:var(--dim);font-family:var(--mono)">—</span>';
   const pr=document.getElementById('csqpfrow'), mech=getMech();
   if(pr){
     // Affiche la jauge de ressource pour toute classe qui en a une influençant le calcul.
@@ -1209,7 +1232,7 @@ function renderAdvisor(){
   renderHPBars();
   renderPlayerStatus();
   if(!hasBuild){
-    ['combatcard','gaugecard','tipscard','seqcard'].forEach(id=>document.getElementById(id).style.display='none');
+    ['combatcard','tipscard','seqcard'].forEach(id=>document.getElementById(id).style.display='none');
     document.getElementById('ranklist').innerHTML='';
     document.getElementById('rankempty').textContent='Configure un build.';
     return;
@@ -1217,16 +1240,9 @@ function renderAdvisor(){
   // Toggles de combat : visibles dès qu'un build est présent.
   document.getElementById('combatcard').style.display='';
   renderSitBuffs(); // toggles/compteurs spécifiques classe (vivent désormais dans cette boîte)
-  // Gauge
-  const mech=getMech(), pm=getPlayerMech(), gc=document.getElementById('gaugecard');
-  if(mech?.res){
-    gc.style.display='';
-    const r=mech.res, val=pm[r.id]||0, pct=Math.min(100,Math.round(Math.abs(val)/r.max*100));
-    document.getElementById('gaugecontent').innerHTML=
-      `<div class="gr"><span class="gl">${r.label}</span>
-       <div class="gb"><div class="gf" style="width:${pct}%;background:${r.color}"></div></div>
-       <span class="gv">${val}/${r.max}</span></div>`;
-  } else gc.style.display='none';
+  // La barre « Mécanique » (jauge en haut) a été retirée : la valeur de jauge est déjà
+  // affichée dans le titre du ranking et dans chaque séquence.
+  const mech=getMech(), pm=getPlayerMech();
   // Tips : mécanique calibrée (Sram) + rappel de classe informationnel.
   // La carte héberge aussi les toggles de combat → toujours visible (même sans conseil).
   const tips=[...(mech?.advice(pm)||[]), ...getClassNote()], tc=document.getElementById('tipscard');
@@ -1343,6 +1359,9 @@ function renderAdvisor(){
     renderDmgSeq();
   }
 }
+// État « coché » (sorts joués) de la séquence optimale, persistant entre re-renders
+// (module, pas closure) pour que claimSeqFocus puisse le réinitialiser de l'extérieur.
+let _optUsed=null; // Set d'indices, ou null = rien de coché
 function renderDmgSeq(){
   const seq=computeSeq(), sc=document.getElementById('seqcard');
   if(seq?.chosen?.length){
@@ -1350,14 +1369,20 @@ function renderDmgSeq(){
     const mech=getMech(), showRes=showsRes(), resMax=mech?.res?.max||100;
     const st=getEffStats(), maxAP=st.ap??6, maxMP=st.mp??3, maxWP=st.wp??0;
     document.getElementById('seqstrat').textContent=(seq.strat||'')+(abActive()?' · 🗡 Assaut Brutal':'');
-    let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP;
-    let pfSim=seq.initPF??(showRes?resVal():0);
-    // PV de cible SIMULÉS localement (cocher un sort n'altère pas le monstre réel,
-    // pour ne pas recalculer le ranking / la séquence perso — état partagé isolé).
-    const seqMonMax=(focusTgt()?(focusTgt()._maxHp||focusTgt().hp||0):0);
-    let seqMonHp=seqMonMax;
-    const used=new Set();
+    if(!_optUsed) _optUsed=new Set();
+    // Borne les indices cochés à la séquence courante (elle peut changer entre deux renders).
+    _optUsed=new Set([..._optUsed].filter(i=>i>=0&&i<seq.chosen.length));
+    // Recalcule PA/PM/PW restants et la jauge à partir des sorts cochés.
+    const recompute=()=>{
+      let remAP=seq.maxAP, remMP=maxMP, remWP=maxWP, pfSim=seq.initPF??(showRes?resVal():0);
+      seq.chosen.forEach((r,j)=>{ if(_optUsed.has(j)){
+        remAP-=(r.spell.apCost||0); remMP-=(r.spell.mpCost||0); remWP-=(r.spell.wpCost||0);
+        pfSim=nextPF(pfSim,r.spell,false);
+      }});
+      return {remAP,remMP,remWP,pfSim};
+    };
     const updBars=()=>{
+      const {remAP,remMP,remWP}=recompute();
       document.getElementById('seqres').innerHTML=
         rbar(remAP,maxAP,'var(--gold)','PA')+(maxMP>0?rbar(remMP,maxMP,'var(--blue)','PM'):'')+(maxWP>0?rbar(remWP,maxWP,'var(--purple)','PW'):'');
     };
@@ -1366,6 +1391,7 @@ function renderDmgSeq(){
       if(pr){
         pr.style.display=showRes?'':'none';
         if(showRes){
+          const {pfSim}=recompute();
           document.getElementById('seqpfl').textContent=mech.res.label;
           const f=document.getElementById('seqpff');
           f.style.width=Math.min(100,pfSim/resMax*100)+'%'; f.style.backgroundColor=mech.res.color;
@@ -1380,7 +1406,7 @@ function renderDmgSeq(){
       return g>0?`<span style="font-size:var(--fs-9);color:${mech.res.color}">+${g}</span>`:'';
     };
     document.getElementById('seqsteps').innerHTML=seq.chosen.map((r,i)=>
-      `<div class="ss" data-el="${r.spell.element||'Neutre'}" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
+      `<div class="ss${_optUsed.has(i)?' used':''}" data-el="${r.spell.element||'Neutre'}" data-i="${i}" data-ap="${r.spell.apCost||0}" data-mp="${r.spell.mpCost||0}" data-wp="${r.spell.wpCost||0}" data-dmg="${r.damage}" data-pfgen="${effPfGen(r.spell)}" data-consume="${consumesPF(r.spell)?1:0}">
         ${spellIcon(r.spell,'icn-sm')}<span>${r.spell.name}</span>
         <span class="ssap">${[r.spell.apCost?`${r.spell.apCost}PA`:'',r.spell.mpCost?`${r.spell.mpCost}PM`:''].filter(Boolean).join(' ')}</span>
         <span class="ssdmg">${r.damage.toLocaleString('fr')}</span>
@@ -1398,26 +1424,28 @@ function renderDmgSeq(){
       bindSpTip(el,(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.desc||'',(seq.chosen[parseInt(el.dataset.i)]||{}).spell?.name);
       el.addEventListener('click',()=>{
         const i=parseInt(el.dataset.i),ap=parseInt(el.dataset.ap)||0,mp=parseInt(el.dataset.mp)||0,wp=parseInt(el.dataset.wp)||0,dmg=parseInt(el.dataset.dmg)||0;
-        const pfg=parseInt(el.dataset.pfgen)||0, consumes=el.dataset.consume==='1';
-        if(used.has(i)){
-          used.delete(i);remAP=Math.min(maxAP,remAP+ap);remMP=Math.min(maxMP,remMP+mp);remWP=Math.min(maxWP,remWP+wp);
-          el.classList.remove('used');if(dmg>0)seqMonHp=Math.min(seqMonMax,seqMonHp+dmg);
-          // recalc pfSim from scratch
-          pfSim=seq.initPF??(showRes?resVal():0);
-          seq.chosen.forEach((r,j)=>{ if(used.has(j)) pfSim=nextPF(pfSim,r.spell,false); });
+        // Prise de focus de l'optimale : remet le monstre à plein + vide la séquence perso
+        // (claimSeqFocus ne re-render pas). 1er clic après prise de focus → on repart de zéro.
+        const wasOwner=_seqOwner==='opt'; claimSeqFocus('opt');
+        if(!_optUsed) _optUsed=new Set();
+        if(!wasOwner){
+          _optUsed.clear();
+          document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
+          renderCSQ(); // la séquence perso vient d'être vidée → rafraîchir son affichage
+        }
+        if(_optUsed.has(i)){
+          _optUsed.delete(i); el.classList.remove('used'); if(dmg>0) undoDmgToMon(dmg);
         } else {
-          if(ap>remAP||mp>remMP||wp>remWP)return;
-          used.add(i);remAP-=ap;remMP-=mp;remWP-=wp;el.classList.add('used');
-          if(dmg>0)seqMonHp=Math.max(0,seqMonHp-dmg);
-          pfSim=nextPF(pfSim,el._spell||seq.chosen[i].spell,false);
+          const {remAP,remMP,remWP}=recompute();
+          if(ap>remAP||mp>remMP||wp>remWP) return;
+          _optUsed.add(i); el.classList.add('used'); if(dmg>0) applyDmgToMon(dmg);
         }
         updBars(); updPF();
       });
     });
     document.getElementById('seqreset').onclick=()=>{
-      used.clear();remAP=seq.maxAP;remMP=maxMP;remWP=maxWP;
-      pfSim=seq.initPF??(showRes?resVal():0);
-      seqMonHp=seqMonMax;
+      _optUsed=new Set();
+      if(_seqOwner==='opt'){ _seqOwner=null; resetMonHP(); }
       document.getElementById('seqsteps').querySelectorAll('.ss').forEach(e=>e.classList.remove('used'));
       updBars();updPF();
     };

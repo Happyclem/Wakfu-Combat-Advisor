@@ -106,13 +106,6 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
    brillant (gloss) par-dessus pour un rendu en relief, indépendant de cette couleur. */
 .hpf{height:100%;border-radius:3px;transition:width .3s,background .3s;
   background-image:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 45%,rgba(0,0,0,.18))}
-/* Gauge */
-.gr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.gl{font-size:var(--fs-10);color:var(--muted);width:90px;flex-shrink:0}
-.gb{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.gf{height:100%;border-radius:3px;transition:width .3s;
-  background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(255,255,255,0) 50%,rgba(0,0,0,.15))}
-.gv{font-family:var(--mono);font-size:var(--fs-10);color:var(--muted);width:45px;text-align:right}
 /* Res bars */
 .rb{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .rl2{font-size:var(--fs-10);font-weight:700;width:20px;flex-shrink:0}
@@ -131,13 +124,16 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;font-size:var(
 /* Spell cards */
 .sc{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--inp);
   border:1px solid var(--border);border-left:3px solid var(--el-col,var(--border));border-radius:var(--r);
-  margin-bottom:5px;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s,background .12s}
+  margin-bottom:0;cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s,background .12s;min-width:0}
 .sc:hover{border-color:var(--hl);background:#181c2e;transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.4)}
 .sc.dk{border-color:var(--gold);background:var(--gdim)}
 .scn{font-size:var(--fs-13);font-weight:700;color:var(--text)}
 .scap{font-family:var(--mono);font-size:var(--fs-11);color:var(--gold);font-weight:600}
 .scdmg{font-family:var(--mono);font-size:var(--fs-11);color:#8bc34a;font-weight:600}
-.scdf{font-size:var(--fs-11);color:#9099bb;line-height:1.45;margin-top:3px;white-space:pre-wrap}
+/* Description : tronquée à 3 lignes pour des cartes de hauteur homogène en grille
+   (texte complet disponible au survol avec Ctrl). */
+.scdf{font-size:var(--fs-11);color:#9099bb;line-height:1.45;margin-top:3px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 /* Séquence perso en 2 colonnes : sorts cliquables (gauche) | séquence (droite, collante).
    Container query → repli en 1 colonne quand le panneau Conseiller lui-même est étroit
    (et pas seulement la fenêtre), car il vit dans une zone de docking redimensionnable. */
@@ -267,9 +263,10 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 /* Grilles de sorts/passifs : auto-fit → 2 colonnes si la place le permet, sinon 1 colonne.
    Basé sur la largeur RÉELLE de la grille (pas la fenêtre) → suit la zone de docking. */
-#allspells,#passlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 8px;align-items:start}
-#allspells .sc,#passlist .pc{margin-bottom:4px}
-#allspells .elhdr,#passlist .elhdr{grid-column:1/-1}
+/* Page Sorts : deck + bibliothèque en grille fluide ~3 colonnes (retombe à 2/1 selon la
+   largeur de colonne), cartes de largeur uniforme — cohérent avec le ranking. */
+#decklist,#allspells,#passlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px;align-items:start}
+#allspells .elhdr,#passlist .elhdr{grid-column:1/-1;margin:8px 0 0}
 #helppanel .hplink{color:var(--gold);text-decoration:none}
 #helppanel .hplink:hover{text-decoration:underline}
 /* Lignes d'événements cliquables (restauration d'état) */
