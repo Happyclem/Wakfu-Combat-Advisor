@@ -175,11 +175,24 @@ function findTargetByName(name){
 // ── BONUS / STATS ────────────────────────────────────────────────
 // ── SORTS SITUATIONNELS (effets toggle, Sram uniquement) ─────────
 // Actifs via S.situationalBuffs[id]=true. Pas de dégâts propres.
+// `ap`/`wp` = coût du sort qui pose le buff : il est retranché du budget du tour quand
+// le buff est actif (cf. sitBuffsCost), car lancer le sort consomme réellement ces points.
 const SITUATIONAL = {
-  assassinat: { label:'Assassinat', cls:'sram', desc:'-100 Rés. Élémentaire sur la cible', resElemDebuff:-100, spell:'Assassinat' },
-  surineur:   { label:'Surineur',   cls:'sram', desc:'+20 % dmg dos et CC', sb:{ dmgDos:20, dmgCC:20 }, spell:'Surineur' },
+  assassinat: { label:'Assassinat', cls:'sram', desc:'-100 Rés. Élémentaire sur la cible', resElemDebuff:-100, spell:'Assassinat', ap:1, wp:2 },
+  surineur:   { label:'Surineur',   cls:'sram', desc:'+20 % dmg dos et CC', sb:{ dmgDos:20, dmgCC:20 }, spell:'Surineur', ap:2 },
   pf_consumed:{ label:'PF consommé ce tour', cls:'sram', desc:'Châtiment/Effroi +25 % dmg' }, // always visible when sram
 };
+// Coût total (PA/PM/PW) des buffs situationnels actifs ayant un coût (Assassinat,
+// Surineur…). Retranché du budget du tour partout où l'on calcule les PA disponibles.
+function sitBuffsCost(){
+  const c={ap:0,mp:0,wp:0};
+  Object.entries(S.situationalBuffs||{}).forEach(([id,on])=>{
+    if(!on) return;
+    const d=SITUATIONAL[id]; if(!d) return;
+    c.ap+=d.ap||0; c.mp+=d.mp||0; c.wp+=d.wp||0;
+  });
+  return c;
+}
 function sitActive(id){ return id==='pf_consumed'?S.pfConsumedThisTurn:!!S.situationalBuffs?.[id]; }
 function toggleSit(id){
   if(id==='pf_consumed'){ S.pfConsumedThisTurn=!S.pfConsumedThisTurn; }
@@ -673,8 +686,9 @@ function canAdd(seq,sp,wpMax){
 }
 function computeSeq(){
   const spells=getSpells(); if(!spells.length||!S.monster) return null;
-  const st=getEffStats(), ap=S.remainingAP??st.ap??6; if(ap<=0) return null;
-  const maxAP=Math.min(ap,18), mech=getMech(), wpMax=wpBudget();
+  const st=getEffStats(), sc=sitBuffsCost();
+  const ap=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap); if(ap<=0) return null;
+  const maxAP=Math.min(ap,18), mech=getMech(), wpMax=Math.max(0,wpBudget()-sc.wp);
   // La jauge n'est suivie dans le knapsack que si elle influence les dégâts
   // (Sram : finisseurs scalants ; Iop : palier 100). Sinon on l'ignore (perf).
   const trackRes=tracksRes();
@@ -766,11 +780,11 @@ function computeSeq(){
 // en respectant l'ordre de priorité, et en réinjectant les PA regagnés sur kill
 // (passif Assassin / sort Attaque létale via getOnKillRes()).
 // `prefix` = sorts déjà lancés ce tour (pour respecter usages/PW à travers plusieurs kills).
-function minKill(target,budget,pf,prefix){
+function minKill(target,budget,pf,prefix,wpBudgetOverride){
   // DP "coût minimal" : pour chaque total de PA ≤ budget, dégâts max atteignables.
   const spells=getSpells(); if(!spells.length) return null;
   const need=curHP(target); if(need<=0) return {seq:[],ap:0,dmg:0,pf};
-  const tr=tracksRes(), wpMax=wpBudget(), base=prefix||[];
+  const tr=tracksRes(), wpMax=wpBudgetOverride??wpBudget(), base=prefix||[];
   // Chaque cellule porte la séquence COMPLÈTE du tour (préfixe inclus) pour les contraintes,
   // mais on n'extrait que la partie utile au kill courant à la fin.
   const dp=Array.from({length:budget+1},()=>({dmg:0,pf,seq:base.slice()}));
@@ -788,8 +802,9 @@ function minKill(target,budget,pf,prefix){
 function computeKills(){
   const spells=getSpells(); if(!spells.length) return null;
   const alive=aliveTargets(); if(!alive.length) return null;
-  const st=getEffStats();
-  let budget=S.remainingAP??st.ap??6; if(budget<=0) return null;
+  const st=getEffStats(), sc=sitBuffsCost();
+  let budget=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap); if(budget<=0) return null;
+  const wpMax=Math.max(0,wpBudget()-sc.wp);
   const ok=getOnKillRes(); // PA/PM/PW regagnés par kill (Assassin, etc.)
   const tr=tracksRes();
   let pf=tr?resVal():0;
@@ -798,7 +813,7 @@ function computeKills(){
   // Ordre de priorité = ordre du tableau (index 0 = priorité 1).
   for(const t of alive){
     if(budget<=0) break;
-    const plan=minKill(t,budget,pf,castThisTurn);
+    const plan=minKill(t,budget,pf,castThisTurn,wpMax);
     if(!plan || !plan.seq.length){ continue; } // pas tuable maintenant ; on tente la suivante
     castThisTurn.push(...plan.seq);
     // Dégâts réels + jauge reportée à la cible suivante (le dernier sort est le coup létal).
@@ -819,7 +834,7 @@ function computeKills(){
   const killedUids=new Set(kills.map(k=>k.target.uid));
   const survivor=alive.find(t=>!killedUids.has(t.uid));
   if(survivor && budget>0){
-    const mAP=Math.min(budget,18), wpMax=wpBudget();
+    const mAP=Math.min(budget,18); // wpMax (ajusté du coût des buffs) hérité du scope
     // Le dump CONTINUE le tour : on repart des sorts déjà lancés pour les contraintes.
     const dp=Array.from({length:mAP+1},()=>({dmg:0,pf,seq:castThisTurn.slice()}));
     for(let j=1;j<=mAP;j++) for(const sp of spells){
@@ -832,7 +847,7 @@ function computeKills(){
     if(dseq.length) dump={target:survivor,seq:dseq,dmg:dp[mAP].dmg,ap:dseq.reduce((s,sp)=>s+effApCost(sp),0)};
   }
   return { kills, dump, killCount:kills.length, totalAP, totalDmg,
-    aliveCount:alive.length, refundAP:ok.ap||0, budgetStart:S.remainingAP??st.ap??6 };
+    aliveCount:alive.length, refundAP:ok.ap||0, budgetStart:Math.max(0,(S.remainingAP??st.ap??6)-sc.ap) };
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
@@ -887,8 +902,11 @@ function renderPlayerStatus(){
 const CSQ={steps:[],remAP:0,remMP:0,remWP:0,pfCur:0};
 function initCSQ(){
   // Reset complet : vide les étapes, remet les ressources, reset les PV du monstre.
-  const st=getEffStats();
-  CSQ.steps=[]; CSQ.remAP=S.remainingAP??st.ap??6; CSQ.remMP=st.mp??3; CSQ.remWP=st.wp??0;
+  const st=getEffStats(), sc=sitBuffsCost();
+  CSQ.steps=[];
+  CSQ.remAP=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap);
+  CSQ.remMP=Math.max(0,(st.mp??3)-sc.mp);
+  CSQ.remWP=Math.max(0,(st.wp??0)-sc.wp);
   CSQ.pfCur=showsRes()?resVal():0;
   resetMonHP(); renderCSQ(); renderAdvisor(); // maj du compteur d'usages dans le ranking
 }
@@ -1358,7 +1376,10 @@ function renderSitBuffs(){
   const toggles=[];
   if(S.build?.class==='sram'){
     Object.entries(SITUATIONAL).filter(([,v])=>v.cls==='sram'&&(!v.spell||deckNames.has(v.spell.toLowerCase())))
-      .forEach(([id,v])=>toggles.push({id,label:v.label,on:sitActive(id)}));
+      .forEach(([id,v])=>{
+        const cost=[v.ap?`${v.ap}PA`:'',v.mp?`${v.mp}PM`:'',v.wp?`${v.wp}PW`:''].filter(Boolean).join(' ');
+        toggles.push({id,label:v.label,on:sitActive(id),cost});
+      });
   }
   // Modes de la mécanique de classe (Crâ : Tir précis…)
   mechModes().forEach(md=>toggles.push({id:md.id,label:md.label,desc:md.desc,on:isModeOn(md.id)}));
@@ -1368,7 +1389,7 @@ function renderSitBuffs(){
   sitEl.innerHTML=toggles.map(t=>
     `<button class="btn sml${t.on?' on':''}" data-sit="${t.id}"${t.desc?` title="${t.desc.replace(/"/g,'&quot;')}"`:''}
       style="color:${t.on?'var(--gold)':'var(--dim)'};border-color:${t.on?'var(--gold)':'var(--border)'};white-space:nowrap">
-      ${t.on?'✓':'○'} ${t.label}</button>`).join('')
+      ${t.on?'✓':'○'} ${t.label}${t.cost?` <span style="font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${t.cost}</span>`:''}</button>`).join('')
     + counters.map(c=>{
       const v=counterVal(c.id);
       return `<span class="cntr" title="${(c.desc||'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:4px;border:1px solid ${v?'var(--gold)':'var(--border)'};border-radius:5px;padding:1px 4px;white-space:nowrap">
