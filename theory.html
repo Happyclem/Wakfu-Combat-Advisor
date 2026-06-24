@@ -160,7 +160,16 @@
           <div style="display:flex;gap:6px">
             <button class="btn sml" id="modedmg" style="flex:1">⚔ Max dégâts</button>
             <button class="btn sml" id="modekills" style="flex:1">💀 Max kills</button>
+            <button class="btn sml" id="modeturns" style="flex:1">⏱ Multi-tours</button>
           </div>
+        </div>
+        <!-- Multi-tours : tours pour tuer la cible visée (jauge + PV reportés) -->
+        <div id="turnscard" class="card" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="sh" style="margin:0">⏱ Plan — Tours pour tuer</div>
+            <span id="turnsum" style="font-family:var(--mono);font-size:11px;color:var(--gold)"></span>
+          </div>
+          <div id="turnsteps"></div>
         </div>
         <!-- Optimal seq -->
         <div id="seqcard" class="card" style="display:none">

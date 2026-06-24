@@ -923,6 +923,68 @@ function computeKills(){
     aliveCount:alive.length, refundAP:ok.ap||0, budgetStart:Math.max(0,(S.remainingAP??st.ap??6)-sc.ap) };
 }
 
+// ── MODE "MULTI-TOURS" (tours pour tuer la cible visée) ──────────
+// Enchaîne le tour optimal (computeSeq) contre la cible visée, en reportant d'un tour à
+// l'autre les PV de la cible ET la jauge de classe (PF/Concentration/BQ…). On répond :
+// « combien de tours pour tuer » + la séquence idéale de chaque tour.
+//
+// Méthode : on RÉUTILISE l'optimiseur mono-tour existant. Pour cela on place temporairement
+// l'état simulé (PV cible courants, valeur de jauge) là où computeSeq() les lit, on appelle
+// computeSeq(), puis on RESTAURE l'état réel. Aucune mutation persistante : la barre du
+// panneau Cibles et l'état de combat live ne sont jamais touchés.
+const KILL_TURNS_MAX = 12; // garde-fou : au-delà, on déclare « > N tours »
+function computeKillTurns(){
+  const t=focusTgt(); if(!t) return null;
+  const spells=getSpells(); if(!spells.length) return null;
+  const max=t._maxHp||t.hp||0; if(max<=0) return null;
+  const startHp=simStartHp();
+  if(startHp<=0) return { turns:[], killed:true, turnsToKill:0, startHp:0, max, totalDmg:0 };
+
+  // Sauvegarde de l'état réel qu'on va manipuler le temps de la simulation.
+  const realHp=t._currentHp;
+  const realAP=S.remainingAP;
+  const id=resId();
+  if(!S.combat.mechanics['__p']) S.combat.mechanics['__p']={};
+  const pm=S.combat.mechanics['__p'];
+  const realGauge=id?pm[id]:undefined;
+
+  const turns=[]; let hp=startHp, totalDmg=0, killed=false, gauge=(id?resVal():0);
+  try{
+    for(let n=0; n<KILL_TURNS_MAX && hp>0; n++){
+      // Place l'état simulé là où computeSeq() le lira.
+      t._currentHp=hp;
+      S.remainingAP=null;            // chaque tour repart du budget PA plein
+      if(id) pm[id]=gauge;           // jauge reportée du tour précédent
+
+      const seq=computeSeq();
+      if(!seq||!seq.chosen||!seq.chosen.length) break; // plus rien de jouable → on s'arrête
+
+      // Dégâts du tour (la séquence renvoie déjà ses dégâts par sort) + relance sur kill.
+      let dmg=seq.total;
+      if(seq.refund?.lethal) dmg+=seq.refund.total||0;
+      const lethal = dmg>=hp;
+      const dealt = Math.min(dmg, hp);
+      hp=Math.max(0, hp-dmg); totalDmg+=dealt;
+
+      // Jauge en fin de tour : on déroule nextPF sur les sorts joués (depuis initPF).
+      let g=seq.initPF;
+      seq.chosen.forEach((r,k)=>{ g=nextPF(g, r.spell, lethal && k===seq.chosen.length-1); });
+      gauge=g;
+
+      turns.push({ n:n+1, seq:seq.chosen, ap:seq.apUsed, dmg:dealt, hpAfter:hp,
+        strat:seq.strat||'', lethal, refund:seq.refund?.lethal?seq.refund:null });
+      if(hp<=0){ killed=true; break; }
+    }
+  } finally {
+    // Restauration STRICTE de l'état réel.
+    t._currentHp=realHp;
+    S.remainingAP=realAP;
+    if(id){ if(realGauge===undefined) delete pm[id]; else pm[id]=realGauge; }
+  }
+  return { turns, killed, turnsToKill:killed?turns.length:null, startHp, max, totalDmg,
+           capped:!killed && turns.length>=KILL_TURNS_MAX };
+}
+
 // ── MONSTER HP ───────────────────────────────────────────────────
 // Deux régimes pour les PV du monstre (S.monster._currentHp) :
 //  • EN LOG (combat live) : l'état réel est écrit UNIQUEMENT par le parsing du log. Les
@@ -1370,19 +1432,23 @@ function renderAdvisor(){
   const mc=document.getElementById('modecard');
   if(mc){
     mc.style.display=S.targets.length?'':'none';
-    const bd=document.getElementById('modedmg'), bk=document.getElementById('modekills');
     const on='var(--gold)', off='var(--dim)';
-    if(bd) bd.style.color=S.calcMode==='dmg'?on:off;
-    if(bk) bk.style.color=S.calcMode==='kills'?on:off;
-    if(bd) bd.style.borderColor=S.calcMode==='dmg'?on:'var(--border)';
-    if(bk) bk.style.borderColor=S.calcMode==='kills'?on:'var(--border)';
+    [['modedmg','dmg'],['modekills','kills'],['modeturns','turns']].forEach(([bid,m])=>{
+      const b=document.getElementById(bid); if(!b) return;
+      b.style.color=S.calcMode===m?on:off;
+      b.style.borderColor=S.calcMode===m?on:'var(--border)';
+    });
   }
-  // Optimal seq
+  // Optimal seq — une seule carte de plan affichée selon le mode.
+  const seqCard=document.getElementById('seqcard'), killsCard=document.getElementById('killscard'), turnsCard=document.getElementById('turnscard');
   if(S.calcMode==='kills'){
-    document.getElementById('seqcard').style.display='none';
+    if(seqCard) seqCard.style.display='none'; if(turnsCard) turnsCard.style.display='none';
     renderKillsPlan();
+  } else if(S.calcMode==='turns'){
+    if(seqCard) seqCard.style.display='none'; if(killsCard) killsCard.style.display='none';
+    renderKillTurns();
   } else {
-    document.getElementById('killscard').style.display='none';
+    if(killsCard) killsCard.style.display='none'; if(turnsCard) turnsCard.style.display='none';
     renderDmgSeq();
   }
   renderLive(); // panneau Combat live (lecture seule) — suit le log en continu
@@ -1560,9 +1626,42 @@ function renderKillsPlan(){
   if(!plan.kills.length && !plan.dump) html='<div class="muted-sm">Aucune cible tuable avec les PA disponibles.</div>';
   steps.innerHTML=html;
 }
+// ── RENDER : MULTI-TOURS (tours pour tuer la cible visée) ────────
+function renderKillTurns(){
+  const tc=document.getElementById('turnscard'); if(!tc) return;
+  const plan=computeKillTurns();
+  if(!plan || !plan.turns.length){ tc.style.display='none'; return; }
+  tc.style.display='';
+  const t=focusTgt();
+  const sum=document.getElementById('turnsum');
+  if(sum){
+    if(plan.killed) sum.textContent=`${plan.turnsToKill} tour${plan.turnsToKill>1?'s':''} pour tuer · ${plan.totalDmg.toLocaleString('fr')} dmg`;
+    else sum.textContent=plan.capped?`> ${KILL_TURNS_MAX} tours (cible trop résistante)`:`survit · ${plan.totalDmg.toLocaleString('fr')} dmg`;
+  }
+  const steps=document.getElementById('turnsteps');
+  if(!steps) return;
+  let html='';
+  plan.turns.forEach(tr=>{
+    const seqTxt=tr.seq.map(r=>`${spellIcon(r.spell,'icn-sm')}${r.spell.name}`).join(' + ');
+    const refundTxt=tr.refund?.seq?.length?` <span style="color:var(--sky)">↻ ${tr.refund.seq.map(r=>r.spell.name).join(' + ')}</span>`:'';
+    const accent=tr.lethal?'var(--red)':'var(--gold)';
+    const hpTxt=tr.lethal?'☠ cible tuée':`reste ${tr.hpAfter.toLocaleString('fr')} / ${plan.max.toLocaleString('fr')} PV`;
+    html+=`<div style="border:1px solid var(--border);border-left:3px solid ${accent};border-radius:5px;padding:5px 8px;margin-bottom:5px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+        <span style="font-family:var(--mono);font-size:var(--fs-10);color:${accent}">Tour ${tr.n}</span>
+        ${tr.strat?`<span style="font-size:var(--fs-10);color:var(--sky)">${tr.strat}</span>`:''}
+        <span style="margin-left:auto;font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${tr.ap} PA · ${tr.dmg.toLocaleString('fr')} dmg</span>
+      </div>
+      <div style="font-size:var(--fs-10);color:var(--muted)">${seqTxt}${refundTxt}</div>
+      <div style="font-size:var(--fs-10);color:${tr.lethal?'var(--red)':'var(--dim)'};margin-top:2px">${hpTxt}</div>
+    </div>`;
+  });
+  steps.innerHTML=html;
+}
 function setCalcMode(mode){ S.calcMode=mode; save(); renderAdvisor(); }
-document.getElementById('modedmg')?.addEventListener('click',()=>setCalcMode('dmg'));
-document.getElementById('modekills')?.addEventListener('click',()=>setCalcMode('kills'));
+on('modedmg','click',()=>setCalcMode('dmg'));
+on('modekills','click',()=>setCalcMode('kills'));
+on('modeturns','click',()=>setCalcMode('turns'));
 // Délégation des toggles/compteurs situationnels (conteneur #sitbuffs stable).
 document.getElementById('sitbuffs')?.addEventListener('click',e=>{
   const b=e.target.closest('[data-sit],[data-cnt]'); if(!b) return;
