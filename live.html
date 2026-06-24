@@ -94,6 +94,26 @@
       </div>
     </div><!-- /#cp-live -->
 
+    <!-- PERSONNAGE — onglet interactif présent dans les 2 apps, synchronisé via localStorage.
+         Modifier les stats/bonus ici met à jour le Theorycraft (et inversement) en direct. -->
+    <div class="cp" id="cp-perso" data-dock="perso" data-title="👤 Personnage" data-zone="center">
+      <div class="card">
+        <div class="sh">Bonus actifs</div>
+        <div class="brow on" id="brow-guilde" data-bk="guilde">
+          <div class="bchk"></div><span>Bonus de Guilde</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+10PV +2%DI +5Tacle +5Esquive</span>
+        </div>
+        <div class="brow" id="brow-monture" data-bk="monture">
+          <div class="bchk"></div><span>Bonus de Monture</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--dim)">+40 maîtrises élémentaires</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sh">Statistiques</div>
+        <div id="perstats"></div>
+      </div>
+    </div><!-- /#cp-perso -->
+
     <!-- ÉVÉNEMENTS du log -->
     <div class="rp on" id="rp-events" data-dock="events" data-title="📡 Événements" data-zone="right">
       <div id="feedhd" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">

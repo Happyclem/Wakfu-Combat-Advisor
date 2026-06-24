@@ -2,3 +2,8 @@ extract-spells-encyclo.js
 encyclo.bookmarklet.txt
 extract-passives-encyclo.js
 build.bat
+
+# Outils de vérification visuelle (dev only — voir scripts/verify-pages.js)
+node_modules/
+package-lock.json
+screenshots/

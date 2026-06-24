@@ -1,0 +1,11 @@
+{
+  "name": "wakfu-combat-advisor",
+  "private": true,
+  "description": "Outils Wakfu (theorycraft + combat live). App = HTML/CSS/JS vanilla, sans build. Playwright sert UNIQUEMENT aux vérifications visuelles locales.",
+  "scripts": {
+    "verify": "node scripts/verify-pages.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

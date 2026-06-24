@@ -1220,12 +1220,13 @@ document.getElementById('hpmdec')?.addEventListener('click',()=>setHpMultiplier(
 
 function renderIdle(){
   const el=document.getElementById('idle'); if(!el) return;
+  const hasLogPanel=!!document.getElementById('dz'); // étape « Connecter le log » seulement si le panneau Log est présent
   const steps=[
-    {n:1, ok:!!S.build?.class,            lbl:'Choisir ta classe & ton niveau', hint:'Build',  go:()=>openLeftTab('build')},
-    {n:2, ok:getDeck().length>0,          lbl:'Ajouter des sorts au deck',       hint:'Sorts',  go:()=>openRightTab('spells')},
-    {n:3, ok:S.targets.length>0,          lbl:'Choisir une cible',               hint:'Cible',  go:()=>openLeftTab('target')},
-    {n:4, ok:document.getElementById('led')?.classList.contains('on'), lbl:'Connecter le log', opt:true, hint:'Log', go:()=>openLeftTab('log')},
-  ];
+    {ok:!!S.build?.class,            lbl:'Choisir ta classe & ton niveau', hint:'Build',  go:()=>openLeftTab('build')},
+    {ok:getDeck().length>0,          lbl:'Ajouter des sorts au deck',       hint:'Sorts',  go:()=>openRightTab('spells')},
+    {ok:S.targets.length>0,          lbl:'Choisir une cible',               hint:'Cible',  go:()=>openLeftTab('target')},
+    ...(hasLogPanel?[{ok:document.getElementById('led')?.classList.contains('on'), lbl:'Connecter le log', opt:true, hint:'Log', go:()=>openLeftTab('log')}]:[]),
+  ].map((s,i)=>({...s,n:i+1})); // numérotation dynamique après filtrage
   el.innerHTML=`<div style="font-size:var(--fs-30)">⚔</div>
     <div style="font-size:var(--fs-13);color:var(--muted)">Bienvenue — quelques étapes pour démarrer</div>
     <div class="ckl">${steps.map(s=>`
@@ -2373,3 +2374,31 @@ document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dat
 document.getElementById('crit-btn')?.classList.toggle('on',!!S.critMode);
 syncHpMult(); // reflète la difficulté de donjon sauvegardée
 if(S.playerName){ const pn=document.getElementById('pninp'); if(pn) pn.value=S.playerName; }
+
+// ── SYNC INTER-FENÊTRES (Theorycraft ⇄ Combat live) ──────────────
+// Les deux apps partagent la clé localStorage 'wca'. L'événement 'storage' ne se déclenche
+// que dans les AUTRES fenêtres (pas celle qui a écrit) → pas de boucle. À réception, on
+// recharge l'état partagé (build, stats, bonus, cibles…) et on re-rend, en conservant la
+// disposition (dock) PROPRE à cette fenêtre (chaque app a son jeu de panneaux).
+window.addEventListener('storage', debounce(e=>{
+  if(e.key!=='wca' || e.newValue==null) return;
+  // Ne pas écraser une saisie en cours dans cette fenêtre (stats Personnage, nom…) :
+  // on reprogramme la synchro un peu plus tard plutôt que de voler le focus.
+  const ae=document.activeElement, tag=(ae&&ae.tagName)||'';
+  if(/INPUT|TEXTAREA|SELECT/.test(tag)){ setTimeout(()=>window.dispatchEvent(new StorageEvent('storage',{key:'wca',newValue:e.newValue})),600); return; }
+  // On garde, propres à CETTE fenêtre : la disposition (dock) et l'état de combat en cours
+  // (S.combat = PV/regains du joueur lus dans le log). Sans ça, une sauvegarde de l'autre
+  // app (qui n'a pas de log) effacerait l'affichage live via les migrations de load().
+  const myDock=S.dock, myCombat=S.combat;
+  load();
+  S.dock=myDock;
+  if(logActive()) S.combat=myCombat; // seule la fenêtre connectée au log possède l'état de combat
+  syncCls();
+  document.querySelectorAll('[data-pos]').forEach(x=>x.classList.toggle('on',x.dataset.pos===S.position));
+  document.querySelectorAll('[data-rng]').forEach(x=>x.classList.toggle('on',x.dataset.rng===S.range));
+  document.getElementById('crit-btn')?.classList.toggle('on',!!S.critMode);
+  syncHpMult();
+  const pn=document.getElementById('pninp'); if(pn) pn.value=S.playerName||'';
+  renderAll();
+  refreshCSQTarget?.();
+}, 150));
