@@ -757,7 +757,12 @@ function canAdd(seq,sp,wpMax){
   if(wp>wpMax) return false;               // dépasserait le budget PW
   return true;
 }
-function computeSeq(){
+// opts.mode:
+//   'burst' (défaut) → maximise les dégâts du tour (comportement historique).
+//   'bank'           → maximise la JAUGE de fin de tour (dégâts en tiebreak), sans dépenser
+//                      de finisseur. Sert au planificateur multi-tours (banking inter-tours).
+function computeSeq(opts){
+  const bankMode = opts && opts.mode==='bank';
   const spells=getSpells(); if(!spells.length||!S.monster) return null;
   const st=getEffStats(), sc=sitBuffsCost();
   const ap=Math.max(0,(S.remainingAP??st.ap??6)-sc.ap); if(ap<=0) return null;
@@ -806,6 +811,24 @@ function computeSeq(){
       if(bestAlt>dp[maxAP].dmg*FINISHER_SEQ_MARGIN){chosen=bestSeq;strat='⚡ PF max → Finisseur';}
       else strat='⚡ Dégâts directs';
     }
+  }
+  // ── BANK : maximise la jauge de fin de tour (sans finisseur), dégâts en tiebreak. ──
+  // Utilisé par le planificateur multi-tours pour « charger » la jauge avant un gros
+  // finisseur au tour suivant. On n'autorise que les sorts qui NE consomment pas la jauge.
+  if(bankMode && trackRes){
+    const blds=spells.filter(s=>!resConsumes(s));
+    const dpB=Array.from({length:maxAP+1},()=>({pf:initPF,dmg:0,seq:[]}));
+    for(let j=1;j<=maxAP;j++) for(const sp of blds){
+      const c=effApCost(sp); if(c>j) continue;
+      const prev=dpB[j-c]; if(!canAdd(prev.seq,sp,wpMax)) continue;
+      const pf2=nextPF(prev.pf,sp,false), d2=prev.dmg+dmgAt(sp,prev.pf);
+      // priorité : jauge maximale ; à jauge égale, plus de dégâts.
+      if(pf2>dpB[j].pf || (pf2===dpB[j].pf && d2>dpB[j].dmg)) dpB[j]={pf:pf2,dmg:d2,seq:[...prev.seq,sp]};
+    }
+    // Meilleure cellule = jauge max (tiebreak dégâts) sur tous les budgets de PA.
+    let best=dpB[0];
+    for(let j=1;j<=maxAP;j++) if(dpB[j].pf>best.pf || (dpB[j].pf===best.pf && dpB[j].dmg>best.dmg)) best=dpB[j];
+    if(best.seq.length){ chosen=best.seq; strat='🔋 Charge la jauge'; }
   }
   if(!chosen.length) return null;
   let pfSim=initPF;
@@ -933,7 +956,8 @@ function computeKills(){
 // computeSeq(), puis on RESTAURE l'état réel. Aucune mutation persistante : la barre du
 // panneau Cibles et l'état de combat live ne sont jamais touchés.
 const KILL_TURNS_MAX = 12; // garde-fou : au-delà, on déclare « > N tours »
-function computeKillTurns(){
+function computeKillTurns(opts){
+  const optNoBank = !!(opts && opts.noBank);
   const t=focusTgt(); if(!t) return null;
   const spells=getSpells(); if(!spells.length) return null;
   const max=t._maxHp||t.hp||0; if(max<=0) return null;
@@ -948,31 +972,59 @@ function computeKillTurns(){
   const pm=S.combat.mechanics['__p'];
   const realGauge=id?pm[id]:undefined;
 
-  const turns=[]; let hp=startHp, totalDmg=0, killed=false, gauge=(id?resVal():0);
+  // Méta jauge pour l'affichage (null si la classe n'a pas de jauge pertinente à montrer).
+  const mech=getMech();
+  const gaugeMeta = (id && mech?.res && showsRes())
+    ? { id, label:mech.res.label||id, max:mech.res.max||100, color:mech.res.color||'var(--gold)' } : null;
+
+  // Évalue UN tour à (hp, gauge) donnés dans le mode demandé. Renvoie un plan normalisé
+  // (dégâts totaux relance comprise, jauge de fin de tour, létalité), sans rien persister
+  // d'autre que l'état temporaire déjà géré par la boucle.
+  function evalTurn(curHp, curGauge, mode){
+    t._currentHp=curHp; S.remainingAP=null; if(id) pm[id]=curGauge;
+    const seq=computeSeq(mode==='bank'?{mode:'bank'}:undefined);
+    if(!seq||!seq.chosen||!seq.chosen.length) return null;
+    let dmg=seq.total + (seq.refund?.lethal?(seq.refund.total||0):0);
+    const lethal=dmg>=curHp;
+    // Jauge de fin de tour (déroulé nextPF depuis initPF, coup létal sur le dernier sort).
+    let g=seq.initPF;
+    seq.chosen.forEach((r,k)=>{ g=nextPF(g, r.spell, lethal && k===seq.chosen.length-1); });
+    return { seq, dmg, lethal, gaugeAfter:g };
+  }
+  // Le « banking » n'a de sens que pour une classe à jauge avec des finisseurs scalants.
+  // opts.noBank force le burst pur (utilisé pour vérifier que le banking n'aggrave jamais).
+  const canBank = !optNoBank && !!id && tracksRes() && spells.some(s=>resConsumes(s));
+
+  const turns=[]; let hp=startHp, totalDmg=0, killed=false, stalled=false, gauge=(id?resVal():0);
   try{
     for(let n=0; n<KILL_TURNS_MAX && hp>0; n++){
-      // Place l'état simulé là où computeSeq() le lira.
-      t._currentHp=hp;
-      S.remainingAP=null;            // chaque tour repart du budget PA plein
-      if(id) pm[id]=gauge;           // jauge reportée du tour précédent
+      const gaugeBefore=gauge;
+      const burst=evalTurn(hp, gauge, 'burst');
+      if(!burst){ stalled=true; break; } // plus rien de jouable
 
-      const seq=computeSeq();
-      if(!seq||!seq.chosen||!seq.chosen.length) break; // plus rien de jouable → on s'arrête
+      // Choix burst vs bank : on banke seulement si (a) le burst ne tue pas ce tour, et
+      // (b) sur un horizon de 2 tours, charger la jauge puis frapper rapporte plus que
+      // frapper maintenant deux fois. Évite les optima mono-tour myopes (cf. Sram : garder
+      // le Point Faible pour un gros finisseur).
+      let pick=burst, banked=false;
+      if(canBank && !burst.lethal){
+        const bank=evalTurn(hp, gauge, 'bank');
+        if(bank && bank.gaugeAfter>burst.gaugeAfter){
+          const burstNext=evalTurn(Math.max(1,hp-burst.dmg), burst.gaugeAfter, 'burst');
+          const afterBankNext=evalTurn(Math.max(1,hp-bank.dmg), bank.gaugeAfter, 'burst');
+          const horizonBurst = burst.dmg + (burstNext?burstNext.dmg:0);
+          const horizonBank  = bank.dmg + (afterBankNext?afterBankNext.dmg:0);
+          if(horizonBank>horizonBurst){ pick=bank; banked=true; }
+        }
+      }
 
-      // Dégâts du tour (la séquence renvoie déjà ses dégâts par sort) + relance sur kill.
-      let dmg=seq.total;
-      if(seq.refund?.lethal) dmg+=seq.refund.total||0;
-      const lethal = dmg>=hp;
-      const dealt = Math.min(dmg, hp);
-      hp=Math.max(0, hp-dmg); totalDmg+=dealt;
-
-      // Jauge en fin de tour : on déroule nextPF sur les sorts joués (depuis initPF).
-      let g=seq.initPF;
-      seq.chosen.forEach((r,k)=>{ g=nextPF(g, r.spell, lethal && k===seq.chosen.length-1); });
-      gauge=g;
-
-      turns.push({ n:n+1, seq:seq.chosen, ap:seq.apUsed, dmg:dealt, hpAfter:hp,
-        strat:seq.strat||'', lethal, refund:seq.refund?.lethal?seq.refund:null });
+      const dealt=Math.min(pick.dmg, hp);
+      hp=Math.max(0, hp-pick.dmg); totalDmg+=dealt;
+      gauge=pick.gaugeAfter;
+      turns.push({ n:n+1, seq:pick.seq.chosen, ap:pick.seq.apUsed, dmg:dealt, hpAfter:hp,
+        strat:pick.seq.strat||'', lethal:pick.lethal, banked,
+        refund:pick.seq.refund?.lethal?pick.seq.refund:null,
+        gaugeBefore, gaugeAfter:gauge });
       if(hp<=0){ killed=true; break; }
     }
   } finally {
@@ -982,7 +1034,9 @@ function computeKillTurns(){
     if(id){ if(realGauge===undefined) delete pm[id]; else pm[id]=realGauge; }
   }
   return { turns, killed, turnsToKill:killed?turns.length:null, startHp, max, totalDmg,
-           capped:!killed && turns.length>=KILL_TURNS_MAX };
+           hpLeft:hp, gaugeMeta,
+           capped:!killed && !stalled && turns.length>=KILL_TURNS_MAX,
+           stalled };
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
@@ -1630,30 +1684,64 @@ function renderKillsPlan(){
 function renderKillTurns(){
   const tc=document.getElementById('turnscard'); if(!tc) return;
   const plan=computeKillTurns();
-  if(!plan || !plan.turns.length){ tc.style.display='none'; return; }
+  if(!plan){ tc.style.display='none'; return; }
   tc.style.display='';
-  const t=focusTgt();
-  const sum=document.getElementById('turnsum');
+  const max=plan.max||0, gm=plan.gaugeMeta;
+  const steps=document.getElementById('turnsteps'), sum=document.getElementById('turnsum');
+
+  // Cas limites sans aucun tour jouable.
+  if(!plan.turns.length){
+    if(plan.killed){ if(sum) sum.textContent='cible déjà à terre'; if(steps) steps.innerHTML='<div class="muted-sm">La cible visée est déjà morte.</div>'; }
+    else { if(sum) sum.textContent='aucune séquence'; if(steps) steps.innerHTML='<div class="muted-sm">Aucun sort jouable (deck/PA). Ajoute des sorts à dégâts au deck.</div>'; }
+    return;
+  }
+
+  // Résumé.
   if(sum){
     if(plan.killed) sum.textContent=`${plan.turnsToKill} tour${plan.turnsToKill>1?'s':''} pour tuer · ${plan.totalDmg.toLocaleString('fr')} dmg`;
-    else sum.textContent=plan.capped?`> ${KILL_TURNS_MAX} tours (cible trop résistante)`:`survit · ${plan.totalDmg.toLocaleString('fr')} dmg`;
+    else if(plan.stalled) sum.textContent=`bloqué à ${plan.turns.length} tour${plan.turns.length>1?'s':''} · reste ${plan.hpLeft.toLocaleString('fr')} PV`;
+    else sum.textContent=`> ${KILL_TURNS_MAX} tours · reste ${plan.hpLeft.toLocaleString('fr')} / ${max.toLocaleString('fr')} PV`;
   }
-  const steps=document.getElementById('turnsteps');
   if(!steps) return;
+
+  // Barre de PV par tour : couleur selon le % restant (vert/or/rouge), comme renderHPBars.
+  const hpBar=(hp)=>{
+    const pct=max>0?Math.max(0,Math.min(100,Math.round(hp/max*100))):0;
+    const col=hp<=0?'var(--dim)':pct>50?'var(--green)':pct>25?'var(--gold)':'var(--red)';
+    return `<div class="hpt" style="margin-top:4px"><div class="hpf" style="width:${pct}%;background-color:${col}"></div></div>`;
+  };
+  // Barre de jauge de classe (fin de tour) — seulement si la classe en a une pertinente.
+  const gaugeBar=(g)=>{
+    if(!gm) return '';
+    const pct=gm.max>0?Math.max(0,Math.min(100,Math.round(g/gm.max*100))):0;
+    return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+      <span style="font-size:var(--fs-9);color:var(--muted);width:auto;white-space:nowrap">${gm.label}</span>
+      <div class="gb" style="height:5px"><div class="gf" style="width:${pct}%;background-color:${gm.color}"></div></div>
+      <span style="font-family:var(--mono);font-size:var(--fs-9);color:var(--muted)">${Math.round(g)}/${gm.max}</span>
+    </div>`;
+  };
+
   let html='';
   plan.turns.forEach(tr=>{
-    const seqTxt=tr.seq.map(r=>`${spellIcon(r.spell,'icn-sm')}${r.spell.name}`).join(' + ');
-    const refundTxt=tr.refund?.seq?.length?` <span style="color:var(--sky)">↻ ${tr.refund.seq.map(r=>r.spell.name).join(' + ')}</span>`:'';
-    const accent=tr.lethal?'var(--red)':'var(--gold)';
-    const hpTxt=tr.lethal?'☠ cible tuée':`reste ${tr.hpAfter.toLocaleString('fr')} / ${plan.max.toLocaleString('fr')} PV`;
+    // Dégâts par sort (comme la vue live) : icône + nom + dmg.
+    const seqHtml=tr.seq.map(r=>
+      `<span class="kt-sp" data-el="${r.spell.element||'Neutre'}">${spellIcon(r.spell,'icn-sm')}<span>${r.spell.name}</span><b>${r.damage.toLocaleString('fr')}</b></span>`
+    ).join('');
+    const refundHtml=tr.refund?.seq?.length
+      ? `<div style="font-size:var(--fs-9);color:var(--sky);margin-top:2px">↻ relance sur kill : ${tr.refund.seq.map(r=>`${r.spell.name} (${r.damage.toLocaleString('fr')})`).join(' + ')}</div>`
+      : '';
+    const accent=tr.lethal?'var(--red)':tr.banked?'var(--purple)':'var(--gold)';
+    const hpTxt=tr.lethal?'☠ cible tuée':`reste ${tr.hpAfter.toLocaleString('fr')} / ${max.toLocaleString('fr')} PV`;
     html+=`<div style="border:1px solid var(--border);border-left:3px solid ${accent};border-radius:5px;padding:5px 8px;margin-bottom:5px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
         <span style="font-family:var(--mono);font-size:var(--fs-10);color:${accent}">Tour ${tr.n}</span>
         ${tr.strat?`<span style="font-size:var(--fs-10);color:var(--sky)">${tr.strat}</span>`:''}
         <span style="margin-left:auto;font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)">${tr.ap} PA · ${tr.dmg.toLocaleString('fr')} dmg</span>
       </div>
-      <div style="font-size:var(--fs-10);color:var(--muted)">${seqTxt}${refundTxt}</div>
-      <div style="font-size:var(--fs-10);color:${tr.lethal?'var(--red)':'var(--dim)'};margin-top:2px">${hpTxt}</div>
+      <div class="kt-seq">${seqHtml}</div>${refundHtml}
+      ${gaugeBar(tr.gaugeAfter)}
+      ${hpBar(tr.hpAfter)}
+      <div style="font-size:var(--fs-9);color:${tr.lethal?'var(--red)':'var(--dim)'};margin-top:2px">${hpTxt}</div>
     </div>`;
   });
   steps.innerHTML=html;

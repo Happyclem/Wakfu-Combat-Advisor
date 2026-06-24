@@ -234,6 +234,12 @@ img.icn[src*="_coin"],img.icn-sm[src*="_coin"]{background:none;border-radius:0;p
 .ss:hover{border-color:var(--red);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .ssap{font-family:var(--mono);font-size:var(--fs-10);color:var(--muted)}
 .ssdmg{font-family:var(--mono);font-size:var(--fs-11);color:var(--green);margin-left:auto}
+/* Multi-tours : chips de sorts d'un tour (icône + nom + dégâts), repli sur plusieurs lignes. */
+.kt-seq{display:flex;flex-wrap:wrap;gap:4px}
+.kt-sp{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:var(--inp);
+  border:1px solid var(--border);border-left:3px solid var(--el-col,var(--border));border-radius:var(--r);
+  font-size:var(--fs-10)}
+.kt-sp b{font-family:var(--mono);font-size:var(--fs-9);color:var(--green);font-weight:600}
 .stot{font-size:var(--fs-15);font-weight:700;color:var(--gold)}
 /* Passive card */
 .pc{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;background:var(--inp);

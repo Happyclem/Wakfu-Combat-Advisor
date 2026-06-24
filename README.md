@@ -1,26 +1,40 @@
 # ⚔ Wakfu Combat Advisor
 
-Outil d'optimisation de combat pour le jeu **Wakfu**. Il parse le log de combat en temps réel, recommande des séquences de sorts optimales et suit l'état du combat tour par tour.
+Outil d'optimisation de combat pour le jeu **Wakfu**. Il calcule des séquences de sorts optimales à partir de ton build, et peut suivre l'état du combat tour par tour en parsant le log en temps réel.
 
 Fonctionne sans installation — un simple double-clic sur `index.html` suffit (Windows, Linux, macOS).
 
 ---
 
+## Deux applications
+
+L'outil est scindé en **deux apps distinctes** (jamais ouvertes en même temps), accessibles depuis la page d'accueil `index.html` :
+
+| App | Fichier | Usage |
+|---|---|---|
+| 🧪 **Theorycraft** | `theory.html` | Préparer ses tours **à froid** : build, cibles, classement des sorts, séquence optimale, plan max kills, et **plan multi-tours** (combien de tours pour tuer une cible). Aucun log. |
+| 🔴 **Combat live** | `live.html` | Suivre le combat **en direct** : connecter le log et lire la séquence optimale du tour qui se met à jour automatiquement (lecture seule). |
+
+Les deux apps **partagent le même moteur** (`wca.js`, `wca.css`, données, mécaniques) et le **même état** (via `localStorage`) : un build configuré dans Theorycraft apparaît instantanément dans Combat live. L'onglet **Personnage** est présent dans les deux et **synchronisé en temps réel** dans les deux sens.
+
+---
+
 ## Fonctionnalités
 
-### Conseiller en temps réel
-- **Ranking des sorts** par dégâts/PA, groupés par élément, mis à jour à chaque action du log
+### Conseiller (Theorycraft & Live)
+- **Ranking des sorts** par dégâts/PA, groupés par élément
 - **Séquence optimale** calculée par algorithme knapsack (programmation dynamique) sur les PA disponibles
-- **Mode Max Kills** : plan de bataille multi-cibles
-- **Séquence personnalisée** : construction manuelle en cliquant sur les sorts, avec décompte des ressources
+- **Mode Max Kills** : plan de bataille multi-cibles, par priorité, avec réinjection des PA regagnés sur kill
+- **Mode Multi-tours** *(Theorycraft)* : enchaîne le tour optimal contre la cible visée — **jauge de classe et PV reportés d'un tour à l'autre** — et répond « combien de tours pour tuer », avec la séquence idéale de chaque tour. Calcul en simulation pure : n'altère jamais l'état réel.
+- **Séquence personnalisée** *(Theorycraft)* : construction manuelle en cliquant sur les sorts, avec décompte des ressources
 - **Tooltip de description** : maintenir Ctrl et survoler un sort pour afficher sa description
 
-### Suivi du combat
+### Suivi du combat (app Combat live)
 - **Parsing automatique du log** (polling toutes les 500 ms) : sorts, dégâts, soins, états, morts, ressources gagnées
 - **Détection automatique du personnage** et des cibles touchées
 - **Barres de PV** pour le joueur et chaque cible, mises à jour en direct
 - **Restauration d'état** : cliquer sur n'importe quelle ligne du flux d'événements restaure l'état du combat à cet instant
-- **Contexte de combat** dans le panneau Conseiller : Mêlée / Distance, position Face / Côté / Dos, mode Coup Critique, et les toggles spécifiques à la classe (Tir précis, Dé six, Point Faible consommé…)
+- **Contexte de combat** dans le Conseiller (Theorycraft) : Mêlée / Distance, position Face / Côté / Dos, mode Coup Critique, et les toggles spécifiques à la classe (Tir précis, Dé six, Point Faible consommé…)
 - Jusqu'à **8 cibles simultanées** avec priorité réorderable (un même monstre peut être ajouté plusieurs fois ; clic n'importe où sur la carte pour viser)
 - **Icônes officielles** (sorts, éléments, stats, classes) chargées depuis [WakfuAssets](https://github.com/Tmktahu/WakfuAssets), avec repli automatique sur des emojis hors-ligne
 
@@ -33,10 +47,11 @@ Fonctionne sans installation — un simple double-clic sur `index.html` suffit (
 ## Démarrage
 
 1. Placer tous les fichiers dans le même dossier.
-2. Ouvrir `index.html` dans un navigateur (Chrome ou Edge recommandés pour l'API File System Access).
-3. Configurer le build dans l'onglet **BUILD** (classe, niveau, stats ou import).
-4. Ajouter les sorts au deck dans l'onglet **Sorts & Passifs**.
-5. Charger le log de combat via l'onglet **LOG**.
+2. Ouvrir `index.html` dans un navigateur (Chrome ou Edge recommandés pour l'API File System Access) et choisir une app.
+3. Dans **🧪 Theorycraft** : configurer le build dans l'onglet **Build** (classe, niveau, stats ou import), ajouter les sorts au deck dans **Sorts & Passifs**, choisir une **Cible**. Le Conseiller affiche alors la séquence optimale, le plan max kills et le plan multi-tours.
+4. Pour suivre un vrai combat : ouvrir **🔴 Combat live** et charger le log via l'onglet **Log**. Le build et les cibles réglés en Theorycraft y sont déjà présents (état partagé).
+
+> Les deux apps partageant le `localStorage`, on peut basculer de l'une à l'autre via le lien en haut à droite sans rien reconfigurer.
 
 ### Chemin du fichier log
 
@@ -58,7 +73,7 @@ Cocher **"Lire depuis le début"** pour analyser un combat déjà terminé. Sino
 3. Ouvrir la console du navigateur (F12)
 4. Coller et exécuter le contenu de `extract-build-wakfuli.js` ou `extract-build-zenith.js`
 5. Le JSON est copié automatiquement dans le presse-papier (affiché aussi dans la console)
-6. Le coller dans le champ **Import Wakfuli / Zenith** de l'onglet BUILD
+6. Le coller dans le champ **Import Wakfuli / Zenith** de l'onglet **Build** (app 🧪 Theorycraft)
 
 ### Deux façons d'importer le JSON dans le champ
 
@@ -119,17 +134,34 @@ Les CSV par classe portent aussi des colonnes issues de l'extraction directe des
 ## Structure des fichiers
 
 ```
-index.html              Interface (markup uniquement)
-wca.css                 Styles
-wca.js                  Logique applicative
+index.html              Page d'accueil (choix entre les 2 apps) — ne charge aucun JS
+theory.html             App 🧪 Theorycraft (markup) — Build, Cible, Conseiller, Personnage, Sorts
+live.html               App 🔴 Combat live (markup) — Log, Contexte, Combat live, Personnage, Événements
+wca.css                 Styles (partagés)
+wca.js                  Logique applicative (partagée par theory.html et live.html)
 mechanics.js            Mécaniques de classe (jauge, génération, bonus de dégâts) — window.WCA_MECHANICS
 data-game.js            [GÉNÉRÉ] Sorts et passifs des 18 classes (window.WCA_SPELLS)
 data-commun.js          [GÉNÉRÉ] Sorts communs + passifs généraux (window.WCA_COMMON_SPELLS / _GENERAL_PASSIVES)
 data-monsters.js        Base de données monstres — 885 entrées (window.WCA_MONSTERS)
 data-raw/               CSV sources (Sorts_*.csv, Passifs_*.csv, Monstres.csv) — source de vérité
 build-data.js           Générateur : data-raw/*.csv → data-game.js + data-commun.js
+build-monsters.js       Générateur : data-raw/monsters-ankama.json → data-monsters.js
 extract-spells-encyclo.js   Bookmarklet : scrape les sorts d'une classe → CSV
 extract-passives-encyclo.js Bookmarklet : scrape les passifs d'une classe → CSV
 extract-build-wakfuli.js    Script à coller dans la console sur wakfuli.com
 extract-build-zenith.js     Script à coller dans la console sur zenithwakfu.com
+scripts/                Vérification visuelle des pages (Playwright, dev only)
 ```
+
+---
+
+## Architecture & développement
+
+- **Moteur unique partagé** : `theory.html` et `live.html` chargent exactement les mêmes scripts. Ce qui distingue une app de l'autre = **quels panneaux (`data-dock`) sont présents dans son HTML**. Le moteur de docking (`wca.js`) construit ses onglets à partir du DOM existant ; les fonctions de rendu sont défensives (helper `on()` pour les écouteurs, early-returns si un conteneur est absent) afin que le script tourne sans erreur quel que soit le sous-ensemble de panneaux d'une page.
+- **État partagé** : tout l'état vit dans `localStorage` (clé `wca`). Un écouteur de l'événement `storage` recharge et re-rend l'autre fenêtre → synchronisation temps réel build / stats / bonus / cibles entre les deux apps. Chaque fenêtre conserve sa propre disposition (dock) ; la fenêtre connectée au log garde son état de combat.
+- **Vérification visuelle** (optionnelle, dépendance de dev uniquement) :
+  ```bash
+  npm install && npx playwright install chromium   # une seule fois
+  npm run verify                                    # charge les 3 pages, capture erreurs + screenshots
+  ```
+  `node_modules/` et `screenshots/` sont gitignorés ; l'app elle-même reste 100 % vanilla (HTML/CSS/JS, sans build).

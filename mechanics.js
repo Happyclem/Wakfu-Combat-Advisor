@@ -37,7 +37,11 @@
     initial: 0, // ⚠ supposé 0 en début de combat (à confirmer in-game)
     gen(sp) { return sp.pfGen || 0; },
     consumes(sp) {
-      return !!sp.isFinisher || /consomme.*point\s*faible/i.test(sp.desc || '');
+      // Un sort qui GÉNÈRE du Point Faible n'en consomme pas (ex. « Ouvrir les veines »
+      // consomme l'Hémorragie ET gagne du PF → ne doit PAS être pris pour un finisseur).
+      if ((sp.pfGen || 0) > 0) return false;
+      // « consomme le/du Point faible » (et non « consomme l'Hémorragie … Point faible »).
+      return !!sp.isFinisher || /consomme\s+(le|du)\s+point\s*faible/i.test(sp.desc || '');
     },
     scales(sp) {
       return this.consumes(sp) || /arnaque/i.test(sp.name || '');
@@ -51,9 +55,14 @@
       const g = ctx && ctx.suppressGen ? 0 : this.gen(sp) + (ctx && ctx.posBonus || 0);
       return Math.min(SRAM_PF_MAX, val + g);
     },
-    bonus(m) { return 1 + (m.pf || 0) * SRAM_PF_PER; }, // ×1 → ×2.0 (PF 0→200)
+    // ⚠ Le bonus de Point Faible n'est PAS un multiplicateur GLOBAL : il ne s'applique
+    // qu'aux sorts qui CONSOMMENT le Point Faible (finisseurs/Arnaque), via spellDmgMult
+    // (chemin isPFScaler). Renvoyer 1 ici, sinon le PF doublerait TOUS les sorts (y compris
+    // les builders), ce qui pousserait à ne jamais dépenser le PF (jauge bloquée à 200).
+    bonus() { return 1; },
     // Les multiplicateurs par sort restent dans wca.js (spellDmgMult) qui connaît
-    // Assaut Brutal, Attaque mortelle <50 % PV, Châtiment/Effroi, l'Hémorragie…
+    // le scaling PF des finisseurs, Assaut Brutal, Attaque mortelle <50 % PV,
+    // Châtiment/Effroi, l'Hémorragie…
     advice(m) {
       const pf = m.pf || 0, mult = (1 + pf * SRAM_PF_PER).toFixed(2);
       if (pf >= SRAM_PF_MAX) return [{ p: 'H', msg: `🔴 Point Faible MAX (${SRAM_PF_MAX}) → Finisseur/ultime ! (×2.00)` }];

@@ -34,6 +34,23 @@ const ANKAMA_SPELLS = loadJSON('spells-ankama.json'); // [{id, baseDamage, critD
 const ANKAMA_SCALING = loadJSON('spell-damage.json'); // [{spellId, base, inc, critBase, critInc, levelCap, matched}]
 const ankamaById = new Map((ANKAMA_SPELLS || []).map(s => [s.id, s]));
 const scalingById = new Map((ANKAMA_SCALING || []).map(s => [s.spellId, s]));
+// Limites de lancer + coût PW officiels (autobuilder 1.8.0). Source de vérité pour
+// usages/tour, max par cible, cooldown et CoutPW — plus fiable que les colonnes CSV
+// (souvent vides pour le PW). Convention autobuilder : 0 = illimité/aucun.
+// [{spellId, maxCastPerTurn, maxCastPerTarget, cooldown, wpCost}]
+const ANKAMA_CASTLIM = loadJSON('spell-cast-limits.json');
+const castLimById = new Map((ANKAMA_CASTLIM || []).map(c => [c.spellId, c]));
+function ankamaCastLimits(id) {
+  if (!id) return null;
+  const c = castLimById.get(id);
+  if (!c) return null;
+  return {
+    u:   c.maxCastPerTurn   > 0 ? c.maxCastPerTurn   : undefined, // 0 = illimité → on laissera le défaut
+    mcc: c.maxCastPerTarget > 0 ? c.maxCastPerTarget : undefined,
+    cd:  c.cooldown         > 0 ? c.cooldown         : undefined,
+    wp:  c.wpCost           > 0 ? c.wpCost           : undefined,
+  };
+}
 // Sorts où NOTRE valeur encyclopédie (CSV) est juste et celle d'Ankama mal ancrée :
 // Saccade / Perforation — l'extraction Ankama a ancré sur le dégât « sur l'Armure »
 // (effet conditionnel) au lieu du dégât normal. On garde donc le CSV pour ces id.
@@ -360,16 +377,18 @@ function buildSpells(classDisplay) {
     // Dégâts officiels Ankama (si le sort est apparié par id et non blacklisté).
     // Source de vérité pour dm/dc/dm1/dc1 + coefficients de scaling exact ; sinon CSV.
     const adm = ankamaDamage(num(r['Id']));
+    // Limites de lancer + PW officiels (autobuilder) ; priment sur le CSV quand appariés.
+    const acl = ankamaCastLimits(num(r['Id'])) || {};
     const sp = {
       n: clean(r['Nom']),
       el: ELEM[clean(r['Element']).toLowerCase()] || 'Neutre',
       ap,
       mp: num(r['CoutPm'] || r['CoutPM']),
-      wp: num(r['CoutPW']),
-      u: parseUses(r['Usages'], eff + ' ' + descRaw),  // usages par tour (défaut 3 ; source autobuilder via colonne Usages)
+      wp: acl.wp != null ? acl.wp : (num(r['CoutPW']) || undefined),  // coût PW (autobuilder prioritaire)
+      u: acl.u != null ? acl.u : parseUses(r['Usages'], eff + ' ' + descRaw),  // usages/tour (autobuilder → CSV → texte → défaut 3)
       id: num(r['Id']) || undefined,                   // id officiel Ankama (clé d'appariement autobuilder)
-      mcc: num(r['MaxParCible']) || undefined,         // max lancers par cible (0/absent = illimité)
-      cd: num(r['Cooldown']) || undefined,             // cooldown en tours (0/absent = aucun)
+      mcc: acl.mcc != null ? acl.mcc : (num(r['MaxParCible']) || undefined),  // max lancers par cible (0/absent = illimité)
+      cd: acl.cd != null ? acl.cd : (num(r['Cooldown']) || undefined),        // cooldown en tours (0/absent = aucun)
       icon: num(r['iconId']) || undefined,             // iconId Ankama (affichage)
       // Dégâts : valeurs officielles Ankama si appariées, sinon valeurs CSV (encyclopédie).
       dm: adm ? adm.dm : num(r['Dommage lvl245']),
@@ -430,21 +449,24 @@ function buildCommonSpells() {
   const file = path.join(RAW, 'Sorts_commun.csv');
   if (!fs.existsSync(file)) return [];
   const rows = parseCSV(fs.readFileSync(file, 'utf8'));
-  return rows.map(r => ({
+  return rows.map(r => {
+    const acl = ankamaCastLimits(num(r['Id'])) || {};
+    return {
     n: clean(r['Nom']),
     el: 'Neutre',
     ap: num(r['CoutPA']),
     mp: num(r['CoutPM'] || r['CoutPm']),
-    wp: num(r['CoutPW']),
+    wp: acl.wp != null ? acl.wp : (num(r['CoutPW']) || undefined),
     dm: 0,
     id: num(r['Id']) || undefined,
-    mcc: num(r['MaxParCible']) || undefined,
-    cd: num(r['Cooldown']) || undefined,
+    mcc: acl.mcc != null ? acl.mcc : (num(r['MaxParCible']) || undefined),
+    cd: acl.cd != null ? acl.cd : (num(r['Cooldown']) || undefined),
     icon: num(r['iconId']) || undefined,
     lvl: num(r['Niveau de déblocage'] || r['Niveau de deblocage']),
     rng: clean(r['Portée']) || '',
     desc: clean(r['Effets']),
-  })).filter(s => s.n);
+    };
+  }).filter(s => s.n);
 }
 
 // Bonus de stats des passifs généraux : ces valeurs ne sont pas dans le CSV,
