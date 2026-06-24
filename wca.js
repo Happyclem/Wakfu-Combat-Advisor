@@ -995,28 +995,53 @@ function computeKillTurns(opts){
   // opts.noBank force le burst pur (utilisé pour vérifier que le banking n'aggrave jamais).
   const canBank = !optNoBank && !!id && tracksRes() && spells.some(s=>resConsumes(s));
 
+  // ── DÉCISION DE TOUR : lookahead PROFOND « banker K tours puis frapper » ──
+  // Le banking ne se voit pas sur un horizon de 2 tours (charger jusqu'à 200 puis lâcher un
+  // gros finisseur ne paie qu'après plusieurs tours de charge). On évalue donc, à PV/jauge
+  // courants, les fenêtres « banker K tours (K=0,1,2,…) puis frapper » et on retient le K au
+  // meilleur DPS PAR TOUR. K=0 → on frappe ce tour ; K≥1 → ce tour est un tour de charge.
+  const BANK_MAX = 8; // borne de profondeur (la jauge sature bien avant en pratique)
+  // Renvoie le nb optimal de tours à CHARGER avant de frapper, en comparant le DPS PAR TOUR
+  // des fenêtres « banker k tours puis frapper » pour k=0..BANK_MAX. La fenêtre compte LE
+  // DÉGÂT des tours de charge (les builders tapent quand même) + le finisseur final, divisé
+  // par (k+1) tours. C'est là que le gain « monter à 200 puis gros finisseur » devient visible.
+  function bestBankDepth(curHp, curGauge){
+    let best={k:0, dps:-1};
+    let g=curGauge, bankSum=0; // dégâts cumulés des tours de charge déjà comptés
+    for(let k=0; k<=BANK_MAX; k++){
+      const fire=evalTurn(curHp, g, 'burst'); if(!fire) break;
+      const dps=(bankSum+fire.dmg)/(k+1); // dégâts totaux de la fenêtre / nb de tours
+      if(dps>best.dps+1e-9) best={k, dps};
+      // Tour de charge suivant : on accumule son dégât et on avance la jauge.
+      const bankT=evalTurn(curHp, g, 'bank');
+      if(!bankT || bankT.gaugeAfter<=g) break; // jauge saturée → inutile de charger plus
+      bankSum+=bankT.dmg; g=bankT.gaugeAfter;
+    }
+    return best.k; // nb de tours à banker avant de frapper
+  }
+
   const turns=[]; let hp=startHp, totalDmg=0, killed=false, stalled=false, gauge=(id?resVal():0);
+  // Phase de charge ENGAGÉE : nb de tours de charge restants avant de frapper. On le fixe
+  // une fois (bestBankDepth) au lieu de re-décider chaque tour — sinon, après 1 charge, « frapper
+  // maintenant » paraît toujours localement meilleur (la jauge déjà investie gonfle le burst)
+  // et on ne charge jamais à fond. On s'engage donc sur la profondeur optimale, puis on frappe.
+  let bankLeft=0;
   try{
     for(let n=0; n<KILL_TURNS_MAX && hp>0; n++){
       const gaugeBefore=gauge;
       const burst=evalTurn(hp, gauge, 'burst');
       if(!burst){ stalled=true; break; } // plus rien de jouable
 
-      // Choix burst vs bank : on banke seulement si (a) le burst ne tue pas ce tour, et
-      // (b) sur un horizon de 2 tours, charger la jauge puis frapper rapporte plus que
-      // frapper maintenant deux fois. Évite les optima mono-tour myopes (cf. Sram : garder
-      // le Point Faible pour un gros finisseur).
+      // On ne banke jamais si le burst tue ce tour (on prend le kill).
       let pick=burst, banked=false;
       if(canBank && !burst.lethal){
-        const bank=evalTurn(hp, gauge, 'bank');
-        if(bank && bank.gaugeAfter>burst.gaugeAfter){
-          const burstNext=evalTurn(Math.max(1,hp-burst.dmg), burst.gaugeAfter, 'burst');
-          const afterBankNext=evalTurn(Math.max(1,hp-bank.dmg), bank.gaugeAfter, 'burst');
-          const horizonBurst = burst.dmg + (burstNext?burstNext.dmg:0);
-          const horizonBank  = bank.dmg + (afterBankNext?afterBankNext.dmg:0);
-          if(horizonBank>horizonBurst){ pick=bank; banked=true; }
+        if(bankLeft<=0) bankLeft=bestBankDepth(hp, gauge); // (re)planifie une phase de charge
+        if(bankLeft>=1){
+          const bank=evalTurn(hp, gauge, 'bank');
+          if(bank && bank.gaugeAfter>gauge){ pick=bank; banked=true; bankLeft--; }
+          else bankLeft=0; // jauge saturée → on frappe
         }
-      }
+      } else bankLeft=0;
 
       const dealt=Math.min(pick.dmg, hp);
       hp=Math.max(0, hp-pick.dmg); totalDmg+=dealt;
