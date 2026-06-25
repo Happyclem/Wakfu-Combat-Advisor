@@ -537,6 +537,14 @@ function main() {
   console.log('───────────────────────────────────────────────');
   console.log(`✅ data-game.js   : ${classCount} classes, ${totSpells} sorts, ${totPassives} passifs`);
   console.log(`✅ data-commun.js : ${common.length} sorts communs, ${general.length} passifs généraux`);
+
+  // Cache-busting : réécrit ?v=<hash> sur les assets des pages HTML pour que le navigateur
+  // recharge data-game.js (et wca.js si modifié) au lieu d'une version en cache.
+  try {
+    require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'stamp-assets.js')], { stdio: 'inherit' });
+  } catch (e) {
+    console.warn('⚠ stamp-assets.js a échoué (cache-busting non appliqué) :', e.message);
+  }
 }
 
 main();

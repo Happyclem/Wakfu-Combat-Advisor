@@ -1061,7 +1061,10 @@ function computeKillTurns(opts){
   return { turns, killed, turnsToKill:killed?turns.length:null, startHp, max, totalDmg,
            hpLeft:hp, gaugeMeta,
            capped:!killed && !stalled && turns.length>=KILL_TURNS_MAX,
-           stalled };
+           stalled,
+           // canBank : la classe POURRAIT banker (jauge + finisseur scalant) ; anyBanked : le
+           // plan a effectivement chargé. Sert à expliquer dans l'UI pourquoi le plan ne banke pas.
+           canBank, anyBanked:turns.some(t=>t.banked) };
 }
 
 // ── MONSTER HP ───────────────────────────────────────────────────
@@ -1746,7 +1749,17 @@ function renderKillTurns(){
     </div>`;
   };
 
+  // Note de stratégie de jauge : explique POURQUOI le plan charge ou non la jauge, pour les
+  // classes qui pourraient banker (Sram). Évite de croire à un bug quand « pas de charge » est
+  // en fait le choix optimal (bas niveau / cible très résistante → finisseur chargé peu rentable).
   let html='';
+  if(plan.canBank && gm){
+    if(plan.anyBanked){
+      html+=`<div style="font-size:var(--fs-10);color:var(--purple);margin-bottom:6px">🔋 Jauge chargée avant le finisseur (${gm.label}) : c'est ce qui maximise les dégâts ici.</div>`;
+    } else {
+      html+=`<div style="font-size:var(--fs-10);color:var(--dim);margin-bottom:6px">⚡ Frappe directe chaque tour : charger la jauge (${gm.label}) ne rapporte pas plus contre cette cible (niveau / résistances). Choix calculé, pas un bug.</div>`;
+    }
+  }
   plan.turns.forEach(tr=>{
     // Dégâts par sort (comme la vue live) : icône + nom + dmg.
     const seqHtml=tr.seq.map(r=>
