@@ -1675,6 +1675,9 @@ function renderLive(){
         <div style="margin-top:3px;font-size:var(--fs-11)">${k.seq.map(sp=>`${spellIcon(sp,'icn-sm')}${sp.name}`).join(' + ')}</div>
       </div>`).join('');
   } else kc.style.display='none';
+  // Plan multi-tours (lecture seule) : « combien de tours pour tuer la cible visée » en partant
+  // des PV/jauge réels du log. Même moteur que le Conseiller, rendu dans la carte 'live*'.
+  renderKillTurns({card:'liveturnscard',sum:'liveturnsum',steps:'liveturnsteps'});
 }
 function renderKillsPlan(){
   const kc=document.getElementById('killscard'); if(!kc) return;
@@ -1709,13 +1712,17 @@ function renderKillsPlan(){
   steps.innerHTML=html;
 }
 // ── RENDER : MULTI-TOURS (tours pour tuer la cible visée) ────────
-function renderKillTurns(){
-  const tc=document.getElementById('turnscard'); if(!tc) return;
+// `ids` cible les conteneurs à remplir : carte / résumé / étapes. Permet d'afficher le même
+// plan dans le Conseiller (Theorycraft) ET dans le panneau Combat live (lecture seule), qui
+// partent tous deux de l'état courant (PV simulés/réels via simStartHp + jauge via resVal).
+function renderKillTurns(ids){
+  ids=ids||{card:'turnscard',sum:'turnsum',steps:'turnsteps'};
+  const tc=document.getElementById(ids.card); if(!tc) return;
   const plan=computeKillTurns();
   if(!plan){ tc.style.display='none'; return; }
   tc.style.display='';
   const max=plan.max||0, gm=plan.gaugeMeta;
-  const steps=document.getElementById('turnsteps'), sum=document.getElementById('turnsum');
+  const steps=document.getElementById(ids.steps), sum=document.getElementById(ids.sum);
 
   // Cas limites sans aucun tour jouable.
   if(!plan.turns.length){

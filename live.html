@@ -91,6 +91,15 @@
           <div class="sh">💀 Cibles tuables ce tour <span id="livekillsum" style="font-weight:400;color:var(--muted);font-size:var(--fs-10)"></span></div>
           <div id="livekills"></div>
         </div>
+        <!-- Multi-tours (lecture seule) : tours pour tuer la cible visée, à partir des PV/jauge
+             réels lus dans le log. Rempli par renderKillTurns() avec les ids 'live*'. -->
+        <div class="card" id="liveturnscard" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="sh" style="margin:0">⏱ Tours pour tuer</div>
+            <span id="liveturnsum" style="font-family:var(--mono);font-size:11px;color:var(--gold)"></span>
+          </div>
+          <div id="liveturnsteps"></div>
+        </div>
       </div>
     </div><!-- /#cp-live -->
 
@@ -133,5 +142,5 @@
 <script src="data-game.js?v=c77dd172"></script>
 <script src="data-commun.js?v=a120404f"></script>
 <script src="mechanics.js?v=eaaf3d40"></script>
-<script src="wca.js?v=effdfd6b"></script>
+<script src="wca.js?v=e5a3ea82"></script>
 </html>
